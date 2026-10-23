@@ -1,0 +1,268 @@
+[
+  {
+    "id": "aws-d3-025",
+    "domain": "3",
+    "type": "single",
+    "difficulty": "hard",
+    "question": "Una aplicación lee muchos objetos pequeños de un único prefijo de S3 y recibe errores 503 Slow Down en horas pico. ¿Qué cambio mejora el rendimiento?",
+    "options": [
+      "Distribuir los objetos en varios prefijos para paralelizar (cada prefijo soporta ~5 500 GET/s)",
+      "Habilitar versionado",
+      "Mover los objetos a S3 Glacier",
+      "Reducir el tamaño de los objetos"
+    ],
+    "answer": [0],
+    "explanation": "S3 escala por prefijo: al menos 3 500 PUT/COPY/POST/DELETE y 5 500 GET/HEAD por segundo por prefijo. Usar más prefijos multiplica el rendimiento. También ayuda CloudFront para lecturas repetidas."
+  },
+  {
+    "id": "aws-d3-026",
+    "domain": "3",
+    "type": "single",
+    "difficulty": "medium",
+    "question": "Una aplicación necesita leer solo los primeros 10 MB de archivos de 5 GB en S3. ¿Qué técnica usa menos transferencia y tiempo?",
+    "options": ["Byte-range fetches (encabezado Range en GET)", "Multipart upload", "S3 Select sobre todo el objeto", "Descargar el objeto completo"],
+    "answer": [0],
+    "explanation": "Los GET con rango leen solo los bytes necesarios y permiten paralelizar descargas grandes."
+  },
+  {
+    "id": "aws-d3-027",
+    "domain": "3",
+    "type": "single",
+    "difficulty": "hard",
+    "question": "Una API global en API Gateway tiene usuarios en todo el mundo y las respuestas son específicas por usuario (no cacheables). Se quiere reducir la latencia de establecimiento de conexión TLS. ¿Qué tipo de endpoint usar?",
+    "options": ["Edge-optimized", "Regional", "Private", "HTTP API con endpoint privado"],
+    "answer": [0],
+    "explanation": "Un endpoint edge-optimized termina las conexiones en el punto de presencia de CloudFront más cercano y las lleva por la red de AWS. Regional es para clientes en la misma región; private para acceso desde VPC."
+  },
+  {
+    "id": "aws-d3-028",
+    "domain": "3",
+    "type": "single",
+    "difficulty": "medium",
+    "question": "¿Qué familia de instancias EC2 es la más adecuada para una base de datos en memoria de gran tamaño (SAP HANA, Redis autogestionado)?",
+    "options": ["Memory optimized (R, X, u-)", "Compute optimized (C)", "Storage optimized (I, D)", "Accelerated computing (P, G)"],
+    "answer": [0],
+    "explanation": "Las familias R/X/High Memory ofrecen mucha RAM por vCPU. C es para CPU intensiva, I/D para IOPS/almacenamiento local y P/G para GPU."
+  },
+  {
+    "id": "aws-d3-029",
+    "domain": "3",
+    "type": "single",
+    "difficulty": "medium",
+    "question": "¿Qué familia de instancias es la más adecuada para codificación de video por lotes y servidores de juegos con uso intensivo de CPU?",
+    "options": ["Compute optimized (C)", "Memory optimized (R)", "Burstable (T)", "Storage optimized (I)"],
+    "answer": [0],
+    "explanation": "Las instancias C tienen una relación alta de CPU frente a memoria. Las T son burstables para cargas con CPU baja la mayor parte del tiempo."
+  },
+  {
+    "id": "aws-d3-030",
+    "domain": "3",
+    "type": "single",
+    "difficulty": "hard",
+    "question": "Una instancia t3.micro de un servidor web se vuelve lenta tras horas de uso intensivo de CPU, aunque la CPU no supera el 100 %. ¿Cuál es la causa más probable?",
+    "options": [
+      "Agotó sus créditos de CPU y quedó limitada a su rendimiento base (si no está en modo unlimited)",
+      "El volumen EBS está lleno",
+      "El security group limita el tráfico",
+      "La AMI está desactualizada"
+    ],
+    "answer": [0],
+    "explanation": "Las instancias T acumulan créditos cuando están por debajo de su baseline y los gastan en ráfagas. Al agotarse (modo standard) quedan limitadas al baseline. Para cargas sostenidas, usar otra familia o modo unlimited."
+  },
+  {
+    "id": "aws-d3-031",
+    "domain": "3",
+    "type": "single",
+    "difficulty": "hard",
+    "question": "Un Auto Scaling group debe mantener la CPU promedio cerca del 50 % de forma automática y sencilla. ¿Qué política usar?",
+    "options": ["Target tracking scaling", "Simple scaling", "Scheduled scaling", "Escalado manual"],
+    "answer": [0],
+    "explanation": "Target tracking ajusta la capacidad para mantener una métrica en el valor objetivo, creando y gestionando las alarmas automáticamente. Step/simple scaling requieren definir alarmas y ajustes."
+  },
+  {
+    "id": "aws-d3-032",
+    "domain": "3",
+    "type": "single",
+    "difficulty": "medium",
+    "question": "Una empresa necesita procesar grandes volúmenes de datos con Apache Spark y Hadoop, con control del clúster. ¿Qué servicio usar?",
+    "options": ["Amazon EMR", "AWS Glue DataBrew", "Amazon Athena", "Amazon QuickSight"],
+    "answer": [0],
+    "explanation": "EMR ejecuta frameworks de big data (Spark, Hadoop, Hive, Presto) sobre EC2, EKS o serverless. Glue ofrece ETL serverless basado en Spark sin gestionar clústeres; QuickSight es BI."
+  },
+  {
+    "id": "aws-d3-033",
+    "domain": "3",
+    "type": "single",
+    "difficulty": "medium",
+    "question": "Una empresa necesita un servicio ETL serverless que descubra el esquema de los datos en S3 y lo registre en un catálogo para consultarlo con Athena. ¿Qué usar?",
+    "options": ["AWS Glue (crawlers + Data Catalog + jobs)", "Amazon EMR", "AWS Data Pipeline", "Amazon Kinesis Data Streams"],
+    "answer": [0],
+    "explanation": "Los crawlers de Glue infieren esquemas y pueblan el Glue Data Catalog, que Athena, Redshift Spectrum y EMR utilizan. Los jobs de Glue ejecutan ETL serverless."
+  },
+  {
+    "id": "aws-d3-034",
+    "domain": "3",
+    "type": "single",
+    "difficulty": "medium",
+    "question": "La dirección necesita dashboards interactivos de BI sobre datos de Redshift y Athena, accesibles desde el navegador y con pago por usuario. ¿Qué servicio usar?",
+    "options": ["Amazon QuickSight", "Amazon OpenSearch Dashboards", "Amazon CloudWatch dashboards", "AWS Glue Studio"],
+    "answer": [0],
+    "explanation": "QuickSight es el servicio de BI serverless de AWS con dashboards, ML insights y consultas en lenguaje natural (Q)."
+  },
+  {
+    "id": "aws-d3-035",
+    "domain": "3",
+    "type": "single",
+    "difficulty": "hard",
+    "question": "Una aplicación web dinámica con usuarios globales tiene contenido estático y dinámico. Se quiere reducir la latencia de ambos con un solo servicio. ¿Qué hacer?",
+    "options": [
+      "Usar CloudFront con comportamientos (cache behaviors) distintos: caché para estático y sin caché/caché corta para el dinámico hacia el ALB",
+      "Replicar la aplicación en todas las regiones",
+      "Usar S3 Transfer Acceleration",
+      "Usar Route 53 geoproximity"
+    ],
+    "answer": [0],
+    "explanation": "CloudFront acelera también contenido dinámico (conexiones persistentes al origen, red de AWS, TLS en el edge). Los cache behaviors por ruta permiten políticas de caché diferenciadas."
+  },
+  {
+    "id": "aws-d3-036",
+    "domain": "3",
+    "type": "single",
+    "difficulty": "hard",
+    "question": "Las respuestas cacheadas de CloudFront tienen un hit ratio bajo porque la caché incluye todos los query strings y cookies, que varían por usuario. ¿Qué mejora el hit ratio?",
+    "options": [
+      "Ajustar la cache policy para incluir en la cache key solo los headers, cookies y query strings necesarios",
+      "Reducir el TTL a 0",
+      "Usar más edge locations",
+      "Habilitar Origin Shield y nada más"
+    ],
+    "answer": [0],
+    "explanation": "Cuantos más valores formen la cache key, menos coincidencias. Limitar la cache key aumenta los aciertos; la origin request policy puede reenviar al origen valores que no forman parte de la clave. Origin Shield ayuda, pero no resuelve una cache key mal diseñada."
+  },
+  {
+    "id": "aws-d3-037",
+    "domain": "3",
+    "type": "single",
+    "difficulty": "medium",
+    "question": "¿Qué permite Lambda@Edge o CloudFront Functions?",
+    "options": [
+      "Ejecutar código en las ubicaciones de CloudFront para personalizar peticiones y respuestas cerca del usuario",
+      "Ejecutar contenedores en el edge",
+      "Reemplazar el origen por una base de datos",
+      "Cachear datos de DynamoDB"
+    ],
+    "answer": [0],
+    "explanation": "CloudFront Functions (JS ligero, viewer request/response) sirve para manipulaciones simples a gran escala; Lambda@Edge permite lógica más compleja, acceso a red y eventos de origen."
+  },
+  {
+    "id": "aws-d3-038",
+    "domain": "3",
+    "type": "single",
+    "difficulty": "hard",
+    "question": "Una aplicación necesita una base de datos relacional compatible con MySQL con hasta 15 réplicas de lectura de bajo lag y un endpoint que reparta las lecturas. ¿Qué usar?",
+    "options": [
+      "Amazon Aurora MySQL con Aurora Replicas y el reader endpoint",
+      "RDS for MySQL con 15 read replicas",
+      "DynamoDB con DAX",
+      "Redshift"
+    ],
+    "answer": [0],
+    "explanation": "Aurora admite hasta 15 réplicas que comparten el almacenamiento (lag típico < 100 ms) y un reader endpoint que balancea conexiones. RDS for MySQL admite hasta 15 réplicas, pero con replicación asíncrona por binlog y sin reader endpoint automático."
+  },
+  {
+    "id": "aws-d3-039",
+    "domain": "3",
+    "type": "single",
+    "difficulty": "medium",
+    "question": "¿Qué característica de red mejora el rendimiento de EC2 con mayor PPS, menor latencia y menor jitter, y viene habilitada en las instancias de generación actual?",
+    "options": ["Enhanced networking con ENA (SR-IOV)", "Elastic IP", "Jumbo frames en Internet", "VPC Flow Logs"],
+    "answer": [0],
+    "explanation": "Enhanced networking (Elastic Network Adapter) usa SR-IOV para alto rendimiento de red sin costo adicional."
+  },
+  {
+    "id": "aws-d3-040",
+    "domain": "3",
+    "type": "single",
+    "difficulty": "hard",
+    "question": "Una empresa transfiere de forma constante 5 Gbps entre su data center y AWS y necesita latencia predecible. ¿Qué solución usar?",
+    "options": ["AWS Direct Connect de 10 Gbps", "VPN site-to-site", "Internet público con Transfer Acceleration", "VPC peering"],
+    "answer": [0],
+    "explanation": "Direct Connect ofrece conexión privada dedicada con ancho de banda consistente. Cada túnel VPN tiene un máximo de ~1,25 Gbps y viaja por Internet con latencia variable."
+  },
+  {
+    "id": "aws-d3-041",
+    "domain": "3",
+    "type": "multiple",
+    "difficulty": "hard",
+    "question": "Una aplicación sobre RDS tiene consultas de informes pesadas que ralentizan las transacciones de los usuarios. ¿Qué DOS acciones mejoran el rendimiento sin perder disponibilidad?",
+    "options": [
+      "Crear una read replica y ejecutar los informes en ella",
+      "Cachear resultados frecuentes en ElastiCache",
+      "Deshabilitar Multi-AZ",
+      "Reducir el periodo de retención de backups",
+      "Mover los informes a la instancia standby de Multi-AZ"
+    ],
+    "answer": [0, 1],
+    "explanation": "Separar lecturas pesadas en réplicas y cachear resultados reduce la carga del primario. La standby de Multi-AZ (instancia) no acepta conexiones, y quitar Multi-AZ reduce la disponibilidad."
+  },
+  {
+    "id": "aws-d3-042",
+    "domain": "3",
+    "type": "single",
+    "difficulty": "medium",
+    "question": "¿Qué servicio permite ejecutar contenedores en Kubernetes administrado por AWS?",
+    "options": ["Amazon EKS", "Amazon ECS", "AWS App Runner", "AWS Batch"],
+    "answer": [0],
+    "explanation": "EKS ofrece el plano de control de Kubernetes administrado (nodos en EC2 o Fargate). ECS es el orquestador propio de AWS; App Runner despliega apps web desde código o imágenes sin gestionar orquestación."
+  },
+  {
+    "id": "aws-d3-043",
+    "domain": "3",
+    "type": "single",
+    "difficulty": "hard",
+    "question": "Una aplicación necesita una clase de almacenamiento S3 con latencia de un solo dígito de milisegundos para datos accedidos con mucha frecuencia, y acepta que se almacene en una sola AZ. ¿Qué usar?",
+    "options": ["S3 Express One Zone", "S3 One Zone-IA", "S3 Standard-IA", "S3 Glacier Instant Retrieval"],
+    "answer": [0],
+    "explanation": "S3 Express One Zone usa directory buckets en una AZ con latencia de un dígito de ms, ideal para ML/analítica intensiva. One Zone-IA es para datos de acceso infrecuente (más barato)."
+  },
+  {
+    "id": "aws-d3-044",
+    "domain": "3",
+    "type": "single",
+    "difficulty": "medium",
+    "question": "Una aplicación que corre en EC2 necesita procesar trabajos por lotes de duración variable con colas, prioridades y aprovisionamiento automático de cómputo. ¿Qué servicio usar?",
+    "options": ["AWS Batch", "AWS Lambda", "Amazon SQS solo", "AWS Step Functions Express"],
+    "answer": [0],
+    "explanation": "AWS Batch gestiona colas de trabajos y aprovisiona EC2/Spot/Fargate según la demanda. Lambda tiene límite de 15 minutos."
+  },
+  {
+    "id": "aws-d3-045",
+    "domain": "3",
+    "type": "single",
+    "difficulty": "hard",
+    "question": "Una aplicación de juegos necesita una tabla de clasificación (leaderboard) en tiempo real con ordenamiento por puntuación y latencia submilisegundo. ¿Qué usar?",
+    "options": ["ElastiCache for Redis (sorted sets)", "Amazon RDS con ORDER BY", "Amazon S3", "Amazon Redshift"],
+    "answer": [0],
+    "explanation": "Los sorted sets de Redis/Valkey mantienen elementos ordenados por puntuación en memoria con operaciones O(log n), ideales para leaderboards."
+  },
+  {
+    "id": "aws-d3-046",
+    "domain": "3",
+    "type": "single",
+    "difficulty": "medium",
+    "question": "¿Qué tipo de volumen EBS permite configurar IOPS y throughput independientemente del tamaño, con un baseline de 3 000 IOPS y 125 MB/s?",
+    "options": ["gp3", "gp2", "st1", "sc1"],
+    "answer": [0],
+    "explanation": "gp3 incluye 3 000 IOPS y 125 MB/s base y permite aprovisionar más (hasta 16 000 IOPS y 1 000 MB/s) sin aumentar el tamaño. En gp2 las IOPS dependen del tamaño (3 IOPS/GB)."
+  },
+  {
+    "id": "aws-d3-047",
+    "domain": "3",
+    "type": "single",
+    "difficulty": "hard",
+    "question": "Una aplicación necesita consultar con SQL datos de S3 y además unirlos con tablas del data warehouse sin cargarlos en él. ¿Qué característica usar?",
+    "options": ["Amazon Redshift Spectrum", "S3 Select", "Amazon EMR con HBase", "DynamoDB Export"],
+    "answer": [0],
+    "explanation": "Redshift Spectrum consulta datos externos en S3 (vía el catálogo) desde Redshift y permite unirlos con tablas locales."
+  }
+]

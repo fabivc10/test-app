@@ -1,0 +1,121 @@
+{
+  "domainId": "4",
+  "topics": [
+    {
+      "id": "aws-t4-storage-cost",
+      "objective": "4.1",
+      "title": "Almacenamiento optimizado en costo",
+      "content": [
+        "| Clase S3 | Acceso | Recuperación | Notas |",
+        "|---|---|---|---|",
+        "| Standard | Frecuente | ms | — |",
+        "| Intelligent-Tiering | Desconocido/cambiante | ms (niveles archive opcionales) | Tarifa de monitoreo, sin cargo por recuperación |",
+        "| Standard-IA | Infrecuente | ms | Mín. 30 días, cargo por GB recuperado |",
+        "| One Zone-IA | Infrecuente, regenerable | ms | Una AZ, ~20 % más barata |",
+        "| Glacier Instant Retrieval | Trimestral o menos | ms | Mín. 90 días |",
+        "| Glacier Flexible Retrieval | 1–2 veces/año | minutos–12 h | Mín. 90 días |",
+        "| Glacier Deep Archive | Retención larga | 12–48 h | Mín. 180 días, la más barata |",
+        "",
+        "- **Lifecycle rules**: transiciones y expiración (incluidas versiones no actuales y multipart incompletos).",
+        "- **S3 Storage Lens**, **S3 Inventory**, **Requester Pays**.",
+        "- EBS: gp2 → **gp3**, eliminar volúmenes `available` y snapshots huérfanos, **Data Lifecycle Manager**.",
+        "- EFS: clases IA y Archive con lifecycle management.",
+        "- **AWS Backup** con transición a cold storage."
+      ],
+      "keyPoints": [
+        "Patrón desconocido → Intelligent-Tiering.",
+        "Milisegundos + acceso raro → Glacier Instant Retrieval.",
+        "Más barato posible, horas aceptables → Deep Archive."
+      ],
+      "references": [
+        { "title": "Amazon S3 storage classes", "url": "https://aws.amazon.com/s3/storage-classes/" },
+        { "title": "S3 Lifecycle", "url": "https://docs.aws.amazon.com/AmazonS3/latest/userguide/object-lifecycle-mgmt.html" }
+      ]
+    },
+    {
+      "id": "aws-t4-compute-cost",
+      "objective": "4.2",
+      "title": "Cómputo optimizado en costo",
+      "content": [
+        "| Opción | Descuento | Cuándo |",
+        "|---|---|---|",
+        "| On-Demand | 0 % | Corto plazo, impredecible |",
+        "| **Compute Savings Plans** | hasta ~66 % | Compromiso $/h; EC2 (cualquier familia/región), Fargate, Lambda |",
+        "| EC2 Instance Savings Plans | hasta ~72 % | Una familia en una región |",
+        "| Standard / Convertible RIs | hasta ~72 % / ~66 % | Uso estable; convertible permite cambiar atributos |",
+        "| **Spot** | hasta ~90 % | Tolerante a interrupciones (aviso de 2 min) |",
+        "| Dedicated Hosts | — | Licencias BYOL por socket/núcleo, cumplimiento |",
+        "| Dedicated Instances | — | Hardware aislado sin visibilidad de sockets |",
+        "| Capacity Reservations | — | Garantizar capacidad en una AZ (sin descuento por sí sola) |",
+        "",
+        "- **Right-sizing** con **Compute Optimizer**; **Graviton**; apagar entornos fuera de horario (Instance Scheduler).",
+        "- ASG con **mixed instances policy** (base On-Demand + Spot diversificado).",
+        "- Serverless (Lambda/Fargate) para cargas intermitentes; Lambda en arm64 y memoria ajustada.",
+        "- EMR transitorio con task nodes Spot."
+      ],
+      "keyPoints": [
+        "Flexibilidad máxima entre servicios → Compute Savings Plans.",
+        "Interrumpible → Spot.",
+        "Licencia por socket → Dedicated Hosts."
+      ],
+      "references": [
+        { "title": "Savings Plans", "url": "https://docs.aws.amazon.com/savingsplans/latest/userguide/what-is-savings-plans.html" },
+        { "title": "EC2 Spot Instances", "url": "https://docs.aws.amazon.com/AWSEC2/latest/UserGuide/using-spot-instances.html" }
+      ]
+    },
+    {
+      "id": "aws-t4-db-cost",
+      "objective": "4.3",
+      "title": "Bases de datos optimizadas en costo",
+      "content": [
+        "- DynamoDB: **on-demand** (impredecible) vs **provisioned + auto scaling + reserved capacity** (estable); TTL para borrar datos expirados gratis; clase Standard-IA de tabla.",
+        "- Aurora: **Serverless v2** para cargas variables; **I/O-Optimized** si la E/S > ~25 % del gasto.",
+        "- RDS: right-sizing, Reserved Instances, detener instancias de desarrollo (máx. 7 días detenida), Graviton.",
+        "- Caché (ElastiCache/DAX) para reducir lecturas costosas.",
+        "- Migración: **DMS** + **SCT** para pasar de motores comerciales a open source/Aurora."
+      ],
+      "keyPoints": [
+        "Tráfico estable en DynamoDB → provisioned.",
+        "E/S alta en Aurora → I/O-Optimized."
+      ],
+      "references": [
+        { "title": "DynamoDB pricing modes", "url": "https://docs.aws.amazon.com/amazondynamodb/latest/developerguide/capacity-mode.html" }
+      ]
+    },
+    {
+      "id": "aws-t4-network-cost",
+      "objective": "4.4",
+      "title": "Redes optimizadas en costo y gestión de costos",
+      "content": [
+        "### Transferencia de datos",
+        "- Entrante desde Internet: gratis. Saliente a Internet: se cobra (CloudFront suele ser más barato y origen AWS → CloudFront es gratis).",
+        "- Entre AZs: se cobra en ambas direcciones. Misma AZ con IP privada: gratis. Entre regiones: se cobra.",
+        "- **NAT gateway**: por hora + por GB procesado → usar **gateway endpoints** para S3/DynamoDB.",
+        "- IPv4 públicas (incluidas EIPs) se cobran por hora.",
+        "- VPN vs Direct Connect: DX tiene menor costo por GB a gran volumen.",
+        "",
+        "### Herramientas",
+        "| Herramienta | Uso |",
+        "|---|---|",
+        "| Cost Explorer | Análisis histórico y pronóstico, recomendaciones de SP/RI |",
+        "| Budgets | Alertas (real/pronosticado) y budget actions |",
+        "| Cost and Usage Report / Data Exports | Detalle máximo, consulta con Athena |",
+        "| Cost allocation tags | Costos por proyecto/equipo |",
+        "| Cost Anomaly Detection | Gastos inusuales con ML |",
+        "| Trusted Advisor | Recursos ociosos, recomendaciones |",
+        "| Compute Optimizer | Right-sizing |",
+        "| Pricing Calculator | Estimar antes de construir |",
+        "| Organizations | Consolidated billing, descuentos compartidos |"
+      ],
+      "keyPoints": [
+        "Factura NAT alta por S3 → gateway endpoint.",
+        "Alertas de gasto → Budgets; análisis → Cost Explorer.",
+        "Costos por proyecto → cost allocation tags activadas."
+      ],
+      "references": [
+        { "title": "Overview of data transfer costs", "url": "https://aws.amazon.com/blogs/architecture/overview-of-data-transfer-costs-for-common-architectures/" },
+        { "title": "Cost Optimization Pillar", "url": "https://docs.aws.amazon.com/wellarchitected/latest/cost-optimization-pillar/welcome.html" }
+      ]
+    }
+  ]
+}

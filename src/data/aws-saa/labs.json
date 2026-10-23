@@ -1,0 +1,594 @@
+[
+  {
+    "id": "aws-lab-vpc",
+    "domain": "1",
+    "title": "VPC desde cero: subredes públicas/privadas, NAT y endpoint S3",
+    "tool": "AWS Console / CLI",
+    "difficulty": "intermedio",
+    "estimatedMinutes": 60,
+    "cost": "NAT gateway ~USD 0,045/h + GB procesado. Bórralo al terminar.",
+    "description": "Construye manualmente una VPC de dos AZs con subredes públicas y privadas, salida a Internet controlada y acceso privado a S3.",
+    "objectives": [
+      "Diseñar CIDRs para una VPC multi-AZ",
+      "Configurar IGW, NAT gateway y tablas de rutas",
+      "Comparar security groups y NACLs",
+      "Usar un gateway endpoint para S3"
+    ],
+    "setup": [
+      "Región: us-east-1 (o la tuya). VPC `lab-vpc` 10.0.0.0/16.",
+      "",
+      "| Subred | AZ | CIDR |",
+      "|---|---|---|",
+      "| public-a | a | 10.0.1.0/24 |",
+      "| public-b | b | 10.0.2.0/24 |",
+      "| private-a | a | 10.0.11.0/24 |",
+      "| private-b | b | 10.0.12.0/24 |"
+    ],
+    "tasks": [
+      "Crea la VPC y las cuatro subredes (sin usar el asistente *VPC and more*).",
+      "Crea y adjunta un Internet Gateway; tabla de rutas pública con 0.0.0.0/0 → IGW asociada a las subredes públicas.",
+      "Crea un NAT gateway en public-a y una tabla privada con 0.0.0.0/0 → NAT asociada a las privadas.",
+      "Lanza una instancia t3.micro en public-a (SG `web-sg`: 80 desde 0.0.0.0/0) y otra en private-a (SG `app-sg`: todo el tráfico desde `web-sg`). Usa Session Manager en lugar de SSH.",
+      "Comprueba que la instancia privada sale a Internet (`curl https://aws.amazon.com`) pero no es accesible desde fuera.",
+      "Crea un gateway endpoint para S3 asociado a la tabla privada y verifica que `aws s3 ls` funciona desde la instancia privada.",
+      "Añade una NACL a private-a que bloquee el tráfico entrante desde 10.0.2.0/24 y explica por qué debes permitir puertos efímeros de retorno."
+    ],
+    "verification": [
+      "La tabla privada muestra la ruta `pl-xxxx (com.amazonaws.<region>.s3) → vpce-…`.",
+      "Desde la instancia privada `curl ifconfig.me` devuelve la EIP del NAT gateway.",
+      "VPC Flow Logs (opcional) muestran REJECT para el tráfico bloqueado por la NACL."
+    ],
+    "solution": [
+      "```bash",
+      "VPC=$(aws ec2 create-vpc --cidr-block 10.0.0.0/16 --query Vpc.VpcId --output text)",
+      "aws ec2 create-tags --resources $VPC --tags Key=Name,Value=lab-vpc",
+      "PUBA=$(aws ec2 create-subnet --vpc-id $VPC --cidr-block 10.0.1.0/24 --availability-zone us-east-1a --query Subnet.SubnetId --output text)",
+      "PUBB=$(aws ec2 create-subnet --vpc-id $VPC --cidr-block 10.0.2.0/24 --availability-zone us-east-1b --query Subnet.SubnetId --output text)",
+      "PRIA=$(aws ec2 create-subnet --vpc-id $VPC --cidr-block 10.0.11.0/24 --availability-zone us-east-1a --query Subnet.SubnetId --output text)",
+      "PRIB=$(aws ec2 create-subnet --vpc-id $VPC --cidr-block 10.0.12.0/24 --availability-zone us-east-1b --query Subnet.SubnetId --output text)",
+      "",
+      "IGW=$(aws ec2 create-internet-gateway --query InternetGateway.InternetGatewayId --output text)",
+      "aws ec2 attach-internet-gateway --internet-gateway-id $IGW --vpc-id $VPC",
+      "RTPUB=$(aws ec2 create-route-table --vpc-id $VPC --query RouteTable.RouteTableId --output text)",
+      "aws ec2 create-route --route-table-id $RTPUB --destination-cidr-block 0.0.0.0/0 --gateway-id $IGW",
+      "aws ec2 associate-route-table --route-table-id $RTPUB --subnet-id $PUBA",
+      "aws ec2 associate-route-table --route-table-id $RTPUB --subnet-id $PUBB",
+      "aws ec2 modify-subnet-attribute --subnet-id $PUBA --map-public-ip-on-launch",
+      "",
+      "EIP=$(aws ec2 allocate-address --domain vpc --query AllocationId --output text)",
+      "NAT=$(aws ec2 create-nat-gateway --subnet-id $PUBA --allocation-id $EIP --query NatGateway.NatGatewayId --output text)",
+      "aws ec2 wait nat-gateway-available --nat-gateway-ids $NAT",
+      "RTPRI=$(aws ec2 create-route-table --vpc-id $VPC --query RouteTable.RouteTableId --output text)",
+      "aws ec2 create-route --route-table-id $RTPRI --destination-cidr-block 0.0.0.0/0 --nat-gateway-id $NAT",
+      "aws ec2 associate-route-table --route-table-id $RTPRI --subnet-id $PRIA",
+      "aws ec2 associate-route-table --route-table-id $RTPRI --subnet-id $PRIB",
+      "",
+      "aws ec2 create-vpc-endpoint --vpc-id $VPC --vpc-endpoint-type Gateway \\",
+      "  --service-name com.amazonaws.us-east-1.s3 --route-table-ids $RTPRI",
+      "```",
+      "",
+      "Instancias: rol con `AmazonSSMManagedInstanceCore` (+ `AmazonS3ReadOnlyAccess` para la prueba). `app-sg` con regla de entrada *All traffic* origen `web-sg`.",
+      "",
+      "NACL: al ser stateless, si bloqueas o permites tráfico entrante también debes permitir la salida a puertos efímeros (1024–65535) para las respuestas, y viceversa. Regla ejemplo: `100 DENY all 10.0.2.0/24`, `200 ALLOW all 0.0.0.0/0` (entrada) y `100 ALLOW all 0.0.0.0/0` (salida).",
+      "",
+      "**Limpieza**: terminar instancias → borrar NAT gateway → liberar EIP → borrar endpoint, subredes, tablas, IGW y VPC."
+    ],
+    "references": [
+      { "title": "VPC with public and private subnets", "url": "https://docs.aws.amazon.com/vpc/latest/userguide/vpc-example-private-subnets-nat.html" },
+      { "title": "Gateway endpoints for S3", "url": "https://docs.aws.amazon.com/vpc/latest/privatelink/vpc-endpoints-s3.html" }
+    ]
+  },
+  {
+    "id": "aws-lab-iam",
+    "domain": "1",
+    "title": "IAM: rol de instancia de mínimo privilegio, cross-account y permissions boundary",
+    "tool": "AWS Console / CLI",
+    "difficulty": "intermedio",
+    "estimatedMinutes": 45,
+    "cost": "Free Tier (t3.micro/t2.micro)",
+    "description": "Practica la forma correcta de dar permisos a workloads y a otras identidades sin credenciales de larga duración.",
+    "objectives": [
+      "Crear un rol para EC2 con acceso solo a un prefijo de un bucket",
+      "Entender la evaluación de políticas (Deny explícito, boundary)",
+      "Asumir un rol con STS"
+    ],
+    "setup": [
+      "Un bucket `lab-iam-<tuid>` con prefijos `reports/` y `private/`. Una instancia EC2 Amazon Linux 2023 con Session Manager."
+    ],
+    "tasks": [
+      "Crea una política que permita `s3:ListBucket` limitado al prefijo `reports/` y `s3:GetObject`/`PutObject` en `reports/*`.",
+      "Crea el rol `ec2-reports-role` con esa política y asócialo a la instancia. Prueba leer `reports/` y `private/`.",
+      "Añade a la bucket policy un Deny para cualquier petición sin HTTPS y verifica que `aws s3 cp --no-verify-ssl` sigue usando HTTPS (explica).",
+      "Crea un rol `dev-role` asumible por tu usuario con AdministratorAccess pero con un permissions boundary que solo permita S3 y CloudWatch. Asúmelo y prueba `ec2 describe-instances`.",
+      "Usa IAM Policy Simulator para verificar los resultados."
+    ],
+    "verification": [
+      "Desde la instancia: `aws s3 ls s3://lab-iam-<tuid>/reports/` funciona y `.../private/` da AccessDenied.",
+      "`aws sts get-caller-identity` muestra el rol asumido.",
+      "Con `dev-role`, `aws ec2 describe-instances` falla por el boundary aunque la política sea AdministratorAccess."
+    ],
+    "solution": [
+      "**Política del rol de instancia**",
+      "```json",
+      "{",
+      "  \"Version\": \"2012-10-17\",",
+      "  \"Statement\": [",
+      "    {",
+      "      \"Effect\": \"Allow\",",
+      "      \"Action\": \"s3:ListBucket\",",
+      "      \"Resource\": \"arn:aws:s3:::lab-iam-TUID\",",
+      "      \"Condition\": { \"StringLike\": { \"s3:prefix\": [\"reports/*\"] } }",
+      "    },",
+      "    {",
+      "      \"Effect\": \"Allow\",",
+      "      \"Action\": [\"s3:GetObject\", \"s3:PutObject\"],",
+      "      \"Resource\": \"arn:aws:s3:::lab-iam-TUID/reports/*\"",
+      "    }",
+      "  ]",
+      "}",
+      "```",
+      "**Bucket policy (solo HTTPS)**",
+      "```json",
+      "{",
+      "  \"Version\": \"2012-10-17\",",
+      "  \"Statement\": [{",
+      "    \"Effect\": \"Deny\",",
+      "    \"Principal\": \"*\",",
+      "    \"Action\": \"s3:*\",",
+      "    \"Resource\": [\"arn:aws:s3:::lab-iam-TUID\", \"arn:aws:s3:::lab-iam-TUID/*\"],",
+      "    \"Condition\": { \"Bool\": { \"aws:SecureTransport\": \"false\" } }",
+      "  }]",
+      "}",
+      "```",
+      "La CLI siempre usa HTTPS; `--no-verify-ssl` solo omite la validación del certificado, por eso no se bloquea.",
+      "",
+      "**Trust policy de dev-role**",
+      "```json",
+      "{",
+      "  \"Version\": \"2012-10-17\",",
+      "  \"Statement\": [{",
+      "    \"Effect\": \"Allow\",",
+      "    \"Principal\": { \"AWS\": \"arn:aws:iam::ACCOUNT_ID:user/TU_USUARIO\" },",
+      "    \"Action\": \"sts:AssumeRole\"",
+      "  }]",
+      "}",
+      "```",
+      "Boundary: política administrada con `\"Action\": [\"s3:*\", \"cloudwatch:*\"]`, `\"Resource\": \"*\"`. Asignarla con `aws iam put-role-permissions-boundary`.",
+      "```bash",
+      "aws sts assume-role --role-arn arn:aws:iam::ACCOUNT_ID:role/dev-role --role-session-name lab",
+      "# exportar AWS_ACCESS_KEY_ID / SECRET / SESSION_TOKEN con los valores devueltos",
+      "```",
+      "**Limpieza**: borrar instancia, roles, políticas y bucket."
+    ],
+    "references": [
+      { "title": "IAM roles for EC2", "url": "https://docs.aws.amazon.com/AWSEC2/latest/UserGuide/iam-roles-for-amazon-ec2.html" },
+      { "title": "Permissions boundaries", "url": "https://docs.aws.amazon.com/IAM/latest/UserGuide/access_policies_boundaries.html" }
+    ]
+  },
+  {
+    "id": "aws-lab-alb-asg",
+    "domain": "2",
+    "title": "Aplicación web altamente disponible: ALB + Auto Scaling multi-AZ",
+    "tool": "AWS Console",
+    "difficulty": "intermedio",
+    "estimatedMinutes": 60,
+    "cost": "ALB ~USD 0,0225/h + LCU; instancias t3.micro (Free Tier parcial)",
+    "description": "Despliega una capa web stateless detrás de un Application Load Balancer con escalado automático y reemplazo de instancias no saludables.",
+    "objectives": [
+      "Crear un launch template con user data",
+      "Configurar ALB, target group y health checks",
+      "Configurar un ASG multi-AZ con target tracking",
+      "Probar autorreparación y escalado"
+    ],
+    "setup": [
+      "Usa la VPC del lab anterior (o la default) con dos subredes públicas para el ALB y dos privadas para las instancias (con NAT o endpoints SSM)."
+    ],
+    "tasks": [
+      "Crea un launch template (Amazon Linux 2023, t3.micro) con user data que instale nginx y publique el ID de instancia y la AZ en `/` y un `/health` que devuelva 200.",
+      "Crea un target group HTTP con health check en `/health`.",
+      "Crea un ALB internet-facing en las subredes públicas con listener HTTP:80 → target group. SG del ALB: 80 desde Internet; SG de instancias: 80 solo desde el SG del ALB.",
+      "Crea un ASG en las subredes privadas: min 2, desired 2, max 6, health check type ELB, grace period 120 s.",
+      "Agrega una política target tracking de CPU promedio al 50 %.",
+      "Termina manualmente una instancia y observa el reemplazo. Detén nginx en otra (`sudo systemctl stop nginx`) y observa qué pasa.",
+      "Genera carga (`stress-ng --cpu 2 --timeout 600`) y observa el escalado."
+    ],
+    "verification": [
+      "Al refrescar el DNS del ALB se alternan instancias de distintas AZs.",
+      "La instancia con nginx detenido queda unhealthy en el target group y el ASG la reemplaza (por el health check ELB).",
+      "El historial de actividad del ASG muestra *Launching a new EC2 instance* por la alarma de target tracking."
+    ],
+    "solution": [
+      "**User data**",
+      "```bash",
+      "#!/bin/bash",
+      "dnf install -y nginx stress-ng",
+      "TOKEN=$(curl -s -X PUT http://169.254.169.254/latest/api/token -H 'X-aws-ec2-metadata-token-ttl-seconds: 300')",
+      "ID=$(curl -s -H \"X-aws-ec2-metadata-token: $TOKEN\" http://169.254.169.254/latest/meta-data/instance-id)",
+      "AZ=$(curl -s -H \"X-aws-ec2-metadata-token: $TOKEN\" http://169.254.169.254/latest/meta-data/placement/availability-zone)",
+      "echo \"<h1>$ID - $AZ</h1>\" > /usr/share/nginx/html/index.html",
+      "echo ok > /usr/share/nginx/html/health",
+      "systemctl enable --now nginx",
+      "```",
+      "(Usa IMDSv2 con token, como exige la buena práctica.)",
+      "",
+      "Claves de configuración:",
+      "- Target group: protocolo HTTP 80, health check path `/health`, healthy threshold 2, interval 15 s.",
+      "- ASG: *Health checks → Turn on Elastic Load Balancing health checks*. Sin esto, solo los status checks de EC2 cuentan y la instancia con nginx caído no se reemplazaría.",
+      "- Política: *Target tracking, Average CPU utilization, 50*.",
+      "",
+      "**Limpieza**: borrar ASG (termina instancias) → ALB → target group → launch template."
+    ],
+    "references": [
+      { "title": "Tutorial: ASG with an ALB", "url": "https://docs.aws.amazon.com/autoscaling/ec2/userguide/tutorial-ec2-auto-scaling-load-balancer.html" },
+      { "title": "Health checks for ASG", "url": "https://docs.aws.amazon.com/autoscaling/ec2/userguide/ec2-auto-scaling-health-checks.html" }
+    ]
+  },
+  {
+    "id": "aws-lab-serverless-decoupled",
+    "domain": "2",
+    "title": "Procesamiento desacoplado: S3 → SQS → Lambda → DynamoDB con DLQ",
+    "tool": "AWS Console / CLI",
+    "difficulty": "intermedio",
+    "estimatedMinutes": 50,
+    "cost": "Free Tier (Lambda, SQS, DynamoDB on-demand con uso mínimo)",
+    "description": "Construye un pipeline resiliente a picos y errores donde cada archivo subido genera un registro en DynamoDB.",
+    "objectives": [
+      "Configurar notificaciones de eventos de S3 hacia SQS",
+      "Configurar Lambda con event source mapping de SQS",
+      "Manejar fallos con DLQ y visibility timeout correcto"
+    ],
+    "setup": [
+      "Bucket `lab-uploads-<tuid>`, cola `uploads-queue` con DLQ `uploads-dlq` (maxReceiveCount 3), tabla DynamoDB `Uploads` (PK `key`, on-demand)."
+    ],
+    "tasks": [
+      "Crea la DLQ y la cola principal con redrive policy y visibility timeout de 6× el timeout de la Lambda.",
+      "Configura la access policy de la cola para que S3 pueda enviar mensajes (condición aws:SourceArn del bucket).",
+      "Crea la notificación `s3:ObjectCreated:*` del bucket hacia la cola.",
+      "Crea una Lambda (Python) que lea el evento S3 dentro del mensaje SQS y escriba `key`, `size` y `eventTime` en DynamoDB. Si el nombre contiene `fail`, debe lanzar una excepción.",
+      "Conecta la cola a la Lambda (batch size 10, *report batch item failures*).",
+      "Sube 20 archivos y uno llamado `fail.txt`; verifica DynamoDB y la DLQ."
+    ],
+    "verification": [
+      "La tabla `Uploads` tiene 20 ítems.",
+      "`fail.txt` termina en la DLQ tras 3 recepciones.",
+      "CloudWatch Logs de la Lambda muestra los reintentos."
+    ],
+    "solution": [
+      "**Access policy de la cola**",
+      "```json",
+      "{",
+      "  \"Version\": \"2012-10-17\",",
+      "  \"Statement\": [{",
+      "    \"Effect\": \"Allow\",",
+      "    \"Principal\": { \"Service\": \"s3.amazonaws.com\" },",
+      "    \"Action\": \"sqs:SendMessage\",",
+      "    \"Resource\": \"arn:aws:sqs:REGION:ACCOUNT:uploads-queue\",",
+      "    \"Condition\": { \"ArnEquals\": { \"aws:SourceArn\": \"arn:aws:s3:::lab-uploads-TUID\" } }",
+      "  }]",
+      "}",
+      "```",
+      "**Lambda** (rol con `AWSLambdaSQSQueueExecutionRole` + `dynamodb:PutItem` en la tabla)",
+      "```python",
+      "import json, boto3",
+      "table = boto3.resource('dynamodb').Table('Uploads')",
+      "",
+      "def handler(event, context):",
+      "    failures = []",
+      "    for record in event['Records']:",
+      "        try:",
+      "            body = json.loads(record['body'])",
+      "            for s3rec in body.get('Records', []):   # el primer mensaje es un s3:TestEvent",
+      "                key = s3rec['s3']['object']['key']",
+      "                if 'fail' in key:",
+      "                    raise ValueError(f'archivo inválido {key}')",
+      "                table.put_item(Item={",
+      "                    'key': key,",
+      "                    'size': s3rec['s3']['object'].get('size', 0),",
+      "                    'eventTime': s3rec['eventTime'],",
+      "                })",
+      "        except Exception as e:",
+      "            print(e)",
+      "            failures.append({'itemIdentifier': record['messageId']})",
+      "    return {'batchItemFailures': failures}",
+      "```",
+      "Timeout de la Lambda 30 s → visibility timeout de la cola 180 s. Con *ReportBatchItemFailures* solo se reintentan los mensajes fallidos, no todo el lote.",
+      "",
+      "**Limpieza**: borrar la notificación, el mapping, la Lambda, las colas, la tabla y vaciar/borrar el bucket."
+    ],
+    "references": [
+      { "title": "Using Lambda with Amazon SQS", "url": "https://docs.aws.amazon.com/lambda/latest/dg/with-sqs.html" },
+      { "title": "S3 event notifications", "url": "https://docs.aws.amazon.com/AmazonS3/latest/userguide/EventNotifications.html" }
+    ]
+  },
+  {
+    "id": "aws-lab-rds",
+    "domain": "2",
+    "title": "RDS Multi-AZ, read replica, Secrets Manager y failover",
+    "tool": "AWS Console",
+    "difficulty": "avanzado",
+    "estimatedMinutes": 75,
+    "cost": "Multi-AZ NO está en Free Tier (~USD 0,04–0,07/h con db.t4g.micro). Borra al terminar.",
+    "description": "Comprueba en la práctica la diferencia entre Multi-AZ (disponibilidad) y read replicas (escalado de lectura), con credenciales gestionadas.",
+    "objectives": [
+      "Desplegar RDS MySQL/PostgreSQL Multi-AZ en subredes privadas",
+      "Gestionar la contraseña maestra con Secrets Manager",
+      "Crear una read replica",
+      "Forzar un failover y medir el impacto"
+    ],
+    "setup": [
+      "VPC con subredes privadas en 2 AZs y un DB subnet group. Una instancia EC2 cliente en la VPC (Session Manager) con cliente `mysql` o `psql`."
+    ],
+    "tasks": [
+      "Crea una instancia RDS db.t4g.micro Multi-AZ (instancia, no cluster), cifrada con KMS, sin acceso público, con la opción *Manage master credentials in AWS Secrets Manager*.",
+      "SG de la BD: puerto 3306/5432 solo desde el SG de la instancia cliente.",
+      "Desde la EC2, obtén la contraseña con la CLI de Secrets Manager y conéctate al endpoint.",
+      "Crea una tabla, inserta filas y crea una read replica. Verifica que la réplica es de solo lectura.",
+      "Ejecuta un bucle que inserte filas cada segundo y fuerza un failover con *Reboot with failover*. Anota cuántos segundos falla.",
+      "Revisa los eventos de RDS."
+    ],
+    "verification": [
+      "El endpoint no cambia tras el failover, pero la IP que resuelve sí (`dig <endpoint>`).",
+      "Los eventos muestran *Multi-AZ instance failover started/completed*.",
+      "Escribir en la réplica falla con error de solo lectura."
+    ],
+    "solution": [
+      "```bash",
+      "SECRET_ARN=$(aws rds describe-db-instances --db-instance-identifier lab-db \\",
+      "  --query 'DBInstances[0].MasterUserSecret.SecretArn' --output text)",
+      "PASS=$(aws secretsmanager get-secret-value --secret-id $SECRET_ARN \\",
+      "  --query SecretString --output text | jq -r .password)",
+      "mysql -h lab-db.xxxx.us-east-1.rds.amazonaws.com -u admin -p\"$PASS\"",
+      "",
+      "CREATE DATABASE lab; USE lab;",
+      "CREATE TABLE ping (id INT AUTO_INCREMENT PRIMARY KEY, ts TIMESTAMP DEFAULT CURRENT_TIMESTAMP);",
+      "",
+      "while true; do mysql -h $EP -u admin -p\"$PASS\" -e 'INSERT INTO lab.ping () VALUES ()' && echo ok || echo FAIL; sleep 1; done",
+      "",
+      "aws rds reboot-db-instance --db-instance-identifier lab-db --force-failover",
+      "aws rds create-db-instance-read-replica --db-instance-identifier lab-db-replica \\",
+      "  --source-db-instance-identifier lab-db",
+      "```",
+      "Resultado esperado: el failover tarda típicamente 60–120 s; el DNS del endpoint apunta a la nueva primaria. La standby de una *instancia* Multi-AZ no atiende lecturas; la read replica sí, pero es asíncrona (puede haber lag) y su promoción es manual.",
+      "",
+      "Si el rol de la EC2 no tiene `secretsmanager:GetSecretValue` (y `kms:Decrypt` si la clave es propia), la obtención de la contraseña falla.",
+      "",
+      "**Limpieza**: borrar réplica e instancia (sin snapshot final si es un lab), el secreto se elimina con la instancia."
+    ],
+    "references": [
+      { "title": "RDS Multi-AZ deployments", "url": "https://docs.aws.amazon.com/AmazonRDS/latest/UserGuide/Concepts.MultiAZSingleStandby.html" },
+      { "title": "RDS and Secrets Manager", "url": "https://docs.aws.amazon.com/AmazonRDS/latest/UserGuide/rds-secrets-manager.html" }
+    ]
+  },
+  {
+    "id": "aws-lab-s3-cloudfront",
+    "domain": "3",
+    "title": "Sitio estático privado en S3 con CloudFront y OAC",
+    "tool": "AWS Console",
+    "difficulty": "básico",
+    "estimatedMinutes": 40,
+    "cost": "Free Tier (CloudFront 1 TB/mes, S3 5 GB)",
+    "description": "Publica un sitio estático global con caché en el edge, manteniendo el bucket completamente privado.",
+    "objectives": [
+      "Configurar CloudFront con Origin Access Control",
+      "Escribir la bucket policy que solo permite a la distribución",
+      "Entender caché, TTL e invalidaciones"
+    ],
+    "setup": [
+      "Un bucket `lab-site-<tuid>` con Block Public Access activado y un `index.html` simple con una imagen."
+    ],
+    "tasks": [
+      "Crea una distribución CloudFront con el bucket como origen (REST endpoint, no website endpoint) y OAC.",
+      "Define `index.html` como default root object y *Redirect HTTP to HTTPS*.",
+      "Aplica la bucket policy sugerida por CloudFront.",
+      "Verifica que la URL de CloudFront funciona y la URL directa del objeto en S3 devuelve AccessDenied.",
+      "Modifica `index.html`, comprueba que se sigue sirviendo la versión cacheada y crea una invalidación `/index.html`.",
+      "Revisa en las cabeceras `x-cache: Hit from cloudfront` / `Miss from cloudfront`."
+    ],
+    "verification": [
+      "`curl -I https://dxxxx.cloudfront.net` devuelve 200 y `x-cache`.",
+      "`curl -I https://lab-site-<tuid>.s3.amazonaws.com/index.html` devuelve 403.",
+      "Tras la invalidación se ve el contenido nuevo."
+    ],
+    "solution": [
+      "**Bucket policy (OAC)**",
+      "```json",
+      "{",
+      "  \"Version\": \"2012-10-17\",",
+      "  \"Statement\": [{",
+      "    \"Sid\": \"AllowCloudFrontServicePrincipalReadOnly\",",
+      "    \"Effect\": \"Allow\",",
+      "    \"Principal\": { \"Service\": \"cloudfront.amazonaws.com\" },",
+      "    \"Action\": \"s3:GetObject\",",
+      "    \"Resource\": \"arn:aws:s3:::lab-site-TUID/*\",",
+      "    \"Condition\": {",
+      "      \"StringEquals\": { \"AWS:SourceArn\": \"arn:aws:cloudfront::ACCOUNT_ID:distribution/DIST_ID\" }",
+      "    }",
+      "  }]",
+      "}",
+      "```",
+      "```bash",
+      "aws cloudfront create-invalidation --distribution-id DIST_ID --paths '/index.html'",
+      "```",
+      "Notas: OAC requiere el endpoint REST del bucket (el *website endpoint* no soporta OAC). Para un dominio propio, el certificado de ACM debe crearse en us-east-1. En producción conviene versionar los archivos (`app.v2.js`) en lugar de invalidar.",
+      "",
+      "**Limpieza**: deshabilitar y borrar la distribución, vaciar y borrar el bucket."
+    ],
+    "references": [
+      { "title": "Restricting access to an S3 origin (OAC)", "url": "https://docs.aws.amazon.com/AmazonCloudFront/latest/DeveloperGuide/private-content-restricting-access-to-s3.html" }
+    ]
+  },
+  {
+    "id": "aws-lab-s3-data-protection",
+    "domain": "4",
+    "title": "S3: cifrado KMS, lifecycle, versionado y replicación",
+    "tool": "AWS Console / CLI",
+    "difficulty": "intermedio",
+    "estimatedMinutes": 45,
+    "cost": "Bajo (KMS customer managed key USD 1/mes prorrateado; S3 mínimo)",
+    "description": "Aplica controles de protección de datos y optimización de costos en un bucket de logs.",
+    "objectives": [
+      "Configurar SSE-KMS por defecto con Bucket Key",
+      "Forzar una clave concreta con bucket policy",
+      "Crear reglas de lifecycle para clases más baratas",
+      "Configurar replicación entre regiones"
+    ],
+    "setup": [
+      "Bucket origen `lab-logs-<tuid>` (us-east-1) y destino `lab-logs-dr-<tuid>` (us-west-2). Una customer managed key `alias/lab-logs`."
+    ],
+    "tasks": [
+      "Habilita versionado en ambos buckets.",
+      "Configura cifrado por defecto SSE-KMS con `alias/lab-logs` y S3 Bucket Key.",
+      "Agrega una bucket policy que deniegue PutObject con otra clave KMS o sin cifrado KMS.",
+      "Crea una lifecycle rule: Standard-IA a los 30 días, Glacier Flexible Retrieval a los 90, expirar a los 365; versiones no actuales expiran a los 30 días; abortar multipart incompletos a los 7 días.",
+      "Configura CRR hacia el bucket destino (con una clave KMS en la región destino).",
+      "Sube un objeto y verifica el cifrado y la réplica."
+    ],
+    "verification": [
+      "`aws s3api head-object` muestra `ServerSideEncryption: aws:kms` y `BucketKeyEnabled: true`.",
+      "Subir con `--sse AES256` es denegado.",
+      "El objeto aparece en el bucket destino con `ReplicationStatus: REPLICA`."
+    ],
+    "solution": [
+      "**Política: forzar la clave**",
+      "```json",
+      "{",
+      "  \"Version\": \"2012-10-17\",",
+      "  \"Statement\": [{",
+      "    \"Sid\": \"DenyWrongKey\",",
+      "    \"Effect\": \"Deny\",",
+      "    \"Principal\": \"*\",",
+      "    \"Action\": \"s3:PutObject\",",
+      "    \"Resource\": \"arn:aws:s3:::lab-logs-TUID/*\",",
+      "    \"Condition\": {",
+      "      \"StringNotEqualsIfExists\": {",
+      "        \"s3:x-amz-server-side-encryption-aws-kms-key-id\": \"arn:aws:kms:us-east-1:ACCOUNT_ID:key/KEY_ID\"",
+      "      }",
+      "    }",
+      "  }]",
+      "}",
+      "```",
+      "(`IfExists` permite subidas sin cabecera, que reciben la clave por defecto del bucket.)",
+      "",
+      "**Lifecycle**",
+      "```json",
+      "{",
+      "  \"Rules\": [{",
+      "    \"ID\": \"logs-tiering\",",
+      "    \"Status\": \"Enabled\",",
+      "    \"Filter\": {},",
+      "    \"Transitions\": [",
+      "      { \"Days\": 30, \"StorageClass\": \"STANDARD_IA\" },",
+      "      { \"Days\": 90, \"StorageClass\": \"GLACIER\" }",
+      "    ],",
+      "    \"Expiration\": { \"Days\": 365 },",
+      "    \"NoncurrentVersionExpiration\": { \"NoncurrentDays\": 30 },",
+      "    \"AbortIncompleteMultipartUpload\": { \"DaysAfterInitiation\": 7 }",
+      "  }]",
+      "}",
+      "```",
+      "```bash",
+      "aws s3api put-bucket-lifecycle-configuration --bucket lab-logs-TUID --lifecycle-configuration file://lifecycle.json",
+      "```",
+      "Replicación: regla con rol IAM que S3 crea, *Replicate objects encrypted with AWS KMS* activado y la clave del destino. La replicación solo afecta objetos nuevos (para existentes: Batch Replication).",
+      "",
+      "**Limpieza**: borrar todas las versiones y los buckets; programar la eliminación de la clave KMS (7 días mínimo)."
+    ],
+    "references": [
+      { "title": "S3 Bucket Keys", "url": "https://docs.aws.amazon.com/AmazonS3/latest/userguide/bucket-key.html" },
+      { "title": "Replicating encrypted objects", "url": "https://docs.aws.amazon.com/AmazonS3/latest/userguide/replication-config-for-kms-objects.html" }
+    ]
+  },
+  {
+    "id": "aws-lab-governance",
+    "domain": "1",
+    "title": "Detección y cumplimiento: CloudTrail, Config y GuardDuty",
+    "tool": "AWS Console",
+    "difficulty": "básico",
+    "estimatedMinutes": 40,
+    "cost": "Bajo; GuardDuty y Config tienen prueba gratuita/costos por uso. Desactívalos al terminar.",
+    "description": "Configura auditoría, cumplimiento continuo con remediación y detección de amenazas.",
+    "objectives": [
+      "Crear un trail multi-región hacia S3",
+      "Evaluar security groups con una regla administrada de Config y remediación",
+      "Generar hallazgos de ejemplo en GuardDuty"
+    ],
+    "setup": [
+      "Cuenta personal de laboratorio. Un security group de prueba."
+    ],
+    "tasks": [
+      "Crea un trail multi-región con validación de integridad de logs, entregando a un bucket S3 cifrado con KMS.",
+      "Activa AWS Config y la regla administrada `restricted-ssh` (o `vpc-sg-open-only-to-authorized-ports`).",
+      "Agrega una regla de entrada 22 desde 0.0.0.0/0 al SG de prueba y comprueba el estado NON_COMPLIANT.",
+      "Configura remediación automática con el documento SSM `AWS-DisablePublicAccessForSecurityGroup`.",
+      "Habilita GuardDuty y genera *sample findings*.",
+      "En CloudTrail, busca el evento `AuthorizeSecurityGroupIngress` y identifica quién lo hizo."
+    ],
+    "verification": [
+      "Config muestra el SG como NON_COMPLIANT y luego COMPLIANT tras la remediación.",
+      "GuardDuty muestra hallazgos de ejemplo con severidad.",
+      "CloudTrail Event history muestra el usuario/rol y la IP de origen."
+    ],
+    "solution": [
+      "Pasos clave:",
+      "1. CloudTrail → Create trail → *Enable for all regions*, *Log file validation*, SSE-KMS.",
+      "2. Config → Get started → registrar todos los recursos → regla `restricted-ssh`.",
+      "3. Regla → Actions → Manage remediation → Automatic → `AWS-DisablePublicAccessForSecurityGroup` con parámetro `GroupId` = RESOURCE_ID y un rol de automatización con `ec2:RevokeSecurityGroupIngress`.",
+      "4. GuardDuty → Enable → Settings → Generate sample findings.",
+      "",
+      "```bash",
+      "aws cloudtrail lookup-events --lookup-attributes AttributeKey=EventName,AttributeValue=AuthorizeSecurityGroupIngress \\",
+      "  --query 'Events[].{t:EventTime,u:Username}'",
+      "```",
+      "Diferencias para el examen: CloudTrail = quién llamó a qué API; Config = estado y cumplimiento de recursos en el tiempo; GuardDuty = detección de amenazas; Security Hub = consolida hallazgos.",
+      "",
+      "**Limpieza**: borrar el trail (y el bucket), detener el recorder de Config, suspender GuardDuty."
+    ],
+    "references": [
+      { "title": "AWS Config remediation", "url": "https://docs.aws.amazon.com/config/latest/developerguide/remediation.html" },
+      { "title": "GuardDuty sample findings", "url": "https://docs.aws.amazon.com/guardduty/latest/ug/sample_findings.html" }
+    ]
+  },
+  {
+    "id": "aws-lab-cost",
+    "domain": "4",
+    "title": "Gobierno de costos: tags, Budgets, Cost Explorer y Compute Optimizer",
+    "tool": "AWS Console",
+    "difficulty": "básico",
+    "estimatedMinutes": 30,
+    "cost": "Gratis (Budgets: los 2 primeros sin costo)",
+    "description": "Configura las herramientas básicas de visibilidad y control de gasto que toda cuenta debería tener.",
+    "objectives": [
+      "Activar cost allocation tags",
+      "Crear presupuestos con alertas",
+      "Interpretar recomendaciones de ahorro"
+    ],
+    "setup": [
+      "Cuenta con algunos recursos etiquetados con `Project` (por ejemplo, los de los labs anteriores)."
+    ],
+    "tasks": [
+      "Etiqueta tus recursos de lab con `Project=certstudy` y activa `Project` como cost allocation tag en Billing.",
+      "Crea un budget mensual de costo de USD 10 con alertas al 80 % real y 100 % pronosticado.",
+      "Crea un budget de uso de Free Tier (plantilla *Zero spend* o *Monthly cost*).",
+      "En Cost Explorer agrupa por servicio y por la etiqueta `Project`.",
+      "Activa Compute Optimizer y revisa recomendaciones (pueden tardar ~12 h).",
+      "Activa Cost Anomaly Detection con un monitor por servicio."
+    ],
+    "verification": [
+      "Recibes el correo de confirmación de las alertas del budget.",
+      "Cost Explorer permite filtrar por `Project` (las tags aparecen hasta 24 h después de activarlas)."
+    ],
+    "solution": [
+      "- Billing and Cost Management → Cost allocation tags → seleccionar `Project` → Activate.",
+      "- Budgets → Create budget → Cost budget → USD 10 → alertas: Actual 80 % y Forecasted 100 % con tu correo (o SNS).",
+      "- Cost Explorer → Group by: Service / Tag: Project; granularidad diaria.",
+      "- Compute Optimizer → Opt in (cuenta u organización).",
+      "- Cost Anomaly Detection → Create monitor → AWS services → suscripción con umbral.",
+      "",
+      "Para el examen: **Budgets** alerta y puede ejecutar *budget actions* (aplicar SCP/IAM policy o detener instancias); **Cost Explorer** analiza y pronostica; **Compute Optimizer** hace right-sizing; las tags no aplican de forma retroactiva."
+    ],
+    "references": [
+      { "title": "AWS Budgets", "url": "https://docs.aws.amazon.com/cost-management/latest/userguide/budgets-managing-costs.html" },
+      { "title": "Cost allocation tags", "url": "https://docs.aws.amazon.com/awsaccountbilling/latest/aboutv2/cost-alloc-tags.html" }
+    ]
+  }
+]

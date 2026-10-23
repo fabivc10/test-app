@@ -1,0 +1,400 @@
+[
+  {
+    "id": "aws-d1-001",
+    "domain": "1",
+    "type": "single",
+    "difficulty": "medium",
+    "question": "Una aplicación en instancias EC2 necesita leer objetos de un bucket S3. El equipo de seguridad prohíbe almacenar credenciales de larga duración en las instancias. ¿Cuál es la solución MÁS segura?",
+    "options": [
+      "Crear un rol de IAM con permisos de lectura sobre el bucket y asociarlo a las instancias mediante un instance profile",
+      "Crear un usuario IAM y guardar sus access keys en el archivo ~/.aws/credentials de la AMI",
+      "Guardar las access keys en el user data de la instancia",
+      "Hacer público el bucket y restringir por la IP elástica de las instancias"
+    ],
+    "answer": [0],
+    "explanation": "Un rol con instance profile entrega credenciales temporales rotadas automáticamente vía IMDS. Las access keys en disco o user data son credenciales de larga duración expuestas, y un bucket público viola el mínimo privilegio.",
+    "reference": { "title": "IAM roles for Amazon EC2", "url": "https://docs.aws.amazon.com/AWSEC2/latest/UserGuide/iam-roles-for-amazon-ec2.html" }
+  },
+  {
+    "id": "aws-d1-002",
+    "domain": "1",
+    "type": "single",
+    "difficulty": "hard",
+    "question": "Una empresa usa AWS Organizations con decenas de cuentas. Debe impedir que CUALQUIER usuario, incluido el usuario root de las cuentas miembro, desactive AWS CloudTrail. ¿Qué debe hacer un arquitecto?",
+    "options": [
+      "Aplicar una Service Control Policy (SCP) que deniegue cloudtrail:StopLogging y cloudtrail:DeleteTrail en la OU correspondiente",
+      "Crear una política IAM con Deny en cada cuenta y asignarla a todos los usuarios",
+      "Usar un permissions boundary en todos los roles",
+      "Activar AWS Config con una regla que vuelva a habilitar CloudTrail"
+    ],
+    "answer": [0],
+    "explanation": "Las SCPs limitan los permisos máximos de todas las identidades de las cuentas miembro, incluido el root. Las políticas IAM y los boundaries no afectan al root, y una regla de Config sería detectiva/correctiva, no preventiva. (La cuenta de administración no se ve afectada por SCPs.)",
+    "reference": { "title": "Service control policies", "url": "https://docs.aws.amazon.com/organizations/latest/userguide/orgs_manage_policies_scps.html" }
+  },
+  {
+    "id": "aws-d1-003",
+    "domain": "1",
+    "type": "single",
+    "difficulty": "hard",
+    "question": "Desarrolladores pueden crear roles IAM para sus funciones Lambda. La empresa quiere asegurarse de que ningún rol creado por ellos tenga más permisos que un conjunto definido, aunque se adjunte AdministratorAccess. ¿Qué mecanismo cumple con el MENOR esfuerzo operativo?",
+    "options": [
+      "Exigir un permissions boundary en los roles que creen (condición iam:PermissionsBoundary en su política)",
+      "Revisar manualmente cada rol creado",
+      "Aplicar una SCP que deniegue iam:CreateRole",
+      "Usar AWS Config para eliminar roles con AdministratorAccess"
+    ],
+    "answer": [0],
+    "explanation": "Un permissions boundary fija el máximo de permisos efectivos de un rol/usuario: el permiso efectivo es la intersección entre la política de identidad y el boundary. Se fuerza con una condición en la política que permite iam:CreateRole. Denegar CreateRole impide el trabajo y las revisiones manuales no escalan.",
+    "reference": { "title": "Permissions boundaries for IAM entities", "url": "https://docs.aws.amazon.com/IAM/latest/UserGuide/access_policies_boundaries.html" }
+  },
+  {
+    "id": "aws-d1-004",
+    "domain": "1",
+    "type": "single",
+    "difficulty": "medium",
+    "question": "Una cuenta A tiene un bucket S3 y usuarios de la cuenta B necesitan subir objetos. La cuenta A quiere controlar el acceso sin crear usuarios para B. ¿Qué solución es correcta?",
+    "options": [
+      "Crear un rol en la cuenta A con permisos sobre el bucket y una trust policy que permita a la cuenta B asumirlo",
+      "Compartir las credenciales del usuario root de la cuenta A",
+      "Copiar los datos a un bucket en la cuenta B mediante replicación",
+      "Habilitar S3 Transfer Acceleration"
+    ],
+    "answer": [0],
+    "explanation": "El acceso entre cuentas se hace con un rol asumible (sts:AssumeRole) o con una bucket policy que otorgue permisos a principals de la cuenta B. Compartir credenciales de root es inaceptable y Transfer Acceleration solo mejora la velocidad."
+  },
+  {
+    "id": "aws-d1-005",
+    "domain": "1",
+    "type": "single",
+    "difficulty": "hard",
+    "question": "Un bucket S3 contiene informes que los clientes deben descargar durante 15 minutos tras autenticarse en la aplicación web. El bucket debe permanecer privado. ¿Qué solución cumple el requisito?",
+    "options": [
+      "Generar URLs prefirmadas (presigned URLs) con expiración de 15 minutos desde el backend",
+      "Habilitar el acceso público y usar nombres de objeto aleatorios",
+      "Configurar una ACL de objeto public-read durante 15 minutos",
+      "Usar S3 Object Lock en modo governance"
+    ],
+    "answer": [0],
+    "explanation": "Una presigned URL firma la petición con las credenciales del backend y otorga acceso temporal a un objeto concreto sin hacer público el bucket. Nombres aleatorios no son control de acceso y Object Lock sirve para inmutabilidad (WORM)."
+  },
+  {
+    "id": "aws-d1-006",
+    "domain": "1",
+    "type": "single",
+    "difficulty": "hard",
+    "question": "Un sitio estático en S3 se distribuye con Amazon CloudFront. Los usuarios no deben poder acceder directamente a las URLs del bucket, solo a través de CloudFront. ¿Qué solución es la recomendada actualmente?",
+    "options": [
+      "Configurar Origin Access Control (OAC) en CloudFront y una bucket policy que solo permita el principal del servicio CloudFront para esa distribución",
+      "Habilitar S3 static website hosting y bloquear por IP",
+      "Usar signed cookies para todo el sitio",
+      "Habilitar S3 Block Public Access y nada más"
+    ],
+    "answer": [0],
+    "explanation": "OAC (sucesor de OAI) permite que solo la distribución acceda al bucket privado, con una bucket policy que valida `AWS:SourceArn` de la distribución. Solo Block Public Access dejaría a CloudFront sin acceso. Signed cookies controlan qué usuarios acceden, no el acceso directo al bucket.",
+    "reference": { "title": "Restricting access to an Amazon S3 origin", "url": "https://docs.aws.amazon.com/AmazonCloudFront/latest/DeveloperGuide/private-content-restricting-access-to-s3.html" }
+  },
+  {
+    "id": "aws-d1-007",
+    "domain": "1",
+    "type": "single",
+    "difficulty": "medium",
+    "question": "Una empresa debe cifrar en reposo todos los objetos de S3 y poder auditar en CloudTrail cada uso de la clave, además de controlar quién puede usarla. ¿Qué opción cumple?",
+    "options": [
+      "SSE-KMS con una customer managed key",
+      "SSE-S3",
+      "Cifrado del lado del cliente con una clave guardada en el código",
+      "SSE-C"
+    ],
+    "answer": [0],
+    "explanation": "SSE-KMS registra en CloudTrail cada llamada a KMS y permite controlar el uso con key policies y grants. SSE-S3 usa claves gestionadas por S3 sin control ni auditoría por clave. SSE-C obliga a enviar la clave en cada petición y la gestiona el cliente."
+  },
+  {
+    "id": "aws-d1-008",
+    "domain": "1",
+    "type": "single",
+    "difficulty": "hard",
+    "question": "Una base de datos Amazon RDS for PostgreSQL existente se creó sin cifrado. Ahora debe cifrarse en reposo con KMS. ¿Cuál es el procedimiento correcto?",
+    "options": [
+      "Crear un snapshot, copiarlo habilitando el cifrado con una clave KMS y restaurar una nueva instancia desde el snapshot cifrado",
+      "Modificar la instancia y activar la opción de cifrado",
+      "Habilitar el cifrado de EBS por defecto en la región",
+      "Crear una read replica cifrada directamente desde la instancia sin cifrar"
+    ],
+    "answer": [0],
+    "explanation": "No se puede habilitar el cifrado en una instancia RDS existente. Se cifra copiando un snapshot con cifrado y restaurando. Tampoco se puede crear una réplica cifrada de una instancia no cifrada. El cifrado EBS por defecto no aplica a RDS.",
+    "reference": { "title": "Encrypting Amazon RDS resources", "url": "https://docs.aws.amazon.com/AmazonRDS/latest/UserGuide/Overview.Encryption.html" }
+  },
+  {
+    "id": "aws-d1-009",
+    "domain": "1",
+    "type": "single",
+    "difficulty": "medium",
+    "question": "Una aplicación necesita guardar credenciales de base de datos y rotarlas automáticamente cada 30 días sin cambios de código. ¿Qué servicio usar?",
+    "options": ["AWS Secrets Manager", "AWS Systems Manager Parameter Store (String)", "Variables de entorno de EC2", "AWS KMS"],
+    "answer": [0],
+    "explanation": "Secrets Manager almacena secretos cifrados y ofrece rotación automática nativa (integrada con RDS, Aurora, Redshift, DocumentDB) mediante Lambda. Parameter Store no rota automáticamente; KMS gestiona claves, no secretos."
+  },
+  {
+    "id": "aws-d1-010",
+    "domain": "1",
+    "type": "single",
+    "difficulty": "hard",
+    "question": "Las instancias EC2 en subredes privadas deben acceder a S3 sin que el tráfico salga por Internet y sin costo por GB procesado. ¿Qué solución cumple?",
+    "options": [
+      "Un gateway VPC endpoint para S3 añadido a las tablas de rutas de las subredes privadas",
+      "Un NAT gateway en una subred pública",
+      "Un interface VPC endpoint (PrivateLink) para S3",
+      "Un internet gateway con rutas a S3"
+    ],
+    "answer": [0],
+    "explanation": "El gateway endpoint (S3 y DynamoDB) es gratuito y se implementa como ruta en la tabla de rutas. El interface endpoint también es privado, pero cobra por hora y por GB. NAT gateway cobra por GB y sale hacia la red pública de AWS.",
+    "reference": { "title": "Gateway endpoints", "url": "https://docs.aws.amazon.com/vpc/latest/privatelink/gateway-endpoints.html" }
+  },
+  {
+    "id": "aws-d1-011",
+    "domain": "1",
+    "type": "single",
+    "difficulty": "medium",
+    "question": "Un servidor web en EC2 debe aceptar HTTPS desde Internet. La base de datos en otra instancia solo debe aceptar conexiones desde los servidores web. ¿Cómo se configuran los security groups de la forma más mantenible?",
+    "options": [
+      "SG-web permite 443 desde 0.0.0.0/0; SG-db permite el puerto de la BD con origen SG-web",
+      "SG-db permite el puerto de la BD desde 0.0.0.0/0",
+      "SG-db permite el puerto de la BD desde las IP privadas actuales de los servidores web",
+      "Usar network ACLs con reglas de deny para Internet y no usar security groups"
+    ],
+    "answer": [0],
+    "explanation": "Referenciar un security group como origen permite el tráfico de cualquier instancia asociada a él, aunque cambien sus IPs (p. ej., con Auto Scaling). Usar IPs fijas no escala y abrir la BD a todo Internet es inseguro."
+  },
+  {
+    "id": "aws-d1-012",
+    "domain": "1",
+    "type": "multiple",
+    "difficulty": "medium",
+    "question": "¿Qué DOS afirmaciones describen correctamente las diferencias entre security groups y network ACLs?",
+    "options": [
+      "Los security groups son stateful; las NACLs son stateless",
+      "Las NACLs admiten reglas de deny explícitas; los security groups solo de allow",
+      "Los security groups se aplican a nivel de subred",
+      "Las NACLs evalúan todas las reglas y aplican la más permisiva",
+      "Los security groups requieren reglas de salida explícitas para el tráfico de respuesta"
+    ],
+    "answer": [0, 1],
+    "explanation": "SG: a nivel de ENI/instancia, stateful (las respuestas se permiten automáticamente) y solo allow. NACL: a nivel de subred, stateless (hay que permitir puertos efímeros de retorno), con allow y deny evaluados en orden numérico, aplicando la primera coincidencia."
+  },
+  {
+    "id": "aws-d1-013",
+    "domain": "1",
+    "type": "single",
+    "difficulty": "hard",
+    "question": "Una aplicación detrás de un Application Load Balancer recibe un ataque de inyección SQL y muchas peticiones desde una IP concreta. ¿Qué servicio mitiga ambos problemas con el MENOR esfuerzo?",
+    "options": [
+      "AWS WAF asociado al ALB con reglas administradas para SQLi y una regla rate-based",
+      "AWS Shield Standard",
+      "Network ACL bloqueando la IP",
+      "Amazon GuardDuty"
+    ],
+    "answer": [0],
+    "explanation": "AWS WAF inspecciona capa 7 en ALB, CloudFront, API Gateway, AppSync y Cognito: las managed rules cubren SQLi y las rate-based rules limitan IPs abusivas. Shield Standard protege contra DDoS de capa 3/4; una NACL no detecta SQLi y GuardDuty solo detecta amenazas."
+  },
+  {
+    "id": "aws-d1-014",
+    "domain": "1",
+    "type": "single",
+    "difficulty": "medium",
+    "question": "¿Qué servicio analiza logs de CloudTrail, VPC Flow Logs y DNS para detectar actividad maliciosa, como instancias comunicándose con servidores de minería de criptomonedas?",
+    "options": ["Amazon GuardDuty", "Amazon Inspector", "Amazon Macie", "AWS Config"],
+    "answer": [0],
+    "explanation": "GuardDuty es detección de amenazas basada en análisis de fuentes de logs y threat intelligence. Inspector escanea vulnerabilidades en EC2/ECR/Lambda, Macie descubre datos sensibles en S3 y Config evalúa la conformidad de configuraciones."
+  },
+  {
+    "id": "aws-d1-015",
+    "domain": "1",
+    "type": "single",
+    "difficulty": "medium",
+    "question": "Una empresa debe identificar automáticamente si hay datos personales (PII) como números de tarjetas en sus buckets S3. ¿Qué servicio usar?",
+    "options": ["Amazon Macie", "Amazon GuardDuty", "AWS Shield", "Amazon Detective"],
+    "answer": [0],
+    "explanation": "Macie usa machine learning y pattern matching para descubrir y clasificar datos sensibles en S3. Detective investiga causas raíz de hallazgos de seguridad."
+  },
+  {
+    "id": "aws-d1-016",
+    "domain": "1",
+    "type": "single",
+    "difficulty": "hard",
+    "question": "Por normativa, los registros de auditoría en S3 deben ser inmutables durante 7 años; ni siquiera el usuario root debe poder borrarlos. ¿Qué configuración se requiere?",
+    "options": [
+      "S3 Object Lock en modo compliance con un periodo de retención de 7 años",
+      "S3 Object Lock en modo governance",
+      "Versionado de S3 con MFA Delete",
+      "Una bucket policy que deniegue s3:DeleteObject"
+    ],
+    "answer": [0],
+    "explanation": "En modo compliance nadie (incluido root) puede borrar ni acortar la retención de las versiones protegidas. En governance, usuarios con s3:BypassGovernanceRetention sí pueden. Una bucket policy puede ser modificada por un administrador."
+  },
+  {
+    "id": "aws-d1-017",
+    "domain": "1",
+    "type": "single",
+    "difficulty": "medium",
+    "question": "Una app móvil permite registro e inicio de sesión de millones de usuarios, con login social (Google, Apple) y MFA. ¿Qué servicio usar?",
+    "options": ["Amazon Cognito user pools", "AWS IAM Identity Center", "Usuarios IAM", "AWS Directory Service"],
+    "answer": [0],
+    "explanation": "Cognito user pools gestiona identidades de clientes (CIAM) con registro, federación social, MFA y tokens JWT. IAM Identity Center es para workforce (empleados) y los usuarios IAM no son para usuarios finales de apps."
+  },
+  {
+    "id": "aws-d1-018",
+    "domain": "1",
+    "type": "single",
+    "difficulty": "hard",
+    "question": "Usuarios autenticados con Cognito user pools deben subir fotos directamente a un prefijo propio de S3 desde la app móvil, con credenciales AWS temporales. ¿Qué componente se necesita?",
+    "options": [
+      "Cognito identity pools para intercambiar el token por credenciales temporales de un rol IAM con política por prefijo",
+      "Crear un usuario IAM por cada usuario de la app",
+      "Una API Gateway con API keys",
+      "Hacer público el bucket"
+    ],
+    "answer": [0],
+    "explanation": "Identity pools (federated identities) intercambian tokens del user pool por credenciales temporales de STS. La política del rol puede usar la variable `${cognito-identity.amazonaws.com:sub}` para limitar cada usuario a su prefijo."
+  },
+  {
+    "id": "aws-d1-019",
+    "domain": "1",
+    "type": "single",
+    "difficulty": "medium",
+    "question": "Una empresa quiere que sus empleados inicien sesión una sola vez con su Microsoft Entra ID / Active Directory y accedan a múltiples cuentas AWS con permisos distintos. ¿Qué servicio es el adecuado?",
+    "options": ["AWS IAM Identity Center", "Amazon Cognito user pools", "Usuarios IAM en cada cuenta", "AWS Resource Access Manager"],
+    "answer": [0],
+    "explanation": "IAM Identity Center (sucesor de AWS SSO) se integra con IdPs externos y AWS Organizations, asignando permission sets por cuenta. RAM sirve para compartir recursos, no identidades."
+  },
+  {
+    "id": "aws-d1-020",
+    "domain": "1",
+    "type": "single",
+    "difficulty": "hard",
+    "question": "Una empresa necesita cifrar datos con claves que residan en HSMs dedicados de un solo inquilino, validados FIPS 140-2/140-3 nivel 3, y bajo control exclusivo del cliente. ¿Qué servicio usar?",
+    "options": ["AWS CloudHSM", "AWS KMS con claves administradas por AWS", "AWS Secrets Manager", "SSE-S3"],
+    "answer": [0],
+    "explanation": "CloudHSM provee HSMs dedicados en la VPC del cliente con control exclusivo de las claves. KMS es multi-inquilino y gestionado por AWS (aunque usa HSMs validados). Si se requiere KMS con HSM propio, existe el custom key store respaldado por CloudHSM."
+  },
+  {
+    "id": "aws-d1-021",
+    "domain": "1",
+    "type": "single",
+    "difficulty": "medium",
+    "question": "¿Qué servicio proporciona certificados TLS públicos gratuitos con renovación automática para usar en un ALB o CloudFront?",
+    "options": ["AWS Certificate Manager (ACM)", "AWS KMS", "AWS CloudHSM", "AWS Private CA"],
+    "answer": [0],
+    "explanation": "ACM emite certificados públicos sin costo para servicios integrados (ELB, CloudFront, API Gateway) y los renueva automáticamente. Para CloudFront, el certificado debe estar en us-east-1."
+  },
+  {
+    "id": "aws-d1-022",
+    "domain": "1",
+    "type": "single",
+    "difficulty": "hard",
+    "question": "Una empresa tiene una conexión AWS Direct Connect y la normativa exige cifrado en tránsito entre el centro de datos y la VPC. ¿Qué solución cumple manteniendo el uso de Direct Connect?",
+    "options": [
+      "Establecer una VPN IPsec site-to-site sobre la conexión Direct Connect (public VIF o transit VIF), o usar MACsec si el puerto lo soporta",
+      "Direct Connect ya cifra el tráfico por defecto",
+      "Usar un NAT gateway",
+      "Habilitar VPC Flow Logs"
+    ],
+    "answer": [0],
+    "explanation": "Direct Connect es una conexión privada pero no cifrada por defecto. Se cifra con una VPN IPsec sobre DX o con MACsec (cifrado de capa 2 en puertos dedicados compatibles)."
+  },
+  {
+    "id": "aws-d1-023",
+    "domain": "1",
+    "type": "single",
+    "difficulty": "medium",
+    "question": "Un auditor necesita un historial de quién realizó cada llamada a la API en la cuenta AWS durante el último año. ¿Qué servicio lo proporciona?",
+    "options": ["AWS CloudTrail", "Amazon CloudWatch Metrics", "VPC Flow Logs", "AWS Trusted Advisor"],
+    "answer": [0],
+    "explanation": "CloudTrail registra llamadas a la API (quién, qué, cuándo, desde dónde). El Event history guarda 90 días; para un año se configura un trail que entregue a S3 (o CloudTrail Lake)."
+  },
+  {
+    "id": "aws-d1-024",
+    "domain": "1",
+    "type": "single",
+    "difficulty": "medium",
+    "question": "Una empresa necesita registrar cómo cambia la configuración de sus security groups a lo largo del tiempo y evaluar si cumplen reglas internas (por ejemplo, sin SSH abierto a 0.0.0.0/0). ¿Qué servicio usar?",
+    "options": ["AWS Config", "AWS CloudTrail", "Amazon Inspector", "AWS Shield"],
+    "answer": [0],
+    "explanation": "AWS Config registra el historial de configuración de los recursos y evalúa reglas (administradas o personalizadas), con remediación automática opcional vía SSM Automation. CloudTrail registra las llamadas, no el estado de configuración."
+  },
+  {
+    "id": "aws-d1-025",
+    "domain": "1",
+    "type": "single",
+    "difficulty": "hard",
+    "question": "Una aplicación SaaS en la cuenta del proveedor debe exponerse de forma privada a VPCs de cientos de clientes, sin peering ni rutas solapadas. ¿Qué solución usar?",
+    "options": [
+      "Un Network Load Balancer con un VPC endpoint service (AWS PrivateLink); los clientes crean interface endpoints",
+      "VPC peering con cada cliente",
+      "Un Transit Gateway compartido con todos los clientes",
+      "Exponer la aplicación en Internet con IP allow lists"
+    ],
+    "answer": [0],
+    "explanation": "PrivateLink expone un servicio detrás de un NLB (o GWLB) a otras VPCs mediante interface endpoints, sin necesidad de CIDRs no solapados y de forma unidireccional. Peering o TGW requieren CIDRs no solapados y exponen redes completas."
+  },
+  {
+    "id": "aws-d1-026",
+    "domain": "1",
+    "type": "single",
+    "difficulty": "medium",
+    "question": "¿Qué protección contra DDoS está incluida automáticamente sin costo adicional en todas las cuentas AWS?",
+    "options": ["AWS Shield Standard", "AWS Shield Advanced", "AWS WAF", "AWS Firewall Manager"],
+    "answer": [0],
+    "explanation": "Shield Standard protege contra ataques comunes de capa 3/4 sin costo. Shield Advanced (de pago) añade protección ampliada, el Shield Response Team y protección de costos por escalado."
+  },
+  {
+    "id": "aws-d1-027",
+    "domain": "1",
+    "type": "single",
+    "difficulty": "hard",
+    "question": "Una empresa con muchas cuentas en AWS Organizations quiere aplicar y gestionar de forma centralizada reglas de AWS WAF y políticas de security groups en todas las cuentas, incluidas las nuevas. ¿Qué servicio usar?",
+    "options": ["AWS Firewall Manager", "AWS Network Firewall", "AWS Shield Standard", "AWS Config Aggregator"],
+    "answer": [0],
+    "explanation": "Firewall Manager administra centralmente políticas de WAF, Shield Advanced, security groups, Network Firewall y DNS Firewall en la organización, y las aplica automáticamente a cuentas y recursos nuevos."
+  },
+  {
+    "id": "aws-d1-028",
+    "domain": "1",
+    "type": "single",
+    "difficulty": "medium",
+    "question": "¿Qué servicio escanea automáticamente instancias EC2, imágenes en Amazon ECR y funciones Lambda en busca de vulnerabilidades de software (CVEs)?",
+    "options": ["Amazon Inspector", "Amazon GuardDuty", "Amazon Macie", "AWS Audit Manager"],
+    "answer": [0],
+    "explanation": "Amazon Inspector hace evaluación continua de vulnerabilidades y exposición de red en EC2, ECR y Lambda."
+  },
+  {
+    "id": "aws-d1-029",
+    "domain": "1",
+    "type": "multiple",
+    "difficulty": "hard",
+    "question": "Una empresa debe asegurar que ningún bucket S3 de sus cuentas pueda volverse público por error. ¿Qué DOS acciones lo logran?",
+    "options": [
+      "Activar S3 Block Public Access a nivel de cuenta en todas las cuentas",
+      "Aplicar una SCP que deniegue s3:PutAccountPublicAccessBlock para que nadie pueda desactivarlo",
+      "Habilitar el versionado en todos los buckets",
+      "Habilitar S3 Transfer Acceleration",
+      "Configurar replicación entre regiones"
+    ],
+    "answer": [0, 1],
+    "explanation": "Block Public Access a nivel de cuenta anula ACLs y políticas públicas en todos los buckets. Una SCP impide que alguien en las cuentas miembro lo desactive. Versionado, replicación y Transfer Acceleration no controlan el acceso público."
+  },
+  {
+    "id": "aws-d1-030",
+    "domain": "1",
+    "type": "single",
+    "difficulty": "hard",
+    "question": "Una política de bucket debe denegar cualquier petición que no use HTTPS. ¿Qué condición se utiliza?",
+    "options": [
+      "Deny con `\"Condition\": {\"Bool\": {\"aws:SecureTransport\": \"false\"}}`",
+      "Allow con `aws:SecureTransport` = true y nada más",
+      "Deny con `s3:x-amz-server-side-encryption` = AES256",
+      "Deny con `aws:SourceIp` = 0.0.0.0/0"
+    ],
+    "answer": [0],
+    "explanation": "La condición `aws:SecureTransport` es false cuando la petición llega por HTTP. Un Deny explícito con esa condición fuerza TLS. Un Allow solo no impide que otras políticas permitan HTTP."
+  }
+]

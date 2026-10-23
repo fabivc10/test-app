@@ -1,0 +1,303 @@
+{
+  "domainId": "2",
+  "topics": [
+    {
+      "id": "ccna-t2-vlans",
+      "objective": "2.1",
+      "title": "VLANs: acceso, datos y voz",
+      "content": [
+        "Una VLAN es un dominio de broadcast lógico. Rango normal 1–1005 (1002–1005 reservadas), extendido 1006–4094. VLAN 1 es la default y nativa.",
+        "",
+        "```",
+        "vlan 10",
+        " name VENTAS",
+        "interface range g0/1 - 10",
+        " switchport mode access",
+        " switchport access vlan 10",
+        " switchport voice vlan 110    ! teléfono IP etiqueta la voz",
+        " spanning-tree portfast",
+        "```",
+        "",
+        "- Un puerto de acceso transporta una VLAN de datos **sin etiqueta** (+ una voice VLAN etiquetada que el teléfono aprende por CDP/LLDP).",
+        "- Si asignas una VLAN que no existe, IOS la crea. Si la borras, el puerto queda **inactive**.",
+        "- Para comunicar VLANs distintas hace falta capa 3 (router-on-a-stick o SVIs).",
+        "",
+        "Verificación: `show vlan brief` (solo lista puertos de **acceso**), `show interfaces g0/1 switchport`."
+      ],
+      "keyPoints": [
+        "`show vlan brief` no muestra trunks.",
+        "Voice VLAN no convierte el puerto en trunk.",
+        "Buenas prácticas: no usar VLAN 1 para usuarios ni gestión; puertos sin uso en VLAN parking + shutdown."
+      ],
+      "references": [
+        {
+          "title": "Cisco — Catalyst 9300 Layer 2 Configuration Guide (17.12)",
+          "url": "https://www.cisco.com/c/en/us/td/docs/switches/lan/catalyst9300/software/release/17-12/configuration_guide/lyr2/b_1712_lyr2_9300_cg.html"
+        }
+      ]
+    },
+    {
+      "id": "ccna-t2-trunks",
+      "objective": "2.2",
+      "title": "Trunks 802.1Q, VLAN nativa y DTP",
+      "content": [
+        "802.1Q inserta una etiqueta de 4 bytes: TPID 0x8100, PCP (CoS 3 bits), DEI y VID (12 bits). La **VLAN nativa** viaja sin etiqueta y debe coincidir en ambos extremos.",
+        "",
+        "```",
+        "interface g0/24",
+        " switchport trunk encapsulation dot1q   ! solo en switches que soportan ISL",
+        " switchport mode trunk",
+        " switchport trunk native vlan 99",
+        " switchport trunk allowed vlan 10,20,99",
+        " switchport trunk allowed vlan add 30   ! ¡usar add!",
+        " switchport nonegotiate",
+        "```",
+        "",
+        "### DTP",
+        "| Lado A \\ Lado B | access | dynamic auto | dynamic desirable | trunk |",
+        "|---|---|---|---|---|",
+        "| **dynamic auto** | access | access | trunk | trunk |",
+        "| **dynamic desirable** | access | trunk | trunk | trunk |",
+        "| **trunk** | (mal configurado) | trunk | trunk | trunk |",
+        "",
+        "`show interfaces trunk` muestra: modo, encapsulación, nativa, VLANs permitidas, activas y en forwarding (no podadas por STP)."
+      ],
+      "keyPoints": [
+        "`allowed vlan X` reemplaza la lista; `allowed vlan add X` agrega.",
+        "Native VLAN mismatch: CDP lo avisa y las VLANs se mezclan.",
+        "auto + auto = access.",
+        "Deshabilita DTP con modo fijo + `switchport nonegotiate`."
+      ],
+      "references": [
+        {
+          "title": "Cisco — Catalyst 9300 Layer 2 Configuration Guide (17.12)",
+          "url": "https://www.cisco.com/c/en/us/td/docs/switches/lan/catalyst9300/software/release/17-12/configuration_guide/lyr2/b_1712_lyr2_9300_cg.html"
+        }
+      ]
+    },
+    {
+      "id": "ccna-t2-discovery",
+      "objective": "2.3",
+      "title": "CDP y LLDP",
+      "content": [
+        "| | CDP | LLDP |",
+        "|---|---|---|",
+        "| Estándar | Propietario Cisco | IEEE 802.1AB |",
+        "| Por defecto en Cisco | Habilitado | Normalmente deshabilitado |",
+        "| Timers | 60 s / holdtime 180 s | 30 s / holdtime 120 s |",
+        "",
+        "```",
+        "cdp run / no cdp run           ! global",
+        "interface g0/1",
+        " no cdp enable",
+        "lldp run",
+        "interface g0/1",
+        " lldp transmit",
+        " lldp receive",
+        "show cdp neighbors [detail]",
+        "show lldp neighbors [detail]",
+        "```",
+        "",
+        "`detail` muestra la IP de gestión y la versión de software del vecino."
+      ],
+      "keyPoints": [
+        "Solo `detail` muestra la IP del vecino.",
+        "Deshabilitar CDP/LLDP en puertos hacia usuarios o Internet (fuga de información)."
+      ],
+      "references": [
+        {
+          "title": "Cisco — Catalyst 9300 Layer 2 Configuration Guide (17.12)",
+          "url": "https://www.cisco.com/c/en/us/td/docs/switches/lan/catalyst9300/software/release/17-12/configuration_guide/lyr2/b_1712_lyr2_9300_cg.html"
+        }
+      ]
+    },
+    {
+      "id": "ccna-t2-etherchannel",
+      "objective": "2.4",
+      "title": "EtherChannel (LACP / PAgP / estático)",
+      "content": [
+        "Agrupa 2–8 enlaces activos en uno lógico (STP lo ve como uno solo) con balanceo por flujo (hash src/dst MAC/IP).",
+        "",
+        "| Protocolo | Modos | Se forma con |",
+        "|---|---|---|",
+        "| LACP (802.3ad) | active / passive | active-active, active-passive |",
+        "| PAgP (Cisco) | desirable / auto | desirable-desirable, desirable-auto |",
+        "| Estático | on | solo on-on |",
+        "",
+        "```",
+        "interface range g0/1 - 2",
+        " channel-group 1 mode active",
+        "interface port-channel 1",
+        " switchport mode trunk",
+        "",
+        "! Capa 3",
+        "interface range g0/3 - 4",
+        " no switchport",
+        " channel-group 2 mode active",
+        "interface port-channel 2",
+        " ip address 10.0.0.1 255.255.255.252",
+        "```",
+        "",
+        "Los miembros deben coincidir en: velocidad, dúplex, modo access/trunk, VLAN de acceso o allowed/native VLANs.",
+        "",
+        "`show etherchannel summary`: **P** bundled, **I** stand-alone, **s** suspended, **D** down, **S** L2, **R** L3, **U** in use."
+      ],
+      "keyPoints": [
+        "passive+passive y auto+auto no forman canal.",
+        "El WLC (AireOS) solo soporta LAG en modo on.",
+        "Port-channel L3: `no switchport` en las físicas antes de channel-group."
+      ],
+      "references": [
+        {
+          "title": "Cisco — EtherChannel configuration",
+          "url": "https://www.cisco.com/c/en/us/support/docs/lan-switching/etherchannel/98469-ios-etherchannel.html"
+        }
+      ]
+    },
+    {
+      "id": "ccna-t2-stp",
+      "objective": "2.5",
+      "title": "Rapid PVST+ (STP)",
+      "content": [
+        "### Elección",
+        "1. **Root bridge**: menor Bridge ID = prioridad (múltiplo de 4096; por defecto 32768 + VLAN ID) + MAC.",
+        "2. **Root port** (uno por switch no-root): menor costo al root → menor BID del vecino → menor Port ID del vecino.",
+        "3. **Designated port** (uno por segmento): el del switch con menor costo al root (desempate por BID). Todos los puertos del root son designated.",
+        "4. El resto: **alternate** (bloqueado).",
+        "",
+        "| Velocidad | Costo (short) |",
+        "|---|---|",
+        "| 10 Mbps | 100 |",
+        "| 100 Mbps | 19 |",
+        "| 1 Gbps | 4 |",
+        "| 10 Gbps | 2 |",
+        "",
+        "### 802.1D vs RSTP",
+        "- 802.1D: blocking → listening (15 s) → learning (15 s) → forwarding; Max Age 20 s. Convergencia 30–50 s.",
+        "- RSTP: estados **discarding, learning, forwarding**; roles root, designated, **alternate, backup**; proposal/agreement en enlaces P2P → segundos.",
+        "",
+        "```",
+        "spanning-tree mode rapid-pvst",
+        "spanning-tree vlan 10 root primary        ! macro 24576 (una vez)",
+        "spanning-tree vlan 20 priority 4096",
+        "interface g0/5",
+        " spanning-tree portfast",
+        " spanning-tree bpduguard enable",
+        "spanning-tree portfast default",
+        "spanning-tree portfast bpduguard default",
+        "interface g0/24",
+        " spanning-tree guard root",
+        "```",
+        "",
+        "- **PortFast**: puerto edge pasa directo a forwarding.",
+        "- **BPDU Guard**: err-disabled si recibe BPDU.",
+        "- **Root Guard**: root-inconsistent si recibe BPDU superior.",
+        "- **Loop Guard**: evita que un puerto bloqueado pase a forwarding si deja de recibir BPDUs."
+      ],
+      "keyPoints": [
+        "El root tiene todos sus puertos designated.",
+        "Desempate de root port: costo → BID vecino → Port ID vecino.",
+        "Prioridad en pasos de 4096 por el extended system ID.",
+        "Balanceo por VLAN: un root distinto por VLAN."
+      ],
+      "references": [
+        {
+          "title": "Cisco — Understanding Rapid STP (802.1w)",
+          "url": "https://www.cisco.com/c/en/us/support/docs/lan-switching/spanning-tree-protocol/24062-146.html"
+        }
+      ]
+    },
+    {
+      "id": "ccna-t2-wireless-arch",
+      "objective": "2.6–2.7",
+      "title": "Arquitecturas inalámbricas Cisco y modos de AP",
+      "content": [
+        "| Arquitectura | Descripción |",
+        "|---|---|",
+        "| Autónoma | Cada AP configurado individualmente; trunk hasta el AP |",
+        "| Centralizada (split-MAC) | Lightweight APs + WLC; CAPWAP |",
+        "| Cloud-based | Gestión desde la nube (Meraki); datos locales |",
+        "| Embedded WLC (EWC) | Controlador integrado en un AP o switch |",
+        "",
+        "**Split-MAC**: el AP hace lo de tiempo real (beacons, probe responses, ACKs, cifrado); el WLC hace gestión (asociación, autenticación, RRM, seguridad, QoS, roaming).",
+        "",
+        "**CAPWAP**: UDP 5246 (control, DTLS) y 5247 (datos).",
+        "",
+        "### Modos de AP",
+        "| Modo | Uso |",
+        "|---|---|",
+        "| Local | Por defecto; tuneliza todo al WLC |",
+        "| FlexConnect | Sucursales; conmutación local y operación si cae el WLC |",
+        "| Monitor | No sirve clientes; IDS/rogue/localización |",
+        "| Sniffer | Captura y envía a un analizador |",
+        "| Rogue detector | Detecta rogues en la red cableada |",
+        "| SE-Connect | Análisis de espectro |",
+        "| Bridge / Mesh | Enlaces punto a punto/multipunto |",
+        "",
+        "### Conexión física",
+        "- AP en modo Local → puerto **access** (VLAN de gestión de APs).",
+        "- AP autónomo o FlexConnect con local switching → **trunk**.",
+        "- WLC → trunk; varios puertos con **LAG** (EtherChannel `mode on`)."
+      ],
+      "keyPoints": [
+        "FlexConnect = sucursal remota con WAN poco fiable.",
+        "Local mode AP necesita solo un puerto de acceso.",
+        "LAG del WLC = EtherChannel estático."
+      ],
+      "references": [
+        {
+          "title": "Cisco — Wireless LAN Controller deployment guide",
+          "url": "https://www.cisco.com/c/en/us/td/docs/wireless/controller/8-5/Enterprise-Mobility-8-5-Design-Guide/Enterprise_Mobility_8-5_Deployment_Guide.html"
+        }
+      ]
+    },
+    {
+      "id": "ccna-t2-mgmt",
+      "objective": "2.8–2.9",
+      "title": "Acceso de gestión y configuración de WLAN en el WLC",
+      "content": [
+        "### Métodos de acceso",
+        "| Método | Seguro | Notas |",
+        "|---|---|---|",
+        "| Consola | Físico | Cable rollover/USB, 9600 8N1 |",
+        "| Telnet (TCP 23) | No | Texto plano |",
+        "| SSH (TCP 22) | Sí | Requiere hostname, dominio y llaves RSA |",
+        "| HTTP / HTTPS | No / Sí | GUI |",
+        "| TACACS+ / RADIUS | AAA centralizado | TACACS+ TCP 49 cifra todo; RADIUS UDP 1812/1813 cifra solo la contraseña |",
+        "| Cloud-managed | Dashboard | Meraki / Catalyst Center |",
+        "",
+        "```",
+        "hostname R1",
+        "ip domain-name lab.local",
+        "crypto key generate rsa modulus 2048",
+        "ip ssh version 2",
+        "username admin secret Cl4v3!",
+        "line vty 0 15",
+        " login local",
+        " transport input ssh",
+        " exec-timeout 10 0",
+        "```",
+        "",
+        "Switch L2 gestionable desde otras subredes: SVI de gestión + `ip default-gateway`.",
+        "",
+        "### WLAN en el WLC (GUI)",
+        "1. **WLANs → Create New**: perfil, SSID, ID.",
+        "2. **General**: estado, interfaz dinámica (VLAN), broadcast SSID.",
+        "3. **Security → Layer 2**: WPA2/WPA3, AES, PSK o 802.1X. **Layer 3**: Web Auth. **AAA Servers**: RADIUS.",
+        "4. **QoS**: Platinum (voz), Gold (video), Silver (best effort), Bronze (background).",
+        "5. **Advanced**: FlexConnect local switching, session timeout, DHCP required, etc."
+      ],
+      "keyPoints": [
+        "SSH necesita hostname ≠ Router, `ip domain-name` y llaves RSA.",
+        "TACACS+ separa las tres A y cifra todo; ideal para administrar dispositivos.",
+        "WLAN ↔ interfaz dinámica ↔ VLAN."
+      ],
+      "references": [
+        {
+          "title": "Cisco — Configuring SSH",
+          "url": "https://www.cisco.com/c/en/us/support/docs/security-vpn/secure-shell-ssh/4145-ssh.html"
+        }
+      ]
+    }
+  ]
+}

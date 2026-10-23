@@ -1,0 +1,359 @@
+[
+  {
+    "id": "ccna-d4-001",
+    "domain": "4",
+    "type": "single",
+    "difficulty": "hard",
+    "question": "Según la salida, ¿qué tipo de NAT está en uso y cuál es la dirección inside global?",
+    "exhibit": "```\nR1# show ip nat translations\nPro  Inside global        Inside local         Outside local      Outside global\ntcp  203.0.113.5:1024     192.168.1.10:51000   8.8.8.8:443        8.8.8.8:443\ntcp  203.0.113.5:1025     192.168.1.11:51000   8.8.8.8:443        8.8.8.8:443\n```",
+    "options": [
+      "PAT (NAT overload); inside global 203.0.113.5",
+      "NAT estático; inside global 192.168.1.10",
+      "NAT dinámico con pool; inside global 8.8.8.8",
+      "PAT; inside global 192.168.1.10"
+    ],
+    "answer": [0],
+    "explanation": "Varios hosts internos comparten 203.0.113.5 diferenciados por puerto: es PAT. Inside local = dirección privada del host; inside global = dirección pública que lo representa; outside local/global = el destino externo."
+  },
+  {
+    "id": "ccna-d4-002",
+    "domain": "4",
+    "type": "single",
+    "difficulty": "hard",
+    "question": "¿Qué configuración permite que toda la LAN 192.168.10.0/24 salga a Internet usando la IP de la interfaz Gi0/1?",
+    "options": [
+      "`access-list 1 permit 192.168.10.0 0.0.0.255` + `ip nat inside source list 1 interface Gi0/1 overload` + `ip nat inside`/`ip nat outside` en las interfaces",
+      "`ip nat inside source static 192.168.10.0 interface Gi0/1`",
+      "`ip nat pool LAN 192.168.10.1 192.168.10.254 netmask 255.255.255.0` + `ip nat outside source list 1 pool LAN`",
+      "`access-list 1 permit any` + `ip nat inside source list 1 interface Gi0/1` sin overload"
+    ],
+    "answer": [0],
+    "explanation": "PAT con la IP de la interfaz: ACL que identifica los inside locals, `ip nat inside source list … interface … overload` y marcar las interfaces como inside/outside. Sin `overload`, solo un host podría traducirse a la vez."
+  },
+  {
+    "id": "ccna-d4-003",
+    "domain": "4",
+    "type": "single",
+    "difficulty": "medium",
+    "question": "Un servidor web interno 192.168.1.100 debe ser accesible siempre desde Internet con 203.0.113.10. ¿Qué tipo de NAT usas?",
+    "options": ["NAT estático", "PAT", "NAT dinámico", "NAT64"],
+    "answer": [0],
+    "explanation": "NAT estático (`ip nat inside source static 192.168.1.100 203.0.113.10`) crea un mapeo 1:1 permanente que permite conexiones iniciadas desde fuera."
+  },
+  {
+    "id": "ccna-d4-004",
+    "domain": "4",
+    "type": "single",
+    "difficulty": "hard",
+    "question": "Configuraste NAT dinámico con un pool de 4 direcciones públicas sin overload. El quinto host interno no puede navegar. ¿Por qué?",
+    "options": [
+      "El pool se agotó: cada traducción dinámica sin overload consume una dirección pública",
+      "La ACL de NAT solo permite 4 hosts",
+      "NAT dinámico requiere NTP",
+      "Falta `ip nat outside` en la interfaz LAN"
+    ],
+    "answer": [0],
+    "explanation": "NAT dinámico 1:1 asigna una IP del pool por host mientras la traducción exista. Al agotarse el pool, nuevos hosts fallan hasta que expiren traducciones. Con `overload` (PAT sobre el pool) se resuelve."
+  },
+  {
+    "id": "ccna-d4-005",
+    "domain": "4",
+    "type": "single",
+    "difficulty": "medium",
+    "question": "En la terminología NAT de Cisco, ¿qué es la dirección *inside local*?",
+    "options": [
+      "La dirección del host interno tal como se ve dentro de la red (normalmente privada)",
+      "La dirección pública asignada al host interno",
+      "La dirección del servidor externo vista desde Internet",
+      "La dirección de la interfaz outside del router"
+    ],
+    "answer": [0],
+    "explanation": "Inside = dispositivo de nuestra red; local = como se ve desde dentro. Inside local suele ser privada; inside global es la pública que la representa hacia fuera."
+  },
+  {
+    "id": "ccna-d4-006",
+    "domain": "4",
+    "type": "single",
+    "difficulty": "medium",
+    "question": "¿Qué comando configura un router Cisco como cliente NTP del servidor 10.0.0.100?",
+    "options": ["ntp server 10.0.0.100", "ntp master 10.0.0.100", "clock server 10.0.0.100", "ntp peer 10.0.0.100"],
+    "answer": [0],
+    "explanation": "`ntp server <ip>` hace que el router sincronice con ese servidor. `ntp master [stratum]` convierte al router en fuente de tiempo y `ntp peer` crea una relación simétrica."
+  },
+  {
+    "id": "ccna-d4-007",
+    "domain": "4",
+    "type": "single",
+    "difficulty": "hard",
+    "question": "Un router muestra `Clock is unsynchronized, stratum 16`. ¿Qué significa?",
+    "options": [
+      "El router no está sincronizado con ninguna fuente NTP válida",
+      "El router es un servidor NTP stratum 1",
+      "Está sincronizado con un servidor a 16 saltos",
+      "El reloj está en zona horaria UTC−16"
+    ],
+    "answer": [0],
+    "explanation": "Stratum 16 significa 'no sincronizado'. Los stratums válidos van de 1 (directo a reloj de referencia) a 15. Un cliente queda un stratum por debajo de su servidor."
+  },
+  {
+    "id": "ccna-d4-008",
+    "domain": "4",
+    "type": "single",
+    "difficulty": "medium",
+    "question": "¿Por qué es importante NTP para la seguridad y la operación de la red?",
+    "options": [
+      "Permite correlacionar logs entre dispositivos y es requisito para validar certificados",
+      "Cifra el tráfico de gestión",
+      "Evita bucles de capa 2",
+      "Asigna direcciones IP automáticamente"
+    ],
+    "answer": [0],
+    "explanation": "Marcas de tiempo coherentes son esenciales para correlacionar syslog, análisis forense y validar certificados (fechas de vigencia) y protocolos sensibles al tiempo."
+  },
+  {
+    "id": "ccna-d4-009",
+    "domain": "4",
+    "type": "single",
+    "difficulty": "hard",
+    "question": "Los PCs de la VLAN 20 (192.168.20.0/24) no reciben dirección del servidor DHCP 10.1.1.50, ubicado en otra subred. ¿Qué configuras en la SVI/subinterfaz gateway de la VLAN 20?",
+    "options": ["ip helper-address 10.1.1.50", "ip dhcp pool VLAN20", "ip dhcp relay 192.168.20.1", "ip forward-protocol udp 67 10.1.1.50"],
+    "answer": [0],
+    "explanation": "Los DHCPDISCOVER son broadcasts que el router no reenvía. `ip helper-address` en la interfaz que recibe el broadcast convierte la solicitud en unicast hacia el servidor (DHCP relay) e incluye el giaddr para elegir el scope."
+  },
+  {
+    "id": "ccna-d4-010",
+    "domain": "4",
+    "type": "single",
+    "difficulty": "medium",
+    "question": "¿Cuál es el orden correcto de los mensajes DHCP para obtener una dirección?",
+    "options": ["Discover, Offer, Request, Ack", "Request, Offer, Discover, Ack", "Discover, Request, Offer, Ack", "Offer, Discover, Ack, Request"],
+    "answer": [0],
+    "explanation": "DORA: el cliente envía Discover (broadcast), el servidor Offer, el cliente Request y el servidor confirma con Ack."
+  },
+  {
+    "id": "ccna-d4-011",
+    "domain": "4",
+    "type": "single",
+    "difficulty": "hard",
+    "question": "Configuras un pool DHCP en R1 para 192.168.1.0/24 y no quieres que se asignen .1 a .20. ¿Qué comando usas?",
+    "options": [
+      "ip dhcp excluded-address 192.168.1.1 192.168.1.20 (modo global)",
+      "exclude 192.168.1.1 192.168.1.20 (dentro del pool)",
+      "network 192.168.1.21 255.255.255.0",
+      "ip dhcp pool range 21 254"
+    ],
+    "answer": [0],
+    "explanation": "Las exclusiones se configuran en modo de configuración global con `ip dhcp excluded-address <inicio> <fin>`. Dentro del pool van `network`, `default-router`, `dns-server`, `lease`, etc."
+  },
+  {
+    "id": "ccna-d4-012",
+    "domain": "4",
+    "type": "single",
+    "difficulty": "medium",
+    "question": "¿Qué comando hace que la interfaz Gi0/0 de un router obtenga su dirección IPv4 por DHCP del ISP?",
+    "options": ["ip address dhcp", "ip dhcp client", "ip helper-address dhcp", "dhcp enable"],
+    "answer": [0],
+    "explanation": "`ip address dhcp` convierte la interfaz en cliente DHCP. Es habitual en routers de sucursal conectados a ISPs con IP dinámica."
+  },
+  {
+    "id": "ccna-d4-013",
+    "domain": "4",
+    "type": "single",
+    "difficulty": "medium",
+    "question": "¿Qué tipo de registro DNS resuelve un nombre a una dirección IPv6?",
+    "options": ["AAAA", "A", "CNAME", "PTR"],
+    "answer": [0],
+    "explanation": "A = nombre→IPv4, AAAA = nombre→IPv6, CNAME = alias, PTR = resolución inversa, MX = servidor de correo."
+  },
+  {
+    "id": "ccna-d4-014",
+    "domain": "4",
+    "type": "single",
+    "difficulty": "medium",
+    "question": "¿Qué comando de IOS indica al router qué servidor DNS usar para resolver nombres?",
+    "options": ["ip name-server 8.8.8.8", "ip dns server 8.8.8.8", "dns-server 8.8.8.8", "ip domain-lookup 8.8.8.8"],
+    "answer": [0],
+    "explanation": "`ip name-server` define el servidor DNS; `ip domain-lookup` (habilitado por defecto) permite la resolución. `dns-server` se usa dentro de un pool DHCP para entregarlo a los clientes."
+  },
+  {
+    "id": "ccna-d4-015",
+    "domain": "4",
+    "type": "single",
+    "difficulty": "medium",
+    "question": "¿Qué mensaje SNMP envía un agente al NMS sin solicitud previa y sin esperar confirmación?",
+    "options": ["Trap", "Inform", "Get", "Set"],
+    "answer": [0],
+    "explanation": "Trap es una notificación no solicitada y no confirmada. Inform también es no solicitada pero requiere acuse de recibo (SNMPv2c/v3). Get/Set los envía el NMS."
+  },
+  {
+    "id": "ccna-d4-016",
+    "domain": "4",
+    "type": "single",
+    "difficulty": "hard",
+    "question": "¿Qué versión de SNMP proporciona autenticación de usuarios y cifrado de los mensajes?",
+    "options": ["SNMPv3 con nivel authPriv", "SNMPv2c", "SNMPv1", "SNMPv3 con nivel noAuthNoPriv"],
+    "answer": [0],
+    "explanation": "SNMPv3 añade un modelo de seguridad por usuario con niveles noAuthNoPriv, authNoPriv y authPriv (autenticación + cifrado). v1 y v2c usan community strings en texto plano."
+  },
+  {
+    "id": "ccna-d4-017",
+    "domain": "4",
+    "type": "single",
+    "difficulty": "medium",
+    "question": "¿Qué estructura organiza jerárquicamente las variables que un agente SNMP puede consultar?",
+    "options": ["MIB (identificadas por OIDs)", "LSDB", "CAM table", "RIB"],
+    "answer": [0],
+    "explanation": "La MIB (Management Information Base) define objetos identificados por OIDs en un árbol jerárquico. El NMS consulta esos OIDs con Get/GetNext/GetBulk."
+  },
+  {
+    "id": "ccna-d4-018",
+    "domain": "4",
+    "type": "single",
+    "difficulty": "hard",
+    "question": "Configuraste `logging trap warnings`. ¿Qué niveles de syslog se enviarán al servidor?",
+    "options": ["0 a 4", "4 a 7", "Solo 4", "0 a 7"],
+    "answer": [0],
+    "explanation": "Se envían el nivel indicado y todos los más severos (números menores). warnings = 4 → se envían 0 emergencies, 1 alerts, 2 critical, 3 errors y 4 warnings."
+  },
+  {
+    "id": "ccna-d4-019",
+    "domain": "4",
+    "type": "single",
+    "difficulty": "medium",
+    "question": "¿Qué nivel de severidad syslog corresponde a *notifications*?",
+    "options": ["5", "3", "6", "7"],
+    "answer": [0],
+    "explanation": "0 emergencies, 1 alerts, 2 critical, 3 errors, 4 warnings, 5 notifications, 6 informational, 7 debugging. Mnemónico: \"Every Awesome Cisco Engineer Will Need Ice cream Daily\"."
+  },
+  {
+    "id": "ccna-d4-020",
+    "domain": "4",
+    "type": "single",
+    "difficulty": "hard",
+    "question": "Un mensaje syslog dice `%LINEPROTO-5-UPDOWN: Line protocol on Interface GigabitEthernet0/1, changed state to down`. ¿Qué representan `LINEPROTO` y `5`?",
+    "options": ["Facility y severidad (notifications)", "Severidad y facility", "Proceso y prioridad de QoS", "Mnemonic y número de interfaz"],
+    "answer": [0],
+    "explanation": "El formato es `%FACILITY-SEVERITY-MNEMONIC: descripción`. LINEPROTO es la facility, 5 la severidad (notifications) y UPDOWN el mnemonic."
+  },
+  {
+    "id": "ccna-d4-021",
+    "domain": "4",
+    "type": "single",
+    "difficulty": "medium",
+    "question": "Estás conectado por SSH y no ves los mensajes de log en tu sesión. ¿Qué comando lo resuelve?",
+    "options": ["terminal monitor", "logging console", "logging buffered", "show logging"],
+    "answer": [0],
+    "explanation": "Los logs a líneas VTY requieren `terminal monitor` en la sesión (y `logging monitor` habilitado, que lo está por defecto). `logging console` es para el puerto de consola."
+  },
+  {
+    "id": "ccna-d4-022",
+    "domain": "4",
+    "type": "single",
+    "difficulty": "hard",
+    "question": "¿Qué valor DSCP se recomienda para tráfico de voz (payload RTP)?",
+    "options": ["EF (46)", "AF41 (34)", "CS3 (24)", "0 (Default)"],
+    "answer": [0],
+    "explanation": "Voz usa Expedited Forwarding (EF, DSCP 46) y suele ir en una cola de prioridad estricta (LLQ). AF41 se usa para videoconferencia y CS3 para señalización."
+  },
+  {
+    "id": "ccna-d4-023",
+    "domain": "4",
+    "type": "single",
+    "difficulty": "hard",
+    "question": "¿Qué diferencia hay entre policing y shaping?",
+    "options": [
+      "Policing descarta o remarca el tráfico que excede la tasa; shaping lo almacena en buffer y lo retrasa",
+      "Shaping descarta el exceso; policing lo almacena",
+      "Ambos almacenan el exceso en buffer",
+      "Policing solo se aplica a la salida"
+    ],
+    "answer": [0],
+    "explanation": "Policing aplica un límite estricto (drop/remark) y puede aplicarse en entrada o salida. Shaping suaviza ráfagas encolando el exceso (añade retardo) y se aplica en salida, típico hacia un ISP con CIR inferior a la velocidad física."
+  },
+  {
+    "id": "ccna-d4-024",
+    "domain": "4",
+    "type": "single",
+    "difficulty": "medium",
+    "question": "¿Qué herramienta de QoS evita la sincronización global de TCP descartando aleatoriamente paquetes antes de que la cola se llene?",
+    "options": ["WRED", "LLQ", "CBWFQ", "Policing"],
+    "answer": [0],
+    "explanation": "WRED (Weighted Random Early Detection) empieza a descartar paquetes de menor prioridad conforme se llena la cola, haciendo que los flujos TCP reduzcan su ventana de forma escalonada en vez de todos a la vez (tail drop)."
+  },
+  {
+    "id": "ccna-d4-025",
+    "domain": "4",
+    "type": "multiple",
+    "difficulty": "hard",
+    "question": "¿Qué dos requisitos típicos de calidad tiene el tráfico de voz interactiva?",
+    "options": [
+      "Latencia unidireccional ≤ 150 ms",
+      "Jitter ≤ 30 ms",
+      "Ancho de banda mínimo de 10 Mbps por llamada",
+      "Pérdida de paquetes hasta 10 %",
+      "Retransmisión de paquetes perdidos mediante TCP"
+    ],
+    "answer": [0, 1],
+    "explanation": "Guías típicas para voz: latencia ≤150 ms, jitter ≤30 ms, pérdida ≤1 % y ~30–128 kbps por llamada. La voz usa RTP sobre UDP; retransmitir no sirve."
+  },
+  {
+    "id": "ccna-d4-026",
+    "domain": "4",
+    "type": "single",
+    "difficulty": "medium",
+    "question": "¿Dónde se debe establecer la trust boundary para marcas QoS en un campus con teléfonos IP?",
+    "options": [
+      "Lo más cerca posible del origen, por ejemplo en el teléfono IP/puerto de acceso",
+      "En el router WAN de borde",
+      "En el core",
+      "En el servidor de llamadas"
+    ],
+    "answer": [0],
+    "explanation": "La clasificación y marcado debe hacerse lo más cerca del borde. Con teléfonos IP de confianza (detectados por CDP/LLDP), la trust boundary se extiende al teléfono, mientras que las marcas del PC se reescriben."
+  },
+  {
+    "id": "ccna-d4-027",
+    "domain": "4",
+    "type": "single",
+    "difficulty": "medium",
+    "question": "¿Qué protocolo de transferencia de archivos usa UDP 69 y no tiene autenticación?",
+    "options": ["TFTP", "FTP", "SFTP", "SCP"],
+    "answer": [0],
+    "explanation": "TFTP es simple, sobre UDP 69, sin autenticación ni listado de directorios; se usa para imágenes de IOS y configs en redes controladas. FTP usa TCP 20/21 con usuario/contraseña en claro; SFTP/SCP van sobre SSH."
+  },
+  {
+    "id": "ccna-d4-028",
+    "domain": "4",
+    "type": "single",
+    "difficulty": "hard",
+    "question": "¿Qué comando copia la configuración en ejecución de un router a un servidor TFTP?",
+    "options": ["copy running-config tftp:", "copy tftp: running-config", "write tftp", "backup running-config tftp"],
+    "answer": [0],
+    "explanation": "La sintaxis es `copy <origen> <destino>`: `copy running-config tftp:` pide la IP del servidor y el nombre de archivo. `copy tftp: running-config` hace la operación inversa (fusiona la config descargada)."
+  },
+  {
+    "id": "ccna-d4-029",
+    "domain": "4",
+    "type": "single",
+    "difficulty": "medium",
+    "question": "¿Qué función de QoS identifica el tráfico (por ACL, NBAR, DSCP) para tratarlo de forma diferenciada?",
+    "options": ["Clasificación", "Shaping", "Congestion avoidance", "Queuing"],
+    "answer": [0],
+    "explanation": "La clasificación identifica el tráfico; el marcado lo etiqueta (DSCP/CoS) para que los siguientes dispositivos no tengan que reclasificar. Luego intervienen colas, policing/shaping y congestion avoidance."
+  },
+  {
+    "id": "ccna-d4-030",
+    "domain": "4",
+    "type": "single",
+    "difficulty": "hard",
+    "question": "En CBWFQ con LLQ, ¿qué evita que la cola de prioridad estricta deje sin servicio (starvation) a las demás colas?",
+    "options": [
+      "La cola de prioridad tiene un policer implícito que limita su ancho de banda configurado",
+      "La cola de prioridad solo atiende un paquete por ciclo",
+      "WRED se aplica automáticamente a la cola de prioridad",
+      "LLQ no puede causar starvation porque usa round robin"
+    ],
+    "answer": [0],
+    "explanation": "En LLQ (`priority <kbps>`) el tráfico de la cola prioritaria se atiende primero, pero durante congestión el exceso por encima de la tasa configurada se descarta (policing implícito), protegiendo a las demás clases."
+  }
+]

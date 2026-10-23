@@ -1,0 +1,498 @@
+[
+  {
+    "id": "aws-d4-001",
+    "domain": "4",
+    "type": "single",
+    "difficulty": "medium",
+    "question": "Un trabajo de procesamiento por lotes nocturno es tolerante a interrupciones y puede reanudarse desde checkpoints. ¿Qué opción de compra de EC2 es la MÁS económica?",
+    "options": ["Spot Instances", "On-Demand", "Reserved Instances de 3 años", "Dedicated Hosts"],
+    "answer": [0],
+    "explanation": "Spot ofrece hasta ~90 % de descuento y es ideal para cargas tolerantes a fallos y flexibles; pueden interrumpirse con un aviso de 2 minutos. Las reservas convienen para cargas estables 24/7."
+  },
+  {
+    "id": "aws-d4-002",
+    "domain": "4",
+    "type": "single",
+    "difficulty": "hard",
+    "question": "Una empresa tiene un uso de cómputo estable y prevé migrar parte de EC2 a Fargate y Lambda durante los próximos 3 años, cambiando de familias de instancias y regiones. ¿Qué modelo de ahorro ofrece la MAYOR flexibilidad?",
+    "options": ["Compute Savings Plans", "EC2 Instance Savings Plans", "Standard Reserved Instances", "Spot Instances"],
+    "answer": [0],
+    "explanation": "Compute Savings Plans aplican a EC2 (cualquier familia, tamaño, región, SO), Fargate y Lambda a cambio de un compromiso de gasto por hora. EC2 Instance Savings Plans se limitan a una familia en una región (más descuento, menos flexibilidad)."
+  },
+  {
+    "id": "aws-d4-003",
+    "domain": "4",
+    "type": "single",
+    "difficulty": "hard",
+    "question": "Una aplicación tiene un software con licencia por socket/núcleo físico que exige visibilidad del hardware (BYOL). ¿Qué opción de EC2 usar?",
+    "options": ["Dedicated Hosts", "Dedicated Instances", "Spot Instances", "Instancias compartidas On-Demand"],
+    "answer": [0],
+    "explanation": "Dedicated Hosts dan un servidor físico completo con visibilidad de sockets y núcleos, necesario para muchas licencias BYOL. Dedicated Instances aíslan hardware pero sin visibilidad ni control de colocación."
+  },
+  {
+    "id": "aws-d4-004",
+    "domain": "4",
+    "type": "single",
+    "difficulty": "medium",
+    "question": "Los registros de una aplicación se consultan con frecuencia durante 30 días, rara vez hasta los 90 y luego deben archivarse 7 años con recuperación aceptable en 12 horas. ¿Qué configuración es la MÁS económica?",
+    "options": [
+      "S3 Standard → S3 Standard-IA a los 30 días → S3 Glacier Deep Archive a los 90 días mediante lifecycle rules, con expiración a los 7 años",
+      "S3 Standard durante 7 años",
+      "S3 One Zone-IA desde el día 0",
+      "S3 Glacier Instant Retrieval desde el día 0"
+    ],
+    "answer": [0],
+    "explanation": "Las lifecycle rules mueven objetos a clases más baratas según su antigüedad. Deep Archive es la clase más barata con recuperación estándar en 12 horas (bulk en hasta 48 h). Standard-IA tiene un mínimo de 30 días de almacenamiento."
+  },
+  {
+    "id": "aws-d4-005",
+    "domain": "4",
+    "type": "single",
+    "difficulty": "medium",
+    "question": "Un data lake tiene patrones de acceso desconocidos y cambiantes. La empresa quiere optimizar el costo automáticamente sin penalizaciones por recuperación ni análisis manual. ¿Qué clase usar?",
+    "options": ["S3 Intelligent-Tiering", "S3 Standard-IA", "S3 Glacier Flexible Retrieval", "S3 One Zone-IA"],
+    "answer": [0],
+    "explanation": "Intelligent-Tiering mueve objetos automáticamente entre niveles según su acceso, sin cargos de recuperación (cobra una pequeña tarifa de monitoreo por objeto). Las clases IA cobran por GB recuperado."
+  },
+  {
+    "id": "aws-d4-006",
+    "domain": "4",
+    "type": "single",
+    "difficulty": "hard",
+    "question": "Copias secundarias de datos que pueden regenerarse se acceden una vez al mes y deben estar disponibles en milisegundos. ¿Qué clase de S3 es la MÁS económica?",
+    "options": ["S3 One Zone-IA", "S3 Standard-IA", "S3 Glacier Deep Archive", "S3 Standard"],
+    "answer": [0],
+    "explanation": "One Zone-IA cuesta ~20 % menos que Standard-IA y ofrece acceso en milisegundos; almacena en una sola AZ, lo cual es aceptable para datos que pueden regenerarse. Deep Archive tarda horas."
+  },
+  {
+    "id": "aws-d4-007",
+    "domain": "4",
+    "type": "single",
+    "difficulty": "hard",
+    "question": "Archivos de imágenes médicas se acceden una o dos veces al año, pero cuando se solicitan deben estar disponibles en milisegundos. ¿Qué clase de S3 usar?",
+    "options": ["S3 Glacier Instant Retrieval", "S3 Glacier Flexible Retrieval", "S3 Glacier Deep Archive", "S3 Standard"],
+    "answer": [0],
+    "explanation": "Glacier Instant Retrieval es para datos de archivo que se acceden ~una vez por trimestre o menos y requieren milisegundos. Flexible Retrieval tarda de minutos a horas y Deep Archive horas."
+  },
+  {
+    "id": "aws-d4-008",
+    "domain": "4",
+    "type": "single",
+    "difficulty": "hard",
+    "question": "Instancias en subredes privadas descargan diariamente varios TB desde S3 a través de un NAT gateway, y la factura de NAT es muy alta. ¿Qué cambio reduce el costo con el MENOR esfuerzo?",
+    "options": [
+      "Crear un gateway VPC endpoint para S3",
+      "Reemplazar el NAT gateway por una NAT instance más grande",
+      "Mover las instancias a subredes públicas",
+      "Usar S3 Transfer Acceleration"
+    ],
+    "answer": [0],
+    "explanation": "El tráfico a S3 por un gateway endpoint no tiene cargos de procesamiento ni de endpoint, mientras que el NAT gateway cobra por GB procesado. Mover instancias a subredes públicas reduce la seguridad."
+  },
+  {
+    "id": "aws-d4-009",
+    "domain": "4",
+    "type": "single",
+    "difficulty": "medium",
+    "question": "¿Qué herramienta recomienda tamaños óptimos de instancias EC2, volúmenes EBS y funciones Lambda basándose en el uso histórico?",
+    "options": ["AWS Compute Optimizer", "AWS Budgets", "AWS Cost and Usage Report", "AWS Pricing Calculator"],
+    "answer": [0],
+    "explanation": "Compute Optimizer analiza métricas de CloudWatch con ML y recomienda right-sizing para EC2, ASG, EBS, Lambda, ECS en Fargate y RDS. Budgets alerta sobre gastos y Pricing Calculator estima costos futuros."
+  },
+  {
+    "id": "aws-d4-010",
+    "domain": "4",
+    "type": "single",
+    "difficulty": "medium",
+    "question": "Un gerente quiere recibir un correo cuando el gasto mensual previsto de la cuenta supere los USD 5 000. ¿Qué usar?",
+    "options": ["AWS Budgets con alerta sobre el costo pronosticado", "AWS Cost Explorer", "CloudWatch Logs", "AWS Trusted Advisor"],
+    "answer": [0],
+    "explanation": "AWS Budgets permite alertas por gasto real o pronosticado (y budget actions). Cost Explorer sirve para analizar y visualizar costos, pero no notifica umbrales por sí mismo."
+  },
+  {
+    "id": "aws-d4-011",
+    "domain": "4",
+    "type": "single",
+    "difficulty": "medium",
+    "question": "La empresa quiere ver los costos por proyecto y por centro de costo en sus informes de facturación. ¿Qué hacer?",
+    "options": [
+      "Etiquetar los recursos y activar esas etiquetas como cost allocation tags",
+      "Crear una cuenta por recurso",
+      "Usar CloudTrail",
+      "Configurar VPC Flow Logs"
+    ],
+    "answer": [0],
+    "explanation": "Las cost allocation tags activadas aparecen en Cost Explorer y en el Cost and Usage Report para agrupar costos. Separar por cuentas también ayuda, pero una cuenta por recurso no es razonable."
+  },
+  {
+    "id": "aws-d4-012",
+    "domain": "4",
+    "type": "single",
+    "difficulty": "hard",
+    "question": "Una aplicación web con tráfico estable usa 10 instancias m5.large 24/7 durante los próximos 3 años sin cambios previstos. ¿Qué opción ofrece el MAYOR descuento?",
+    "options": [
+      "Standard Reserved Instances o EC2 Instance Savings Plans de 3 años con pago All Upfront",
+      "Compute Savings Plans de 1 año sin pago adelantado",
+      "On-Demand",
+      "Spot Instances"
+    ],
+    "answer": [0],
+    "explanation": "Para uso estable y predecible, los compromisos de 3 años con pago total por adelantado dan los mayores descuentos (hasta ~72 %). Spot no es apropiado para producción con estado continuo."
+  },
+  {
+    "id": "aws-d4-013",
+    "domain": "4",
+    "type": "single",
+    "difficulty": "hard",
+    "question": "Un Auto Scaling group atiende una carga web con un mínimo estable de 4 instancias y picos impredecibles que se pueden atender con instancias interrumpibles. ¿Qué configuración optimiza el costo?",
+    "options": [
+      "Mixed instances policy: base On-Demand de 4 (cubierta por Savings Plans) y capacidad adicional con Spot en varios tipos de instancia",
+      "Todo On-Demand",
+      "Todo Spot, incluida la base",
+      "Dedicated Hosts para todo"
+    ],
+    "answer": [0],
+    "explanation": "Una mixed instances policy combina una base On-Demand estable (con descuento por compromiso) y Spot diversificado (varias familias/AZs) para los picos, reduciendo el riesgo de interrupción."
+  },
+  {
+    "id": "aws-d4-014",
+    "domain": "4",
+    "type": "single",
+    "difficulty": "medium",
+    "question": "Una API de bajo tráfico recibe unas pocas miles de peticiones al día de forma irregular. ¿Qué arquitectura es la MÁS económica?",
+    "options": ["API Gateway + AWS Lambda + DynamoDB on-demand", "Dos instancias EC2 detrás de un ALB 24/7", "Un clúster EKS", "Amazon RDS Multi-AZ y EC2"],
+    "answer": [0],
+    "explanation": "Con serverless se paga por uso y no por capacidad ociosa. Para tráfico bajo e irregular, el costo es mínimo comparado con servidores encendidos permanentemente."
+  },
+  {
+    "id": "aws-d4-015",
+    "domain": "4",
+    "type": "single",
+    "difficulty": "hard",
+    "question": "Entornos de desarrollo con instancias EC2 y bases RDS solo se usan de lunes a viernes de 8:00 a 18:00. ¿Cómo reducir costos con el MENOR esfuerzo?",
+    "options": [
+      "Programar el apagado/encendido automático (por ejemplo, con Instance Scheduler on AWS o EventBridge Scheduler + SSM)",
+      "Comprar Reserved Instances de 3 años",
+      "Cambiar a instancias más grandes para terminar antes",
+      "Usar Dedicated Hosts"
+    ],
+    "answer": [0],
+    "explanation": "Detener los recursos fuera de horario elimina ~70 % de las horas de cómputo. Las reservas cobrarían 24/7 aunque no se usen."
+  },
+  {
+    "id": "aws-d4-016",
+    "domain": "4",
+    "type": "single",
+    "difficulty": "medium",
+    "question": "¿Qué cambio suele reducir el costo de EBS sin perder rendimiento en volúmenes gp2 de uso general?",
+    "options": ["Migrar de gp2 a gp3", "Migrar de gp2 a io2", "Duplicar el tamaño de los volúmenes", "Usar Multi-Attach"],
+    "answer": [0],
+    "explanation": "gp3 cuesta ~20 % menos por GB que gp2 y permite ajustar IOPS y throughput independientemente; la migración se hace en caliente con Elastic Volumes."
+  },
+  {
+    "id": "aws-d4-017",
+    "domain": "4",
+    "type": "single",
+    "difficulty": "medium",
+    "question": "Trusted Advisor y Cost Explorer muestran muchos volúmenes EBS en estado available. ¿Qué indica y qué hacer?",
+    "options": [
+      "Son volúmenes no adjuntos que siguen generando cargos; hacer un snapshot si se necesitan y eliminarlos",
+      "Son volúmenes en uso que se pueden ignorar",
+      "Son volúmenes gratuitos de la capa free tier",
+      "Son volúmenes cifrados que no generan costo"
+    ],
+    "answer": [0],
+    "explanation": "Los volúmenes en estado available no están adjuntos pero se cobran por GB aprovisionado. Si contienen datos útiles, un snapshot es más barato; si no, deben eliminarse."
+  },
+  {
+    "id": "aws-d4-018",
+    "domain": "4",
+    "type": "single",
+    "difficulty": "hard",
+    "question": "Una empresa comparte un dataset grande en S3 con socios externos, y el costo de las descargas lo paga la empresa. ¿Cómo hacer que los socios paguen la transferencia y las peticiones?",
+    "options": ["Habilitar Requester Pays en el bucket", "Usar CloudFront", "Usar S3 Transfer Acceleration", "Crear presigned URLs"],
+    "answer": [0],
+    "explanation": "Con Requester Pays, quien solicita paga las peticiones y la transferencia de datos (el propietario sigue pagando el almacenamiento). Los solicitantes deben estar autenticados en AWS."
+  },
+  {
+    "id": "aws-d4-019",
+    "domain": "4",
+    "type": "single",
+    "difficulty": "hard",
+    "question": "Un sitio web sirve mucho contenido estático directamente desde EC2 y la factura de data transfer out a Internet es alta. ¿Qué cambio reduce costo y carga?",
+    "options": [
+      "Servir el contenido estático desde S3 a través de CloudFront",
+      "Usar instancias más grandes",
+      "Añadir otro ALB",
+      "Mover las instancias a otra región"
+    ],
+    "answer": [0],
+    "explanation": "CloudFront cachea en el edge, reduce peticiones al origen y su tarifa de transferencia suele ser menor; además la transferencia de origen AWS a CloudFront no se cobra. Descarga trabajo de las instancias."
+  },
+  {
+    "id": "aws-d4-020",
+    "domain": "4",
+    "type": "single",
+    "difficulty": "medium",
+    "question": "¿Qué tipo de procesadores de instancias EC2 ofrece típicamente hasta ~40 % mejor relación precio/rendimiento para muchas cargas Linux?",
+    "options": ["AWS Graviton (Arm)", "Intel de generación anterior", "Instancias T2", "GPU P-family"],
+    "answer": [0],
+    "explanation": "Las instancias Graviton (m7g, c7g, r7g…) ofrecen mejor precio/rendimiento para cargas compatibles con Arm, como la mayoría de aplicaciones Linux, contenedores y servicios administrados (RDS, ElastiCache, Lambda)."
+  },
+  {
+    "id": "aws-d4-021",
+    "domain": "4",
+    "type": "single",
+    "difficulty": "hard",
+    "question": "Una tabla DynamoDB tiene tráfico estable y predecible las 24 horas, y hoy usa modo on-demand. ¿Cómo reducir el costo?",
+    "options": [
+      "Cambiar a capacidad provisionada con auto scaling (y considerar reserved capacity)",
+      "Habilitar DAX",
+      "Activar global tables",
+      "Aumentar el tamaño de los ítems"
+    ],
+    "answer": [0],
+    "explanation": "On-demand cobra más por petición; con tráfico predecible, el modo provisionado con auto scaling es más barato, y la reserved capacity añade descuento."
+  },
+  {
+    "id": "aws-d4-022",
+    "domain": "4",
+    "type": "single",
+    "difficulty": "hard",
+    "question": "Una empresa replica datos entre instancias en distintas AZs y nota cargos de transferencia. ¿Qué afirmación sobre costos de transferencia es correcta?",
+    "options": [
+      "El tráfico entre AZs dentro de la misma región se cobra en ambas direcciones; dentro de la misma AZ usando IP privada es gratuito",
+      "Todo el tráfico dentro de una región es gratuito",
+      "El tráfico entrante desde Internet se cobra por GB",
+      "El tráfico entre regiones es gratuito"
+    ],
+    "answer": [0],
+    "explanation": "La transferencia entrante desde Internet es gratuita. Entre AZs se cobra por GB (en cada dirección); dentro de la misma AZ con IP privada no se cobra. Entre regiones también se cobra."
+  },
+  {
+    "id": "aws-d4-023",
+    "domain": "4",
+    "type": "single",
+    "difficulty": "medium",
+    "question": "¿Qué servicio permite analizar visualmente el gasto histórico por servicio, cuenta o etiqueta, y prever el gasto futuro?",
+    "options": ["AWS Cost Explorer", "AWS Budgets", "AWS Pricing Calculator", "AWS Config"],
+    "answer": [0],
+    "explanation": "Cost Explorer muestra el gasto histórico (hasta 13 meses, o más con datos extendidos), pronósticos y recomendaciones de Savings Plans/RIs."
+  },
+  {
+    "id": "aws-d4-024",
+    "domain": "4",
+    "type": "single",
+    "difficulty": "hard",
+    "question": "Una empresa quiere visibilidad del uso de almacenamiento S3 en todas sus cuentas (buckets sin lifecycle, multipart incompletos, versiones antiguas) para optimizar costos. ¿Qué usar?",
+    "options": ["Amazon S3 Storage Lens", "S3 Inventory solo en un bucket", "CloudTrail", "AWS Backup"],
+    "answer": [0],
+    "explanation": "S3 Storage Lens ofrece métricas a nivel de organización y recomendaciones de eficiencia de costos y protección de datos. S3 Inventory lista objetos de un bucket."
+  },
+  {
+    "id": "aws-d4-025",
+    "domain": "4",
+    "type": "single",
+    "difficulty": "medium",
+    "question": "Un bucket con versionado acumula muchas versiones antiguas que nunca se usan. ¿Cómo reducir el costo automáticamente?",
+    "options": [
+      "Lifecycle rule que expire versiones no actuales tras N días (y elimine multipart uploads incompletos)",
+      "Desactivar el versionado borra las versiones antiguas",
+      "Habilitar Object Lock",
+      "Usar Transfer Acceleration"
+    ],
+    "answer": [0],
+    "explanation": "Las lifecycle rules admiten NoncurrentVersionExpiration/Transition y AbortIncompleteMultipartUpload. Suspender el versionado no borra las versiones existentes."
+  },
+  {
+    "id": "aws-d4-026",
+    "domain": "4",
+    "type": "single",
+    "difficulty": "hard",
+    "question": "Una aplicación usa una instancia RDS grande que tiene CPU < 10 % casi siempre. ¿Qué acción optimiza el costo con menor riesgo?",
+    "options": [
+      "Reducir el tamaño de la instancia (right-sizing) tras revisar métricas, en una ventana de mantenimiento",
+      "Eliminar los backups automáticos",
+      "Deshabilitar Multi-AZ en producción",
+      "Mover la base de datos a instance store"
+    ],
+    "answer": [0],
+    "explanation": "Right-sizing según métricas (CloudWatch, Performance Insights, Compute Optimizer) reduce el costo sin sacrificar resiliencia. Eliminar backups o Multi-AZ aumenta el riesgo."
+  },
+  {
+    "id": "aws-d4-027",
+    "domain": "4",
+    "type": "single",
+    "difficulty": "hard",
+    "question": "Una empresa necesita guardar 500 TB de backups durante 10 años, con acceso solo en caso de auditoría y recuperación en 48 horas aceptable. ¿Qué opción es la MÁS barata?",
+    "options": ["S3 Glacier Deep Archive", "S3 Glacier Flexible Retrieval", "S3 Standard-IA", "EBS sc1"],
+    "answer": [0],
+    "explanation": "Deep Archive es la clase de menor costo de AWS para retención a largo plazo, con recuperación estándar en hasta 12 h y bulk en hasta 48 h."
+  },
+  {
+    "id": "aws-d4-028",
+    "domain": "4",
+    "type": "single",
+    "difficulty": "medium",
+    "question": "¿Qué servicio recomienda optimizaciones de costo como instancias infrautilizadas, Elastic IPs no asociadas o load balancers inactivos?",
+    "options": ["AWS Trusted Advisor", "Amazon Inspector", "AWS Artifact", "AWS Health Dashboard"],
+    "answer": [0],
+    "explanation": "Trusted Advisor revisa costo, rendimiento, seguridad, tolerancia a fallos y cuotas de servicio. Las verificaciones completas requieren planes de soporte Business o superiores."
+  },
+  {
+    "id": "aws-d4-029",
+    "domain": "4",
+    "type": "single",
+    "difficulty": "hard",
+    "question": "Contenedores de una aplicación con tráfico variable se ejecutan en ECS sobre EC2 con mucha capacidad ociosa. El equipo no quiere gestionar servidores. ¿Qué opción reduce costo y operación?",
+    "options": [
+      "Migrar a Fargate (y Fargate Spot para tareas tolerantes a interrupción)",
+      "Aumentar el número de instancias del clúster",
+      "Usar Dedicated Hosts",
+      "Migrar a instancias más grandes"
+    ],
+    "answer": [0],
+    "explanation": "Fargate cobra por vCPU y memoria de cada tarea, eliminando la capacidad ociosa de los nodos; Fargate Spot ofrece hasta ~70 % de descuento para tareas interrumpibles. También puede combinarse con Compute Savings Plans."
+  },
+  {
+    "id": "aws-d4-030",
+    "domain": "4",
+    "type": "single",
+    "difficulty": "medium",
+    "question": "¿Qué se cobra por una Elastic IP pública?",
+    "options": [
+      "Todas las direcciones IPv4 públicas, incluidas las Elastic IPs asociadas, se cobran por hora",
+      "Solo se cobran si están asociadas a una instancia en ejecución",
+      "Son siempre gratuitas",
+      "Solo se cobra la transferencia de datos"
+    ],
+    "answer": [0],
+    "explanation": "Desde febrero de 2024 AWS cobra por hora todas las IPv4 públicas (asociadas o no). Liberar EIPs no usadas y adoptar IPv6 donde sea posible reduce costos."
+  },
+  {
+    "id": "aws-d4-031",
+    "domain": "4",
+    "type": "multiple",
+    "difficulty": "hard",
+    "question": "Una empresa quiere reducir el costo de un flujo de análisis con Athena sobre logs en S3. ¿Qué DOS acciones reducen los datos escaneados?",
+    "options": [
+      "Convertir los datos a un formato columnar comprimido (Parquet/ORC)",
+      "Particionar los datos (por ejemplo, por fecha) y filtrar por partición",
+      "Mover los datos a S3 Standard",
+      "Aumentar el número de archivos pequeños",
+      "Habilitar S3 Versioning"
+    ],
+    "answer": [0, 1],
+    "explanation": "Athena cobra por datos escaneados. El formato columnar comprimido lee solo las columnas necesarias y las particiones permiten saltar datos irrelevantes. Muchos archivos pequeños empeoran el rendimiento."
+  },
+  {
+    "id": "aws-d4-032",
+    "domain": "4",
+    "type": "single",
+    "difficulty": "hard",
+    "question": "Un clúster EMR procesa datos durante 2 horas al día. ¿Qué configuración es la MÁS económica?",
+    "options": [
+      "Clúster transitorio que se crea para el trabajo y se termina al final, con nodos core On-Demand y task nodes Spot, y datos en S3 (EMRFS)",
+      "Clúster permanente 24/7 con On-Demand",
+      "Clúster permanente con Reserved Instances",
+      "Clúster con todos los nodos en Dedicated Hosts"
+    ],
+    "answer": [0],
+    "explanation": "Para trabajos periódicos, un clúster transitorio evita pagar capacidad ociosa. Guardar los datos en S3 desacopla almacenamiento y cómputo, y los task nodes Spot son ideales al no almacenar datos HDFS."
+  },
+  {
+    "id": "aws-d4-033",
+    "domain": "4",
+    "type": "single",
+    "difficulty": "medium",
+    "question": "¿Qué servicio permite estimar el costo de una arquitectura nueva antes de desplegarla?",
+    "options": ["AWS Pricing Calculator", "AWS Cost Explorer", "AWS Budgets", "AWS Compute Optimizer"],
+    "answer": [0],
+    "explanation": "Pricing Calculator estima costos de servicios configurados. Cost Explorer y Compute Optimizer trabajan con uso real ya existente."
+  },
+  {
+    "id": "aws-d4-034",
+    "domain": "4",
+    "type": "single",
+    "difficulty": "hard",
+    "question": "Una aplicación lee los mismos objetos de S3 millones de veces al día desde instancias EC2 en la misma región, y el costo de peticiones GET es alto. ¿Qué cambio lo reduce?",
+    "options": [
+      "Cachear los objetos más usados en ElastiCache o en memoria local de la aplicación",
+      "Mover los objetos a S3 Glacier",
+      "Usar Transfer Acceleration",
+      "Habilitar Requester Pays"
+    ],
+    "answer": [0],
+    "explanation": "Cachear objetos calientes reduce el número de GET (y la latencia). Glacier cobra recuperación y es lento; Transfer Acceleration aumenta el costo."
+  },
+  {
+    "id": "aws-d4-035",
+    "domain": "4",
+    "type": "single",
+    "difficulty": "hard",
+    "question": "Una empresa tiene varias cuentas en AWS Organizations y compró Reserved Instances en una cuenta. ¿Cómo aprovechan las demás cuentas ese descuento?",
+    "options": [
+      "Con consolidated billing, el descuento de RIs/Savings Plans se comparte entre las cuentas de la organización (si el sharing está habilitado)",
+      "Las RIs solo aplican a la cuenta que las compró",
+      "Hay que transferir las instancias a esa cuenta",
+      "No es posible compartir descuentos"
+    ],
+    "answer": [0],
+    "explanation": "La facturación consolidada agrupa el uso y permite compartir descuentos de RIs y Savings Plans y precios por volumen entre cuentas de la organización (se puede desactivar por cuenta)."
+  },
+  {
+    "id": "aws-d4-036",
+    "domain": "4",
+    "type": "single",
+    "difficulty": "medium",
+    "question": "Una aplicación usa SQS con short polling y genera muchas peticiones vacías. ¿Qué reduce el costo?",
+    "options": ["Habilitar long polling (WaitTimeSeconds hasta 20 s)", "Usar colas FIFO", "Aumentar el visibility timeout", "Reducir el retention period"],
+    "answer": [0],
+    "explanation": "Long polling espera hasta que haya mensajes (o vence el tiempo), reduciendo respuestas vacías y, por lo tanto, el número de peticiones facturadas."
+  },
+  {
+    "id": "aws-d4-037",
+    "domain": "4",
+    "type": "single",
+    "difficulty": "hard",
+    "question": "Una aplicación en Lambda se ejecuta millones de veces al mes con duraciones cortas, y el equipo quiere reducir su costo sin cambiar la lógica. ¿Qué acción es la MÁS efectiva?",
+    "options": [
+      "Ajustar la memoria con base en pruebas (p. ej., AWS Lambda Power Tuning) y usar la arquitectura arm64 (Graviton)",
+      "Activar provisioned concurrency para todas las funciones",
+      "Aumentar el timeout",
+      "Mover la función a una VPC"
+    ],
+    "answer": [0],
+    "explanation": "Lambda cobra por GB-segundo y peticiones. Encontrar la memoria óptima puede reducir la duración y el costo; arm64 tiene un precio por GB-s ~20 % menor. Provisioned concurrency añade un costo fijo."
+  },
+  {
+    "id": "aws-d4-038",
+    "domain": "4",
+    "type": "single",
+    "difficulty": "medium",
+    "question": "Una empresa migra 20 TB de archivos on-premises a S3 una sola vez y tiene un enlace de 1 Gbps poco utilizado. ¿Qué opción es razonable y económica?",
+    "options": [
+      "AWS DataSync por la conexión existente (o Snowball si la ventana es muy corta)",
+      "Contratar Direct Connect de 10 Gbps por 3 años",
+      "Copiar a EBS y luego a S3",
+      "Subir manualmente desde la consola"
+    ],
+    "answer": [0],
+    "explanation": "A 1 Gbps, 20 TB tardan ~2 días a plena capacidad; DataSync automatiza y valida la transferencia. Contratar Direct Connect para una migración única es costoso y lento de aprovisionar."
+  },
+  {
+    "id": "aws-d4-039",
+    "domain": "4",
+    "type": "single",
+    "difficulty": "hard",
+    "question": "Una empresa ejecuta Amazon Aurora con una carga de lecturas intensivas en E/S, y los cargos por operaciones de E/S superan el 25 % del gasto en Aurora. ¿Qué opción reduce el costo?",
+    "options": [
+      "Cambiar la configuración de almacenamiento del clúster a Aurora I/O-Optimized",
+      "Cambiar a Aurora Serverless v1",
+      "Aumentar el número de réplicas",
+      "Usar EBS io2 para Aurora"
+    ],
+    "answer": [0],
+    "explanation": "Aurora I/O-Optimized elimina los cargos por E/S a cambio de un mayor precio de cómputo y almacenamiento; AWS lo recomienda cuando la E/S supera ~25 % del gasto de Aurora."
+  }
+]

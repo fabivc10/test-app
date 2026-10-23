@@ -1,0 +1,308 @@
+[
+  {
+    "id": "aws-d2-027",
+    "domain": "2",
+    "type": "single",
+    "difficulty": "hard",
+    "question": "Una aplicación TCP/UDP de juegos se ejecuta en dos regiones. Necesita IPs estáticas anycast para los clientes y failover entre regiones en segundos, sin depender de la caché DNS de los clientes. ¿Qué servicio usar?",
+    "options": ["AWS Global Accelerator", "Route 53 failover routing", "Amazon CloudFront", "Elastic IPs en cada región"],
+    "answer": [0],
+    "explanation": "Global Accelerator ofrece dos IPs estáticas anycast, enruta por la red global de AWS y hace failover entre endpoints regionales según health checks sin depender del TTL de DNS. Soporta TCP y UDP; CloudFront es para HTTP(S)."
+  },
+  {
+    "id": "aws-d2-028",
+    "domain": "2",
+    "type": "single",
+    "difficulty": "medium",
+    "question": "Una aplicación lee mucho más de lo que escribe en Amazon RDS for PostgreSQL y la instancia primaria está saturada por lecturas. ¿Qué solución reduce la carga de lectura?",
+    "options": ["Crear read replicas y dirigir las consultas de lectura a ellas", "Habilitar Multi-AZ", "Aumentar el almacenamiento", "Habilitar backups automáticos"],
+    "answer": [0],
+    "explanation": "Las read replicas escalan lecturas (replicación asíncrona). La standby de Multi-AZ (instancia) no atiende lecturas; solo los Multi-AZ DB clusters ofrecen standbys legibles."
+  },
+  {
+    "id": "aws-d2-029",
+    "domain": "2",
+    "type": "single",
+    "difficulty": "hard",
+    "question": "Una aplicación tiene muchas funciones Lambda que abren conexiones a Amazon RDS y agotan el máximo de conexiones durante picos. ¿Qué solución lo resuelve con el MENOR cambio?",
+    "options": ["Amazon RDS Proxy", "Aumentar max_connections al máximo", "Migrar a DynamoDB", "Usar una read replica"],
+    "answer": [0],
+    "explanation": "RDS Proxy mantiene un pool de conexiones compartido, reduce el consumo de conexiones de funciones serverless y acelera el failover. Cambiar de base de datos es un rediseño completo."
+  },
+  {
+    "id": "aws-d2-030",
+    "domain": "2",
+    "type": "single",
+    "difficulty": "medium",
+    "question": "¿Qué mecanismo permite recuperar una base de datos RDS a un momento concreto de los últimos días (por ejemplo, justo antes de un borrado accidental)?",
+    "options": ["Backups automáticos con point-in-time recovery", "Multi-AZ", "Read replicas", "Enhanced Monitoring"],
+    "answer": [0],
+    "explanation": "Los backups automáticos (retención 1–35 días) más los logs de transacciones permiten restaurar a cualquier segundo dentro del periodo, creando una nueva instancia. Multi-AZ replicaría también el borrado."
+  },
+  {
+    "id": "aws-d2-031",
+    "domain": "2",
+    "type": "single",
+    "difficulty": "hard",
+    "question": "Una aplicación en contenedores debe ejecutarse sin gestionar servidores, mantener siempre 4 tareas repartidas en varias AZs y reemplazar las que fallen. ¿Qué solución usar?",
+    "options": [
+      "Un servicio de Amazon ECS con launch type Fargate, desired count 4 y subredes en varias AZs",
+      "Contenedores en una instancia EC2 con Docker y un cron de verificación",
+      "AWS Batch",
+      "Lambda con imágenes de contenedor programadas cada minuto"
+    ],
+    "answer": [0],
+    "explanation": "Un ECS service mantiene el número deseado de tareas, las distribuye entre AZs, reemplaza las no saludables y se integra con ALB. Fargate elimina la gestión de servidores."
+  },
+  {
+    "id": "aws-d2-032",
+    "domain": "2",
+    "type": "single",
+    "difficulty": "medium",
+    "question": "Un evento de mantenimiento programado de AWS afectará a una instancia EC2 respaldada por EBS. ¿Qué acción conserva los datos y traslada la instancia a hardware nuevo?",
+    "options": ["Detener e iniciar (stop/start) la instancia", "Reiniciar (reboot) la instancia", "Terminar la instancia", "Crear una AMI y no hacer nada más"],
+    "answer": [0],
+    "explanation": "Stop/start en instancias respaldadas por EBS las mueve a un host nuevo conservando los volúmenes EBS (se pierde el instance store y, sin Elastic IP, la IP pública). Un reboot permanece en el mismo host."
+  },
+  {
+    "id": "aws-d2-033",
+    "domain": "2",
+    "type": "single",
+    "difficulty": "hard",
+    "question": "Una aplicación de streaming de clics necesita ingerir millones de eventos por segundo, permitir que varios consumidores los lean en orden por clave y poder reprocesar los últimos 7 días. ¿Qué servicio usar?",
+    "options": ["Amazon Kinesis Data Streams con retención extendida", "Amazon SQS estándar", "Amazon SNS", "Amazon Data Firehose solamente"],
+    "answer": [0],
+    "explanation": "Kinesis Data Streams ordena por shard (partition key), admite múltiples consumidores (incluido enhanced fan-out) y retención de 24 h a 365 días con replay. SQS elimina mensajes consumidos y Firehose entrega a destinos sin replay."
+  },
+  {
+    "id": "aws-d2-034",
+    "domain": "2",
+    "type": "single",
+    "difficulty": "medium",
+    "question": "¿Qué servicio carga datos de streaming casi en tiempo real en S3, Redshift u OpenSearch sin administrar consumidores?",
+    "options": ["Amazon Data Firehose", "Kinesis Data Streams", "AWS Glue", "Amazon MQ"],
+    "answer": [0],
+    "explanation": "Amazon Data Firehose (antes Kinesis Data Firehose) es totalmente administrado, hace buffering, transformación opcional con Lambda, conversión de formato y entrega a destinos."
+  },
+  {
+    "id": "aws-d2-035",
+    "domain": "2",
+    "type": "single",
+    "difficulty": "hard",
+    "question": "Una empresa migra una aplicación que usa ActiveMQ con protocolos AMQP y MQTT, y no quiere reescribir el código de mensajería. ¿Qué servicio administrado usar?",
+    "options": ["Amazon MQ", "Amazon SQS", "Amazon SNS", "Amazon EventBridge"],
+    "answer": [0],
+    "explanation": "Amazon MQ es un broker administrado de ActiveMQ y RabbitMQ compatible con protocolos estándar (AMQP, MQTT, STOMP, OpenWire). SQS/SNS requieren cambiar el código a sus APIs."
+  },
+  {
+    "id": "aws-d2-036",
+    "domain": "2",
+    "type": "single",
+    "difficulty": "hard",
+    "question": "Route 53 debe dirigir el tráfico a un ALB en us-east-1 y otro en eu-west-1 según cuál ofrezca menor latencia al usuario, evitando endpoints no saludables. ¿Qué configurar?",
+    "options": [
+      "Registros alias con latency-based routing y Evaluate Target Health habilitado",
+      "Registros CNAME con weighted routing 50/50",
+      "Geolocation routing sin health checks",
+      "Simple routing con dos valores"
+    ],
+    "answer": [0],
+    "explanation": "Latency-based routing elige la región con menor latencia medida; con Evaluate Target Health el alias se omite si el ALB no tiene targets sanos. Simple routing no admite health checks."
+  },
+  {
+    "id": "aws-d2-037",
+    "domain": "2",
+    "type": "single",
+    "difficulty": "medium",
+    "question": "¿Por qué se usa un registro alias de Route 53 en vez de un CNAME para apuntar el apex del dominio (example.com) a un ALB?",
+    "options": [
+      "Los CNAME no se permiten en el apex de la zona; el alias sí y además es gratuito para consultas a recursos AWS",
+      "Los alias son más rápidos que cualquier registro A",
+      "Los CNAME no funcionan con ALB",
+      "Los alias permiten usar IPs fijas del ALB"
+    ],
+    "answer": [0],
+    "explanation": "El DNS no permite CNAME en el zone apex. Los alias resuelven directamente a recursos AWS (ELB, CloudFront, S3 website, API Gateway…) y sus consultas no tienen costo."
+  },
+  {
+    "id": "aws-d2-038",
+    "domain": "2",
+    "type": "single",
+    "difficulty": "hard",
+    "question": "Un Auto Scaling group escala según CPU, pero cada nueva instancia tarda 10 minutos en estar lista por la instalación de software, y los picos se atienden tarde. ¿Qué mejora es la MÁS efectiva?",
+    "options": [
+      "Usar una AMI dorada preconfigurada (y opcionalmente warm pools) para reducir el tiempo de arranque",
+      "Aumentar el cooldown",
+      "Cambiar a escalado manual",
+      "Reducir el umbral de CPU al 10 %"
+    ],
+    "answer": [0],
+    "explanation": "Hornear el software en la AMI reduce drásticamente el tiempo hasta estar en servicio; los warm pools mantienen instancias preinicializadas. Bajar el umbral escala antes pero con más costo y sin resolver el arranque lento."
+  },
+  {
+    "id": "aws-d2-039",
+    "domain": "2",
+    "type": "single",
+    "difficulty": "medium",
+    "question": "Una empresa sabe que cada lunes a las 8:00 el tráfico se triplica. ¿Qué tipo de escalado del ASG aplicar?",
+    "options": ["Scheduled scaling", "Simple scaling", "Manual scaling", "Step scaling basado en memoria"],
+    "answer": [0],
+    "explanation": "Para patrones conocidos se usa scheduled scaling (ajustar min/desired antes del pico). Predictive scaling también sirve para patrones recurrentes aprendidos de métricas históricas."
+  },
+  {
+    "id": "aws-d2-040",
+    "domain": "2",
+    "type": "single",
+    "difficulty": "hard",
+    "question": "Una empresa necesita conectividad entre 50 VPCs y su red on-premises, con enrutamiento transitivo y gestión centralizada. ¿Qué solución usar?",
+    "options": ["AWS Transit Gateway", "VPC peering en malla completa", "Una VPN por VPC", "PrivateLink entre todas las VPCs"],
+    "answer": [0],
+    "explanation": "Transit Gateway es un hub regional que interconecta VPCs, VPNs y Direct Connect con enrutamiento transitivo. El peering no es transitivo y una malla de 50 VPCs requeriría 1225 conexiones."
+  },
+  {
+    "id": "aws-d2-041",
+    "domain": "2",
+    "type": "single",
+    "difficulty": "hard",
+    "question": "Una empresa tiene una única conexión Direct Connect y necesita un respaldo de bajo costo si falla. ¿Qué solución es la MÁS rentable?",
+    "options": [
+      "Una VPN site-to-site sobre Internet como respaldo",
+      "Una segunda conexión Direct Connect en otra ubicación",
+      "VPC peering",
+      "AWS Global Accelerator"
+    ],
+    "answer": [0],
+    "explanation": "Una VPN como backup de DX es la opción económica (con menor ancho de banda y latencia variable). Para máxima resiliencia AWS recomienda conexiones DX redundantes en ubicaciones distintas, pero es más costoso."
+  },
+  {
+    "id": "aws-d2-042",
+    "domain": "2",
+    "type": "single",
+    "difficulty": "medium",
+    "question": "Una aplicación procesa archivos subidos a S3. ¿Qué arquitectura serverless es resiliente ante picos y fallos del procesador?",
+    "options": [
+      "S3 event notification → cola SQS → Lambda con batch y DLQ",
+      "S3 → Lambda síncrona sin reintentos",
+      "Una instancia EC2 que lista el bucket cada minuto",
+      "S3 → SNS → correo electrónico"
+    ],
+    "answer": [0],
+    "explanation": "SQS almacena los eventos y permite que Lambda los procese a su ritmo con reintentos y DLQ. El polling desde EC2 es ineficiente y no escala."
+  },
+  {
+    "id": "aws-d2-043",
+    "domain": "2",
+    "type": "single",
+    "difficulty": "hard",
+    "question": "Un sistema de pagos reintenta peticiones cuando hay timeouts y a veces cobra dos veces. ¿Qué principio de diseño aplicar?",
+    "options": [
+      "Hacer las operaciones idempotentes con una clave de idempotencia por transacción",
+      "Desactivar los reintentos",
+      "Aumentar los timeouts a 15 minutos",
+      "Usar una sola instancia para evitar duplicados"
+    ],
+    "answer": [0],
+    "explanation": "Con reintentos (y entrega at-least-once) los consumidores deben ser idempotentes: registrar la clave de la transacción y no repetir el efecto si ya se procesó. Desactivar reintentos sacrifica resiliencia."
+  },
+  {
+    "id": "aws-d2-044",
+    "domain": "2",
+    "type": "single",
+    "difficulty": "medium",
+    "question": "¿Qué ventaja tiene Amazon Aurora respecto a RDS for MySQL estándar en durabilidad del almacenamiento?",
+    "options": [
+      "Guarda 6 copias de los datos en 3 AZs en un volumen de clúster compartido",
+      "Guarda 2 copias en una sola AZ",
+      "No requiere backups",
+      "Almacena los datos en S3 Glacier"
+    ],
+    "answer": [0],
+    "explanation": "El almacenamiento de Aurora replica 6 copias en 3 AZs, tolera la pérdida de 2 copias para escrituras y 3 para lecturas, y las réplicas comparten el volumen (failover típicamente < 30 s)."
+  },
+  {
+    "id": "aws-d2-045",
+    "domain": "2",
+    "type": "single",
+    "difficulty": "hard",
+    "question": "Una empresa quiere que una copia de sus backups sea inmune a borrados, incluso por un administrador comprometido. ¿Qué usar?",
+    "options": [
+      "AWS Backup Vault Lock en modo compliance (y copia a otra cuenta)",
+      "Etiquetas en los recovery points",
+      "Una política IAM que deniegue borrado a los desarrolladores",
+      "S3 Intelligent-Tiering"
+    ],
+    "answer": [0],
+    "explanation": "Backup Vault Lock en modo compliance aplica WORM a los recovery points: ni root ni administradores pueden borrarlos antes de la retención. Copiar a otra cuenta añade aislamiento ante una cuenta comprometida."
+  },
+  {
+    "id": "aws-d2-046",
+    "domain": "2",
+    "type": "single",
+    "difficulty": "medium",
+    "question": "¿Qué tipo de balanceador usar para tráfico TCP/UDP con latencia ultrabaja, millones de peticiones por segundo e IP estática por AZ?",
+    "options": ["Network Load Balancer", "Application Load Balancer", "Classic Load Balancer", "Gateway Load Balancer"],
+    "answer": [0],
+    "explanation": "El NLB opera en capa 4, preserva la IP de origen, admite Elastic IPs por AZ y escala a millones de peticiones. El ALB es capa 7 y el GWLB despliega appliances de terceros."
+  },
+  {
+    "id": "aws-d2-047",
+    "domain": "2",
+    "type": "single",
+    "difficulty": "hard",
+    "question": "Una empresa necesita insertar firewalls virtuales de terceros de forma transparente y escalable para inspeccionar todo el tráfico de las VPCs. ¿Qué servicio usar?",
+    "options": ["Gateway Load Balancer", "Network Load Balancer", "Application Load Balancer", "AWS WAF"],
+    "answer": [0],
+    "explanation": "El GWLB distribuye tráfico (encapsulado en GENEVE, puerto 6081) hacia appliances de terceros y se integra con GWLB endpoints en las tablas de rutas para inspección transparente."
+  },
+  {
+    "id": "aws-d2-048",
+    "domain": "2",
+    "type": "single",
+    "difficulty": "medium",
+    "question": "Durante un despliegue, las instancias que salen del ALB cortan las peticiones en curso. ¿Qué ajuste del target group lo evita?",
+    "options": ["Deregistration delay (connection draining)", "Slow start", "Sticky sessions", "Cross-zone load balancing"],
+    "answer": [0],
+    "explanation": "El deregistration delay (300 s por defecto) deja que las peticiones en curso terminen antes de retirar el target. Slow start aumenta gradualmente el tráfico a targets nuevos."
+  },
+  {
+    "id": "aws-d2-049",
+    "domain": "2",
+    "type": "multiple",
+    "difficulty": "hard",
+    "question": "Una aplicación usa Amazon SQS estándar. ¿Qué DOS afirmaciones son correctas sobre su comportamiento?",
+    "options": [
+      "Un mensaje puede entregarse más de una vez (at-least-once)",
+      "El orden de los mensajes es best-effort, no garantizado",
+      "Garantiza exactly-once processing",
+      "Los mensajes se conservan como máximo 1 hora",
+      "Solo admite un consumidor"
+    ],
+    "answer": [0, 1],
+    "explanation": "SQS estándar ofrece throughput casi ilimitado con entrega at-least-once y orden best-effort. La retención es configurable de 1 minuto a 14 días (4 días por defecto) y admite muchos consumidores."
+  },
+  {
+    "id": "aws-d2-050",
+    "domain": "2",
+    "type": "single",
+    "difficulty": "hard",
+    "question": "Una aplicación en una sola región necesita su sitio estático de mantenimiento cuando la aplicación principal falla. ¿Qué combinación es la MÁS sencilla?",
+    "options": [
+      "Route 53 failover: primario apuntando al ALB y secundario a un bucket S3 con sitio estático (o CloudFront)",
+      "Un segundo ALB en la misma AZ",
+      "Lambda que modifica el DNS manualmente",
+      "Un NAT gateway de respaldo"
+    ],
+    "answer": [0],
+    "explanation": "Un registro failover secundario hacia un sitio estático en S3/CloudFront se activa automáticamente cuando falla el health check del primario."
+  },
+  {
+    "id": "aws-d2-051",
+    "domain": "2",
+    "type": "single",
+    "difficulty": "medium",
+    "question": "¿Qué servicio permite a una aplicación serverless desacoplar productores de consumidores con un bus de eventos y volver a reproducir eventos archivados tras corregir un error?",
+    "options": ["Amazon EventBridge (archive & replay)", "Amazon SNS", "AWS Step Functions", "Amazon CloudWatch Logs"],
+    "answer": [0],
+    "explanation": "EventBridge permite archivar eventos que coinciden con un patrón y reproducirlos más tarde (replay) hacia el bus. SNS no retiene mensajes."
+  }
+]

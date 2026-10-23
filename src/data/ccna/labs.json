@@ -1,0 +1,816 @@
+[
+  {
+    "id": "ccna-lab-vlan-trunk-roas",
+    "domain": "2",
+    "title": "VLANs, trunk 802.1Q y router-on-a-stick",
+    "tool": "Packet Tracer",
+    "difficulty": "básico",
+    "estimatedMinutes": 45,
+    "description": "Segmenta una oficina en VLANs, conecta dos switches con un trunk y enruta entre VLANs con subinterfaces en un router.",
+    "objectives": [
+      "Crear VLANs con nombre y asignar puertos de acceso",
+      "Configurar un trunk 802.1Q con VLAN nativa no predeterminada y lista de VLANs permitidas",
+      "Configurar router-on-a-stick para routing inter-VLAN",
+      "Verificar con comandos show y ping"
+    ],
+    "setup": [
+      "Dispositivos: **R1** (ISR 4331 o 2911), **SW1** y **SW2** (2960), 4 PCs.",
+      "",
+      "| Enlace | Puertos |",
+      "|---|---|",
+      "| R1 G0/0/0 ↔ SW1 G0/1 | trunk |",
+      "| SW1 G0/2 ↔ SW2 G0/2 | trunk |",
+      "| PC1 → SW1 Fa0/1, PC2 → SW1 Fa0/11 | |",
+      "| PC3 → SW2 Fa0/1, PC4 → SW2 Fa0/11 | |",
+      "",
+      "| VLAN | Nombre | Red | Gateway | Puertos |",
+      "|---|---|---|---|---|",
+      "| 10 | VENTAS | 192.168.10.0/24 | .1 | Fa0/1–10 |",
+      "| 20 | SOPORTE | 192.168.20.0/24 | .1 | Fa0/11–20 |",
+      "| 99 | NATIVA | 192.168.99.0/24 | .1 | (nativa, gestión) |",
+      "",
+      "PCs: PC1 192.168.10.11, PC2 192.168.20.11, PC3 192.168.10.12, PC4 192.168.20.12. SVI de gestión: SW1 192.168.99.2, SW2 192.168.99.3."
+    ],
+    "tasks": [
+      "Crea las VLANs 10, 20 y 99 con sus nombres en ambos switches.",
+      "Asigna los puertos de acceso según la tabla y apaga los puertos sin uso moviéndolos a una VLAN 999 (PARKING).",
+      "Configura los trunks SW1–SW2 y SW1–R1 con VLAN nativa 99, VLANs permitidas 10,20,99 y DTP deshabilitado.",
+      "Configura subinterfaces en R1 para las tres VLANs (la 99 como nativa).",
+      "Configura la SVI de gestión y el default gateway en cada switch.",
+      "Configura IP, máscara y gateway en los PCs y prueba ping entre todas las VLANs."
+    ],
+    "verification": [
+      "`show vlan brief` muestra los puertos correctos en cada VLAN.",
+      "`show interfaces trunk` muestra nativa 99 y VLANs 10,20,99 permitidas y en forwarding.",
+      "`show ip interface brief` en R1: subinterfaces up/up.",
+      "PC1 → PC4 responde (inter-VLAN, entre switches).",
+      "`ping 192.168.99.1` desde SW2 funciona."
+    ],
+    "solution": [
+      "**SW1 y SW2**",
+      "```",
+      "vlan 10",
+      " name VENTAS",
+      "vlan 20",
+      " name SOPORTE",
+      "vlan 99",
+      " name NATIVA",
+      "vlan 999",
+      " name PARKING",
+      "interface range fa0/1 - 10",
+      " switchport mode access",
+      " switchport access vlan 10",
+      "interface range fa0/11 - 20",
+      " switchport mode access",
+      " switchport access vlan 20",
+      "interface range fa0/21 - 24",
+      " switchport mode access",
+      " switchport access vlan 999",
+      " shutdown",
+      "interface g0/2",
+      " switchport mode trunk",
+      " switchport trunk native vlan 99",
+      " switchport trunk allowed vlan 10,20,99",
+      " switchport nonegotiate",
+      "```",
+      "",
+      "**Solo SW1** (trunk hacia R1 y gestión)",
+      "```",
+      "interface g0/1",
+      " switchport mode trunk",
+      " switchport trunk native vlan 99",
+      " switchport trunk allowed vlan 10,20,99",
+      " switchport nonegotiate",
+      "interface vlan 99",
+      " ip address 192.168.99.2 255.255.255.0",
+      " no shutdown",
+      "ip default-gateway 192.168.99.1",
+      "```",
+      "SW2: igual pero `ip address 192.168.99.3 255.255.255.0` (y sin g0/1).",
+      "",
+      "**R1**",
+      "```",
+      "interface g0/0/0",
+      " no shutdown",
+      "interface g0/0/0.10",
+      " encapsulation dot1Q 10",
+      " ip address 192.168.10.1 255.255.255.0",
+      "interface g0/0/0.20",
+      " encapsulation dot1Q 20",
+      " ip address 192.168.20.1 255.255.255.0",
+      "interface g0/0/0.99",
+      " encapsulation dot1Q 99 native",
+      " ip address 192.168.99.1 255.255.255.0",
+      "```",
+      "",
+      "Error común: usar `switchport trunk allowed vlan 30` sin `add` al ampliar la lista, o no coincidir la VLAN nativa (CDP mostrará *native VLAN mismatch*)."
+    ],
+    "references": [
+      {
+        "title": "Cisco Packet Tracer",
+        "url": "https://www.netacad.com/cisco-packet-tracer"
+      },
+      {
+        "title": "vanhoangkha/CCNA_Course_Notes",
+        "url": "https://github.com/vanhoangkha/CCNA_Course_Notes"
+      }
+    ]
+  },
+  {
+    "id": "ccna-lab-stp",
+    "domain": "2",
+    "title": "Rapid PVST+: elección de root, balanceo por VLAN y protección de puertos",
+    "tool": "Packet Tracer",
+    "difficulty": "intermedio",
+    "estimatedMinutes": 50,
+    "description": "Controla la topología STP en un triángulo de switches, balancea VLANs entre dos switches de distribución y protege los puertos de acceso.",
+    "objectives": [
+      "Identificar root bridge, root ports, designated y alternate",
+      "Forzar el root por VLAN para balancear carga",
+      "Configurar PortFast, BPDU Guard y Root Guard",
+      "Observar la convergencia de RSTP"
+    ],
+    "setup": [
+      "Triángulo: **DS1** G0/1 ↔ **DS2** G0/1; DS1 G0/2 ↔ **AS1** G0/1; DS2 G0/2 ↔ AS1 G0/2. Todos 2960 (o 3650 para DS).",
+      "VLANs 10 y 20 en los tres switches; todos los enlaces entre switches como trunk. PC1 en AS1 Fa0/1 (VLAN 10), PC2 en AS1 Fa0/2 (VLAN 20)."
+    ],
+    "tasks": [
+      "Antes de configurar nada, usa `show spanning-tree` para identificar el root actual y explica por qué ganó.",
+      "Cambia el modo a Rapid PVST+ en los tres switches.",
+      "Haz que DS1 sea root primario de la VLAN 10 y secundario de la 20, y DS2 al revés.",
+      "En AS1, determina qué uplink queda bloqueado en cada VLAN.",
+      "Configura PortFast y BPDU Guard en los puertos de acceso de AS1.",
+      "Configura Root Guard en los puertos de DS1 y DS2 que miran hacia AS1.",
+      "Conecta un switch nuevo a AS1 Fa0/3 y observa qué ocurre."
+    ],
+    "verification": [
+      "`show spanning-tree vlan 10` en DS1: *This bridge is the root*.",
+      "En AS1, G0/1 es Root FWD en VLAN 10 y Altn BLK en VLAN 20 (y al revés con G0/2).",
+      "`show spanning-tree summary` muestra PortFast/BPDU Guard por defecto habilitados.",
+      "El puerto Fa0/3 pasa a err-disabled (`show interfaces status err-disabled`)."
+    ],
+    "solution": [
+      "**Los tres switches**",
+      "```",
+      "spanning-tree mode rapid-pvst",
+      "```",
+      "**DS1**",
+      "```",
+      "spanning-tree vlan 10 root primary",
+      "spanning-tree vlan 20 root secondary",
+      "interface g0/2",
+      " spanning-tree guard root",
+      "```",
+      "**DS2**",
+      "```",
+      "spanning-tree vlan 20 root primary",
+      "spanning-tree vlan 10 root secondary",
+      "interface g0/2",
+      " spanning-tree guard root",
+      "```",
+      "**AS1**",
+      "```",
+      "spanning-tree portfast default",
+      "spanning-tree portfast bpduguard default",
+      "! o por interfaz:",
+      "interface range fa0/1 - 24",
+      " spanning-tree portfast",
+      " spanning-tree bpduguard enable",
+      "errdisable recovery cause bpduguard",
+      "errdisable recovery interval 300",
+      "```",
+      "",
+      "Razonamiento: sin configuración gana el switch con MAC más baja (todas las prioridades son 32768+VLAN). `root primary` fija 24576 y `root secondary` 28672. En AS1 el uplink hacia el root de cada VLAN es root port; el otro uplink queda alternate (el puerto designado del segmento DS2–AS1 en la VLAN 10 es el de DS2, porque DS2 está más cerca del root)."
+    ],
+    "references": [
+      {
+        "title": "Cisco — Understanding Rapid STP",
+        "url": "https://www.cisco.com/c/en/us/support/docs/lan-switching/spanning-tree-protocol/24062-146.html"
+      }
+    ]
+  },
+  {
+    "id": "ccna-lab-etherchannel",
+    "domain": "2",
+    "title": "EtherChannel LACP y PAgP (capa 2)",
+    "tool": "Packet Tracer",
+    "difficulty": "básico",
+    "estimatedMinutes": 30,
+    "description": "Agrupa enlaces redundantes entre switches para aumentar ancho de banda sin que STP los bloquee.",
+    "objectives": [
+      "Configurar EtherChannel con LACP y PAgP",
+      "Configurar el port-channel como trunk",
+      "Diagnosticar un canal que no se forma"
+    ],
+    "setup": [
+      "**SW1** G0/1–2 ↔ **SW2** G0/1–2 (LACP, Po1). **SW1** Fa0/23–24 ↔ **SW3** Fa0/23–24 (PAgP, Po2). VLANs 10, 20."
+    ],
+    "tasks": [
+      "Configura Po1 con LACP: SW1 activo, SW2 pasivo. Hazlo trunk con VLANs 10,20.",
+      "Configura Po2 con PAgP: SW1 desirable, SW3 auto. Hazlo trunk.",
+      "Cambia SW2 a `mode passive` también en SW1 y observa el resultado; luego corrígelo.",
+      "Cambia la velocidad de un miembro a 100 Mbps y observa el estado del miembro."
+    ],
+    "verification": [
+      "`show etherchannel summary`: Po1(SU) LACP y Po2(SU) PAgP con miembros (P).",
+      "`show spanning-tree` muestra Po1/Po2 como un único puerto.",
+      "Con passive/passive los miembros quedan (I) y Po1(SD).",
+      "Con velocidades distintas el miembro queda (s) suspendido."
+    ],
+    "solution": [
+      "**SW1**",
+      "```",
+      "interface range g0/1 - 2",
+      " channel-group 1 mode active",
+      "interface port-channel 1",
+      " switchport mode trunk",
+      " switchport trunk allowed vlan 10,20",
+      "interface range fa0/23 - 24",
+      " channel-group 2 mode desirable",
+      "interface port-channel 2",
+      " switchport mode trunk",
+      "```",
+      "**SW2**",
+      "```",
+      "interface range g0/1 - 2",
+      " channel-group 1 mode passive",
+      "interface port-channel 1",
+      " switchport mode trunk",
+      " switchport trunk allowed vlan 10,20",
+      "```",
+      "**SW3**",
+      "```",
+      "interface range fa0/23 - 24",
+      " channel-group 2 mode auto",
+      "interface port-channel 2",
+      " switchport mode trunk",
+      "```",
+      "Configurar los parámetros en la interfaz Port-channel los propaga a los miembros y evita inconsistencias."
+    ],
+    "references": [
+      {
+        "title": "Cisco — EtherChannel",
+        "url": "https://www.cisco.com/c/en/us/support/docs/lan-switching/etherchannel/98469-ios-etherchannel.html"
+      }
+    ]
+  },
+  {
+    "id": "ccna-lab-static-dual-stack",
+    "domain": "3",
+    "title": "Rutas estáticas IPv4/IPv6 y ruta flotante",
+    "tool": "Packet Tracer",
+    "difficulty": "intermedio",
+    "estimatedMinutes": 50,
+    "description": "Configura direccionamiento dual-stack y enrutamiento estático con un enlace de respaldo.",
+    "objectives": [
+      "Configurar IPv4 e IPv6 (GUA y link-local) en routers",
+      "Configurar rutas estáticas de red, por defecto y de host",
+      "Configurar una ruta flotante de respaldo",
+      "Verificar el failover"
+    ],
+    "setup": [
+      "**R1** (sucursal) — **R2** (central) — **ISP**. Enlaces R1-R2: principal G0/0/0 (10.0.12.0/30, 2001:db8:12::/64) y respaldo G0/0/1 (10.0.21.0/30, 2001:db8:21::/64). R2-ISP: 203.0.113.0/30, 2001:db8:f::/64. ISP tiene Loopback0 8.8.8.8/32 y 2001:4860::8888/128.",
+      "LAN R1: 192.168.1.0/24 y 2001:db8:1:1::/64. LAN R2: 192.168.2.0/24 y 2001:db8:2:1::/64.",
+      "Link-local: FE80::1 en R1, FE80::2 en R2, FE80::3 en ISP."
+    ],
+    "tasks": [
+      "Configura todas las direcciones IPv4/IPv6 y habilita `ipv6 unicast-routing`.",
+      "En R1: ruta por defecto IPv4 e IPv6 por el enlace principal y rutas flotantes (AD 10) por el de respaldo.",
+      "En R2: rutas hacia la LAN de R1 por el principal + flotantes por el respaldo; default hacia ISP.",
+      "En ISP: rutas sumarizadas hacia las LANs de la empresa (192.168.0.0/22 y 2001:db8::/32).",
+      "Apaga G0/0/0 de R1 y verifica que el tráfico usa el respaldo."
+    ],
+    "verification": [
+      "`show ip route static` y `show ipv6 route static`.",
+      "PC de la LAN R1 hace ping a 8.8.8.8 y 2001:4860::8888.",
+      "Tras `shutdown` en el principal, aparecen las rutas con [10/0].",
+      "`traceroute` muestra el camino por 10.0.21.x."
+    ],
+    "solution": [
+      "**R1**",
+      "```",
+      "ipv6 unicast-routing",
+      "interface g0/0/0",
+      " ip address 10.0.12.1 255.255.255.252",
+      " ipv6 address 2001:db8:12::1/64",
+      " ipv6 address fe80::1 link-local",
+      " no shutdown",
+      "interface g0/0/1",
+      " ip address 10.0.21.1 255.255.255.252",
+      " ipv6 address 2001:db8:21::1/64",
+      " ipv6 address fe80::1 link-local",
+      " no shutdown",
+      "interface g0/0/2",
+      " ip address 192.168.1.1 255.255.255.0",
+      " ipv6 address 2001:db8:1:1::1/64",
+      " no shutdown",
+      "ip route 0.0.0.0 0.0.0.0 10.0.12.2",
+      "ip route 0.0.0.0 0.0.0.0 10.0.21.2 10",
+      "ipv6 route ::/0 g0/0/0 fe80::2",
+      "ipv6 route ::/0 g0/0/1 fe80::2 10",
+      "```",
+      "**R2**",
+      "```",
+      "ipv6 unicast-routing",
+      "! (direcciones análogas: .2 / ::2, LAN 192.168.2.1, ISP 203.0.113.1)",
+      "ip route 192.168.1.0 255.255.255.0 10.0.12.1",
+      "ip route 192.168.1.0 255.255.255.0 10.0.21.1 10",
+      "ip route 0.0.0.0 0.0.0.0 203.0.113.2",
+      "ipv6 route 2001:db8:1:1::/64 2001:db8:12::1",
+      "ipv6 route 2001:db8:1:1::/64 2001:db8:21::1 10",
+      "ipv6 route ::/0 2001:db8:f::2",
+      "```",
+      "**ISP**",
+      "```",
+      "ip route 192.168.0.0 255.255.252.0 203.0.113.1",
+      "ipv6 route 2001:db8::/32 2001:db8:f::1",
+      "```",
+      "Nota: el next hop link-local exige indicar la interfaz de salida. La ruta flotante solo aparece en la tabla cuando cae la principal."
+    ],
+    "references": [
+      {
+        "title": "Cisco — Floating static routes",
+        "url": "https://www.cisco.com/c/en/us/support/docs/dial-access/floating-static-route/118263-technote-nexthop-00.html"
+      }
+    ]
+  },
+  {
+    "id": "ccna-lab-ospf",
+    "domain": "3",
+    "title": "OSPFv2 de área única con DR/BDR y ruta por defecto",
+    "tool": "Packet Tracer",
+    "difficulty": "intermedio",
+    "estimatedMinutes": 60,
+    "description": "Despliega OSPF en cuatro routers, controla la elección de DR, ajusta costos y propaga una ruta por defecto.",
+    "objectives": [
+      "Configurar OSPF con router ID, network e interfaz",
+      "Controlar DR/BDR con prioridades",
+      "Ajustar reference bandwidth y costos",
+      "Usar passive-interface y default-information originate",
+      "Resolver fallas de adyacencia"
+    ],
+    "setup": [
+      "**R1, R2, R3** conectados a un switch común (segmento 10.0.0.0/24, .1/.2/.3). **R3** G0/1 ↔ **R4** G0/1 (10.0.34.0/30). R4 conecta al ISP (203.0.113.0/30).",
+      "Loopbacks: R1 1.1.1.1/32 … R4 4.4.4.4/32. LANs: R1 192.168.1.0/24, R2 192.168.2.0/24."
+    ],
+    "tasks": [
+      "Configura OSPF proceso 1, área 0, con router-id igual a la loopback.",
+      "Haz que R1 sea DR y R2 BDR en el segmento compartido; R3 nunca debe ser DR/BDR.",
+      "Configura el enlace R3-R4 como point-to-point.",
+      "Ajusta `auto-cost reference-bandwidth 10000` en todos los routers.",
+      "Marca como pasivas las interfaces LAN.",
+      "R4 tiene default estática hacia el ISP: propágala a OSPF.",
+      "Rompe la adyacencia R3-R4 cambiando el hello a 5 en un lado y diagnostica con `show ip ospf interface`."
+    ],
+    "verification": [
+      "`show ip ospf neighbor` en R3: FULL/DR con R1, FULL/BDR con R2, FULL/- con R4.",
+      "`show ip ospf interface brief`: costos ajustados y estados DR/BDR/DROTHER/P2P.",
+      "`show ip route` en R1: `O*E2 0.0.0.0/0` y rutas a las loopbacks.",
+      "Con hellos distintos la vecindad desaparece y vuelve al corregir."
+    ],
+    "solution": [
+      "**R1** (R2 análogo con prioridad 50 y sus redes)",
+      "```",
+      "interface loopback0",
+      " ip address 1.1.1.1 255.255.255.255",
+      "interface g0/0",
+      " ip address 10.0.0.1 255.255.255.0",
+      " ip ospf priority 100",
+      "router ospf 1",
+      " router-id 1.1.1.1",
+      " auto-cost reference-bandwidth 10000",
+      " network 10.0.0.0 0.0.0.255 area 0",
+      " network 192.168.1.0 0.0.0.255 area 0",
+      " network 1.1.1.1 0.0.0.0 area 0",
+      " passive-interface g0/1",
+      "```",
+      "**R3**",
+      "```",
+      "interface g0/0",
+      " ip ospf priority 0",
+      "interface g0/1",
+      " ip address 10.0.34.1 255.255.255.252",
+      " ip ospf network point-to-point",
+      "router ospf 1",
+      " router-id 3.3.3.3",
+      " auto-cost reference-bandwidth 10000",
+      " network 10.0.0.0 0.0.0.255 area 0",
+      " network 10.0.34.0 0.0.0.3 area 0",
+      " network 3.3.3.3 0.0.0.0 area 0",
+      "```",
+      "**R4**",
+      "```",
+      "interface g0/1",
+      " ip ospf network point-to-point",
+      "ip route 0.0.0.0 0.0.0.0 203.0.113.1",
+      "router ospf 1",
+      " router-id 4.4.4.4",
+      " auto-cost reference-bandwidth 10000",
+      " network 10.0.34.0 0.0.0.3 area 0",
+      " network 4.4.4.4 0.0.0.0 area 0",
+      " default-information originate",
+      "```",
+      "Si la elección de DR ya ocurrió, `clear ip ospf process` en los routers (no hay preemption)."
+    ],
+    "references": [
+      {
+        "title": "RFC 2328 — OSPFv2",
+        "url": "https://www.rfc-editor.org/rfc/rfc2328"
+      }
+    ]
+  },
+  {
+    "id": "ccna-lab-hsrp",
+    "domain": "3",
+    "title": "HSRP con preempt y object tracking",
+    "tool": "Packet Tracer",
+    "difficulty": "intermedio",
+    "estimatedMinutes": 40,
+    "description": "Proporciona un gateway redundante a una LAN y conmuta automáticamente cuando el router activo pierde su uplink.",
+    "objectives": [
+      "Configurar HSRPv2 con IP virtual",
+      "Controlar el router activo con prioridad y preempt",
+      "Usar tracking del uplink"
+    ],
+    "setup": [
+      "LAN 192.168.50.0/24 en un switch con PCs. **R1** G0/0 192.168.50.2, **R2** G0/0 192.168.50.3, IP virtual 192.168.50.1. Ambos routers tienen uplink G0/1 hacia **R-CORE** (10.1.1.0/30 y 10.1.2.0/30) y rutas por OSPF o estáticas."
+    ],
+    "tasks": [
+      "Configura HSRP versión 2, grupo 50, IP virtual .1 en R1 y R2.",
+      "R1 debe ser activo (prioridad 110) y recuperar el rol si vuelve tras una falla.",
+      "Si cae el uplink de R1, R2 debe tomar el control.",
+      "Los PCs usan 192.168.50.1 como gateway."
+    ],
+    "verification": [
+      "`show standby brief`: R1 Active, R2 Standby.",
+      "Ping continuo desde un PC al core mientras haces `shutdown` en G0/1 de R1: se pierden pocos paquetes.",
+      "R1 baja a prioridad 90 y R2 pasa a Active; al reactivar el uplink, R1 vuelve a ser Active."
+    ],
+    "solution": [
+      "**R1**",
+      "```",
+      "track 1 interface g0/1 line-protocol",
+      "interface g0/0",
+      " ip address 192.168.50.2 255.255.255.0",
+      " standby version 2",
+      " standby 50 ip 192.168.50.1",
+      " standby 50 priority 110",
+      " standby 50 preempt",
+      " standby 50 track 1 decrement 20",
+      "```",
+      "**R2**",
+      "```",
+      "interface g0/0",
+      " ip address 192.168.50.3 255.255.255.0",
+      " standby version 2",
+      " standby 50 ip 192.168.50.1",
+      " standby 50 preempt",
+      "```",
+      "R2 necesita `preempt` para tomar el control cuando R1 baja a 90 (< 100). En algunas versiones de Packet Tracer se usa `standby 50 track g0/1 20` directamente si `track` no está disponible."
+    ],
+    "references": [
+      {
+        "title": "Cisco — HSRP",
+        "url": "https://www.cisco.com/c/en/us/support/docs/ip/hot-standby-router-protocol-hsrp/9234-hsrpguidetoc.html"
+      }
+    ]
+  },
+  {
+    "id": "ccna-lab-nat-dhcp",
+    "domain": "4",
+    "title": "DHCP con relay, PAT y NAT estático",
+    "tool": "Packet Tracer",
+    "difficulty": "intermedio",
+    "estimatedMinutes": 50,
+    "description": "Entrega direcciones por DHCP a dos LANs desde un router central y da salida a Internet con PAT, publicando un servidor con NAT estático.",
+    "objectives": [
+      "Configurar un servidor DHCP en IOS con exclusiones",
+      "Configurar ip helper-address",
+      "Configurar PAT y NAT estático",
+      "Verificar traducciones"
+    ],
+    "setup": [
+      "**R-EDGE**: G0/0 inside 10.0.0.1/30 hacia **R-LAN**; G0/1 outside 203.0.113.2/29 hacia **ISP** (203.0.113.1). Pool público para el servidor: 203.0.113.5.",
+      "**R-LAN**: G0/1 192.168.10.1/24 (LAN A), G0/2 192.168.20.1/24 (LAN B), G0/0 10.0.0.2/30.",
+      "Servidor web en LAN A con IP fija 192.168.10.10. Servidor en Internet: ISP Loopback 8.8.8.8."
+    ],
+    "tasks": [
+      "En R-EDGE crea pools DHCP para ambas LANs (gateway en R-LAN, DNS 8.8.8.8), excluyendo .1–.20.",
+      "En R-LAN configura el relay hacia R-EDGE en ambas LANs.",
+      "Configura enrutamiento (estáticas) para que todo funcione.",
+      "Configura PAT para 192.168.0.0/16 con la IP de G0/1.",
+      "Publica el servidor web 192.168.10.10 como 203.0.113.5.",
+      "Comprueba desde el ISP que puede acceder al servidor por 203.0.113.5."
+    ],
+    "verification": [
+      "Los PCs reciben IP .21 en adelante: `show ip dhcp binding`.",
+      "`show ip nat translations` muestra entradas PAT y la estática.",
+      "`show ip nat statistics` muestra hits."
+    ],
+    "solution": [
+      "**R-EDGE**",
+      "```",
+      "ip dhcp excluded-address 192.168.10.1 192.168.10.20",
+      "ip dhcp excluded-address 192.168.20.1 192.168.20.20",
+      "ip dhcp pool LAN-A",
+      " network 192.168.10.0 255.255.255.0",
+      " default-router 192.168.10.1",
+      " dns-server 8.8.8.8",
+      "ip dhcp pool LAN-B",
+      " network 192.168.20.0 255.255.255.0",
+      " default-router 192.168.20.1",
+      " dns-server 8.8.8.8",
+      "interface g0/0",
+      " ip address 10.0.0.1 255.255.255.252",
+      " ip nat inside",
+      "interface g0/1",
+      " ip address 203.0.113.2 255.255.255.248",
+      " ip nat outside",
+      "ip route 192.168.0.0 255.255.0.0 10.0.0.2",
+      "ip route 0.0.0.0 0.0.0.0 203.0.113.1",
+      "access-list 1 permit 192.168.0.0 0.0.255.255",
+      "ip nat inside source list 1 interface g0/1 overload",
+      "ip nat inside source static 192.168.10.10 203.0.113.5",
+      "```",
+      "**R-LAN**",
+      "```",
+      "interface g0/1",
+      " ip helper-address 10.0.0.1",
+      "interface g0/2",
+      " ip helper-address 10.0.0.1",
+      "ip route 0.0.0.0 0.0.0.0 10.0.0.1",
+      "```",
+      "El servidor DHCP elige el pool por el **giaddr** (IP de la interfaz del relay). El ISP no necesita rutas hacia redes privadas."
+    ],
+    "references": [
+      {
+        "title": "Cisco — NAT configuration",
+        "url": "https://www.cisco.com/c/en/us/support/docs/ip/network-address-translation-nat/13772-12.html"
+      }
+    ]
+  },
+  {
+    "id": "ccna-lab-acl-ssh",
+    "domain": "5",
+    "title": "Hardening: SSH, ACL de VTY y ACL extendida",
+    "tool": "Packet Tracer",
+    "difficulty": "intermedio",
+    "estimatedMinutes": 45,
+    "description": "Asegura el acceso de gestión a un router y filtra tráfico entre departamentos con ACLs.",
+    "objectives": [
+      "Configurar SSHv2 con usuarios locales",
+      "Restringir el acceso VTY por ACL estándar",
+      "Aplicar una ACL extendida nombrada en la ubicación correcta",
+      "Editar ACLs con números de secuencia"
+    ],
+    "setup": [
+      "**R1** con G0/0 192.168.10.1/24 (USUARIOS), G0/1 192.168.20.1/24 (SERVIDORES: web 192.168.20.10, FTP 192.168.20.20), G0/2 192.168.99.1/24 (ADMIN, PC-Admin 192.168.99.10)."
+    ],
+    "tasks": [
+      "Configura hostname, dominio, llaves RSA de 2048 bits, SSHv2, usuario `admin` con secret y bloqueo tras 3 intentos fallidos en 60 s.",
+      "Solo la red ADMIN puede hacer SSH al router; Telnet no debe aceptarse.",
+      "USUARIOS solo pueden acceder al servidor web por HTTP/HTTPS y no al FTP; el resto de tráfico de USUARIOS hacia otras redes debe permitirse.",
+      "Después, inserta una línea que permita a 192.168.10.50 usar FTP sin reescribir la ACL."
+    ],
+    "verification": [
+      "SSH desde PC-Admin funciona; desde USUARIOS es rechazado.",
+      "`show access-lists` muestra coincidencias en cada línea.",
+      "Desde 192.168.10.50 el FTP funciona; desde otro usuario no."
+    ],
+    "solution": [
+      "```",
+      "hostname R1",
+      "ip domain-name lab.local",
+      "crypto key generate rsa general-keys modulus 2048",
+      "ip ssh version 2",
+      "username admin secret Adm1n!2026",
+      "login block-for 120 attempts 3 within 60",
+      "access-list 5 permit 192.168.99.0 0.0.0.255",
+      "line vty 0 15",
+      " login local",
+      " transport input ssh",
+      " access-class 5 in",
+      " exec-timeout 10 0",
+      "",
+      "ip access-list extended USUARIOS-IN",
+      " 20 permit tcp 192.168.10.0 0.0.0.255 host 192.168.20.10 eq 80",
+      " 30 permit tcp 192.168.10.0 0.0.0.255 host 192.168.20.10 eq 443",
+      " 40 deny ip 192.168.10.0 0.0.0.255 192.168.20.0 0.0.0.255",
+      " 50 permit ip any any",
+      "interface g0/0",
+      " ip access-group USUARIOS-IN in",
+      "",
+      "ip access-list extended USUARIOS-IN",
+      " 10 permit tcp host 192.168.10.50 host 192.168.20.20 range 20 21",
+      "```",
+      "La extendida se aplica de entrada en la interfaz más cercana al origen (G0/0). La línea 10 se inserta antes del deny. (FTP pasivo usa además puertos altos; en Packet Tracer basta con 20–21.)"
+    ],
+    "references": [
+      {
+        "title": "Cisco — IP ACL samples",
+        "url": "https://www.cisco.com/c/en/us/support/docs/ip/access-lists/26448-ACLsamples.html"
+      }
+    ]
+  },
+  {
+    "id": "ccna-lab-l2-security",
+    "domain": "5",
+    "title": "Port security y DHCP snooping",
+    "tool": "Packet Tracer",
+    "difficulty": "intermedio",
+    "estimatedMinutes": 35,
+    "description": "Protege los puertos de acceso contra equipos no autorizados y servidores DHCP falsos.",
+    "objectives": [
+      "Configurar port security con sticky y modos de violación",
+      "Recuperar un puerto err-disabled",
+      "Configurar DHCP snooping con puertos trusted"
+    ],
+    "setup": [
+      "**SW1** con PCs en Fa0/1–Fa0/3, uplink G0/1 hacia el router que es servidor DHCP de la VLAN 10. Un **Server-PT** con servicio DHCP (rogue) que conectarás en Fa0/10."
+    ],
+    "tasks": [
+      "En Fa0/1–Fa0/3: máximo 1 MAC, sticky, violación shutdown en Fa0/1 y restrict en Fa0/2–3.",
+      "Cambia el PC de Fa0/1 por otro y observa el resultado; recupera el puerto.",
+      "Habilita DHCP snooping en la VLAN 10 con G0/1 como trusted y rate limit de 10 pps en los puertos de acceso.",
+      "Conecta el servidor DHCP rogue en Fa0/10 y verifica que los PCs siguen recibiendo direcciones del router."
+    ],
+    "verification": [
+      "`show port-security` y `show port-security address`.",
+      "Fa0/1 aparece err-disabled tras la violación; Fa0/2 incrementa el contador sin caerse.",
+      "`show ip dhcp snooping binding` lista los clientes legítimos."
+    ],
+    "solution": [
+      "```",
+      "interface range fa0/1 - 3",
+      " switchport mode access",
+      " switchport access vlan 10",
+      " switchport port-security",
+      " switchport port-security maximum 1",
+      " switchport port-security mac-address sticky",
+      "interface range fa0/2 - 3",
+      " switchport port-security violation restrict",
+      "",
+      "! Recuperación",
+      "interface fa0/1",
+      " shutdown",
+      " no shutdown",
+      "",
+      "ip dhcp snooping",
+      "ip dhcp snooping vlan 10",
+      "no ip dhcp snooping information option",
+      "interface g0/1",
+      " ip dhcp snooping trust",
+      "interface range fa0/1 - 24",
+      " ip dhcp snooping limit rate 10",
+      "```",
+      "`no ip dhcp snooping information option` evita que el switch inserte la opción 82, que algunos servidores IOS rechazan cuando no hay relay."
+    ],
+    "references": [
+      {
+        "title": "Cisco — Port security",
+        "url": "https://www.cisco.com/c/en/us/td/docs/switches/lan/catalyst2960/software/release/12-2_55_se/configuration/guide/scg_2960/swtrafc.html"
+      }
+    ]
+  },
+  {
+    "id": "ccna-lab-wlc",
+    "domain": "2",
+    "title": "WLAN WPA2-PSK con WLC y lightweight AP",
+    "tool": "Packet Tracer (WLC-2504/3504)",
+    "difficulty": "avanzado",
+    "estimatedMinutes": 60,
+    "description": "Configura un WLC desde su GUI, registra un lightweight AP y publica una WLAN WPA2-PSK mapeada a una VLAN.",
+    "objectives": [
+      "Conectar WLC y AP correctamente (trunk vs access)",
+      "Crear una interfaz dinámica y una WLAN",
+      "Configurar seguridad WPA2-PSK AES",
+      "Verificar asociación del cliente"
+    ],
+    "setup": [
+      "Switch multicapa **MLS** con VLAN 99 (gestión 192.168.99.0/24) y VLAN 30 (WIFI 192.168.30.0/24), DHCP para ambas.",
+      "**WLC** gestión 192.168.99.5 conectado por trunk. **LAP** (3702i o similar) en puerto access VLAN 99 (con PoE o power adapter).",
+      "PC-Admin en VLAN 99 para acceder a la GUI (https://192.168.99.5). Laptop con tarjeta inalámbrica."
+    ],
+    "tasks": [
+      "Configura el puerto del WLC como trunk (VLANs 30,99) y el del AP como access en VLAN 99.",
+      "Asegúrate de que el AP obtiene IP por DHCP y se une al WLC (opción 43 o mismo segmento).",
+      "En el WLC crea la interfaz dinámica `wifi` en VLAN 30 (IP 192.168.30.5, gateway .1, DHCP .1).",
+      "Crea la WLAN `CORP` asociada a la interfaz `wifi`, WPA2 + AES + PSK `Lab-Wifi-2026!`.",
+      "Conecta la laptop a CORP y verifica que obtiene una IP de la VLAN 30."
+    ],
+    "verification": [
+      "En el WLC: Wireless → All APs muestra el AP registrado.",
+      "Monitor → Clients muestra la laptop asociada a CORP.",
+      "La laptop hace ping a 192.168.30.1."
+    ],
+    "solution": [
+      "**MLS**",
+      "```",
+      "vlan 30",
+      "vlan 99",
+      "interface g1/0/1        ! WLC",
+      " switchport trunk encapsulation dot1q",
+      " switchport mode trunk",
+      " switchport trunk allowed vlan 30,99",
+      "interface g1/0/2        ! AP en modo Local",
+      " switchport mode access",
+      " switchport access vlan 99",
+      " spanning-tree portfast",
+      "ip routing",
+      "interface vlan 99",
+      " ip address 192.168.99.1 255.255.255.0",
+      "interface vlan 30",
+      " ip address 192.168.30.1 255.255.255.0",
+      "ip dhcp excluded-address 192.168.99.1 192.168.99.10",
+      "ip dhcp excluded-address 192.168.30.1 192.168.30.10",
+      "ip dhcp pool APS",
+      " network 192.168.99.0 255.255.255.0",
+      " default-router 192.168.99.1",
+      " option 43 hex f104.c0a8.6305",
+      "ip dhcp pool WIFI",
+      " network 192.168.30.0 255.255.255.0",
+      " default-router 192.168.30.1",
+      "```",
+      "Opción 43: `f1` (tipo) `04` (longitud: 1 WLC × 4 bytes) `c0a86305` = 192.168.99.5.",
+      "",
+      "**WLC GUI**",
+      "1. Controller → Interfaces → New: nombre `wifi`, VLAN 30, IP 192.168.30.5/24, gateway 192.168.30.1, DHCP primario 192.168.30.1.",
+      "2. WLANs → Create New: tipo WLAN, perfil y SSID `CORP` → General: Status Enabled, Interface `wifi`.",
+      "3. Security → Layer 2: WPA+WPA2, WPA2 Policy ✔, AES ✔, Auth Key Mgmt PSK, formato ASCII, clave.",
+      "4. Apply y Save Configuration."
+    ],
+    "references": [
+      {
+        "title": "Cisco — WLC configuration guide",
+        "url": "https://www.cisco.com/c/en/us/td/docs/wireless/controller/8-10/config-guide/b_cg810.html"
+      }
+    ]
+  },
+  {
+    "id": "ccna-lab-rest-api",
+    "domain": "6",
+    "title": "Consumir la API REST de Catalyst Center (DevNet Sandbox) con Python",
+    "tool": "Python + Cisco DevNet Sandbox",
+    "difficulty": "intermedio",
+    "estimatedMinutes": 45,
+    "description": "Obtén un token y consulta el inventario de dispositivos de un controlador real usando su API northbound, interpretando el JSON devuelto.",
+    "objectives": [
+      "Autenticarse contra una API REST y usar el token",
+      "Hacer peticiones GET y leer códigos de estado",
+      "Recorrer estructuras JSON"
+    ],
+    "setup": [
+      "Python 3 con `pip install requests`.",
+      "Cisco DevNet Sandbox *Catalyst Center Always-On* (la URL y credenciales están en la página del sandbox; pueden cambiar).",
+      "Endpoints: `POST /dna/system/api/v1/auth/token` (Basic Auth) y `GET /dna/intent/api/v1/network-device` (header `X-Auth-Token`)."
+    ],
+    "tasks": [
+      "Obtén el token con Basic Auth y muestra el código HTTP.",
+      "Pide el inventario de dispositivos e imprime hostname, IP de gestión, plataforma y versión de software.",
+      "Imprime cuántos dispositivos hay por familia (Switches, Routers, etc.).",
+      "Haz una petición con un token inválido y explica el código devuelto."
+    ],
+    "verification": [
+      "La autenticación devuelve 200 y un campo `Token`.",
+      "El inventario devuelve 200 con un objeto cuyo campo `response` es un arreglo.",
+      "Con token inválido obtienes 401."
+    ],
+    "solution": [
+      "```python",
+      "import requests",
+      "from collections import Counter",
+      "requests.packages.urllib3.disable_warnings()",
+      "",
+      "BASE = 'https://sandboxdnac.cisco.com'   # revisar en el portal del sandbox",
+      "USER, PWD = 'devnetuser', 'Cisco123!'     # revisar en el portal",
+      "",
+      "r = requests.post(f'{BASE}/dna/system/api/v1/auth/token', auth=(USER, PWD), verify=False)",
+      "print('auth', r.status_code)",
+      "token = r.json()['Token']",
+      "",
+      "headers = {'X-Auth-Token': token, 'Accept': 'application/json'}",
+      "r = requests.get(f'{BASE}/dna/intent/api/v1/network-device', headers=headers, verify=False)",
+      "print('devices', r.status_code)",
+      "devices = r.json()['response']",
+      "for d in devices:",
+      "    print(d['hostname'], d['managementIpAddress'], d['platformId'], d['softwareVersion'])",
+      "print(Counter(d['family'] for d in devices))",
+      "",
+      "bad = requests.get(f'{BASE}/dna/intent/api/v1/network-device',",
+      "                   headers={'X-Auth-Token': 'x'}, verify=False)",
+      "print('token inválido', bad.status_code)   # 401 Unauthorized",
+      "```",
+      "`response` es un arreglo de objetos; cada objeto es un dispositivo con claves string. `verify=False` solo es aceptable en un sandbox."
+    ],
+    "references": [
+      {
+        "title": "Cisco DevNet Sandbox",
+        "url": "https://developer.cisco.com/site/sandbox/"
+      },
+      {
+        "title": "Catalyst Center API docs",
+        "url": "https://developer.cisco.com/docs/dna-center/"
+      }
+    ]
+  }
+]

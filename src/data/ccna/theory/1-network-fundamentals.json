@@ -1,0 +1,394 @@
+{
+  "domainId": "1",
+  "topics": [
+    {
+      "id": "ccna-t1-components",
+      "objective": "1.1",
+      "title": "Componentes de red y su función",
+      "content": [
+        "Cada componente opera principalmente en una capa del modelo OSI/TCP-IP y cumple un rol concreto.",
+        "",
+        "| Componente | Capa | Función principal |",
+        "|---|---|---|",
+        "| Router | 3 | Reenvía paquetes entre redes según la tabla de rutas; delimita dominios de broadcast; NAT, VPN, QoS |",
+        "| Switch L2 | 2 | Conmuta tramas por MAC dentro de una VLAN; cada puerto es un dominio de colisión |",
+        "| Switch L3 (multicapa) | 2/3 | Conmuta y además enruta entre VLANs con SVIs a velocidad de hardware |",
+        "| Next-Gen Firewall | 3-7 | Filtrado stateful + AVC (control de aplicaciones), IPS, URL filtering, antimalware |",
+        "| IPS | 3-7 | En línea; compara tráfico contra firmas y lo **bloquea**. Un IDS solo **alerta** (recibe copia) |",
+        "| Access Point | 1/2 | Conecta clientes 802.11 a la red cableada |",
+        "| WLC | - | Gestiona centralmente lightweight APs vía CAPWAP (RF, WLANs, seguridad, roaming) |",
+        "| Endpoints | - | PCs, teléfonos, impresoras, IoT |",
+        "| Servidores | - | Ofrecen servicios (web, DNS, DHCP, archivos) |",
+        "| PoE | 1 | El switch (PSE) alimenta dispositivos (PD) por el cable UTP |",
+        "",
+        "### PoE",
+        "| Estándar | Nombre | Potencia en PSE |",
+        "|---|---|---|",
+        "| 802.3af | PoE | 15,4 W |",
+        "| 802.3at | PoE+ | 30 W |",
+        "| 802.3bt Type 3 | UPoE / PoE++ | 60 W |",
+        "| 802.3bt Type 4 | UPoE+ | 90-100 W |"
+      ],
+      "keyPoints": [
+        "Router = un dominio de broadcast por interfaz; switch = un dominio de colisión por puerto.",
+        "IPS en línea bloquea; IDS fuera de banda solo alerta.",
+        "NGFW añade capa 7: AVC, IPS, filtrado de URL, AMP.",
+        "WLC + lightweight APs usan CAPWAP (UDP 5246 control, 5247 datos)."
+      ],
+      "references": [
+        {
+          "title": "Cisco CCNA Exam Topics",
+          "url": "https://learningnetwork.cisco.com/s/ccna-exam-topics"
+        },
+        {
+          "title": "vanhoangkha/CCNA_Course_Notes",
+          "url": "https://github.com/vanhoangkha/CCNA_Course_Notes"
+        }
+      ]
+    },
+    {
+      "id": "ccna-t1-topologies",
+      "objective": "1.2–1.4",
+      "title": "Arquitecturas, cableado y problemas de interfaz",
+      "content": [
+        "### Arquitecturas",
+        "- **Three-tier (campus)**: Access (endpoints, PoE, port security) → Distribution (agregación, routing inter-VLAN, políticas, FHRP) → Core (transporte rápido, sin políticas pesadas).",
+        "- **Two-tier / collapsed core**: distribución y core en el mismo par de switches (campus pequeño/mediano).",
+        "- **Spine-leaf (data center)**: cada leaf se conecta a todos los spines; spines no se conectan entre sí; servidores en los leaves. Latencia predecible (siempre leaf-spine-leaf) y escalado horizontal.",
+        "- **WAN**: punto a punto, hub-and-spoke, full/partial mesh; tecnologías MPLS, Metro Ethernet, Internet VPN, SD-WAN.",
+        "- **SOHO**: un router integrado (router + switch + AP + firewall).",
+        "- **On-premises vs cloud**: CAPEX vs OPEX; la nube ofrece self-service, elasticidad, pago por uso (NIST: on-demand self-service, broad network access, resource pooling, rapid elasticity, measured service).",
+        "",
+        "### Cableado",
+        "| Medio | Distancia típica | Notas |",
+        "|---|---|---|",
+        "| UTP Cat5e | 100 m | 1 Gbps |",
+        "| UTP Cat6a | 100 m | 10GBASE-T |",
+        "| Fibra multimodo (MMF) | cientos de m | Núcleo 50/62,5 µm, LED/VCSEL, dispersión modal |",
+        "| Fibra monomodo (SMF) | km (10–80+) | Núcleo ~9 µm, láser |",
+        "",
+        "- **Straight-through**: dispositivos distintos (PC-switch, router-switch).",
+        "- **Crossover**: dispositivos iguales sin Auto-MDIX (switch-switch, router-router, PC-PC).",
+        "- **Rollover**: consola.",
+        "",
+        "### Problemas de interfaz (`show interfaces`)",
+        "| Contador | Significado típico |",
+        "|---|---|",
+        "| CRC / input errors | Cable dañado, EMI, conectores (capa 1) |",
+        "| Runts | Tramas < 64 B (colisiones) |",
+        "| Giants | Tramas > 1518 B (MTU) |",
+        "| Late collisions | **Duplex mismatch** (lado half) |",
+        "| Collisions en full-duplex | No deberían existir |",
+        "",
+        "Estados: `up/up` OK; `down/down` capa 1 (cable, otro lado apagado); `administratively down` = `shutdown`; `up/down` capa 2 (encapsulación, keepalives)."
+      ],
+      "keyPoints": [
+        "Spine-leaf: leaf ↔ todos los spines, nunca spine ↔ spine ni leaf ↔ leaf.",
+        "Late collisions = duplex mismatch; CRC sin colisiones = capa 1.",
+        "SMF = láser, núcleo pequeño, larga distancia; MMF = corta distancia, más barata.",
+        "Si un lado fija velocidad/dúplex y el otro autonegocia, el lado auto cae a half-duplex en 10/100."
+      ],
+      "references": [
+        {
+          "title": "Cisco — Troubleshooting Ethernet collisions",
+          "url": "https://www.cisco.com/c/en/us/support/docs/interfaces-modules/port-adapters/12768-eth-collisions.html"
+        },
+        {
+          "title": "NIST SP 800-145",
+          "url": "https://csrc.nist.gov/pubs/sp/800/145/final"
+        }
+      ]
+    },
+    {
+      "id": "ccna-t1-tcpudp",
+      "objective": "1.5",
+      "title": "TCP vs UDP y puertos",
+      "content": [
+        "| TCP | UDP |",
+        "|---|---|",
+        "| Orientado a conexión (3-way handshake SYN, SYN-ACK, ACK) | Sin conexión |",
+        "| Fiable: secuencia, ACK, retransmisión | Best effort |",
+        "| Control de flujo (Window) | Sin control de flujo |",
+        "| Encabezado 20–60 B | Encabezado 8 B |",
+        "| HTTP/HTTPS, SSH, Telnet, FTP, SMTP | DNS (consultas), DHCP, TFTP, SNMP, Syslog, NTP, VoIP (RTP) |",
+        "",
+        "Cierre TCP: FIN → ACK → FIN → ACK (four-way).",
+        "",
+        "### Puertos que hay que saber",
+        "| Puerto | Servicio |",
+        "|---|---|",
+        "| TCP 20/21 | FTP datos/control |",
+        "| TCP 22 | SSH / SCP / SFTP |",
+        "| TCP 23 | Telnet |",
+        "| TCP 25 | SMTP |",
+        "| UDP/TCP 53 | DNS |",
+        "| UDP 67/68 | DHCP servidor/cliente |",
+        "| UDP 69 | TFTP |",
+        "| TCP 80 / 443 | HTTP / HTTPS |",
+        "| UDP 123 | NTP |",
+        "| UDP 161/162 | SNMP agente / traps |",
+        "| UDP 514 | Syslog |",
+        "| TCP 49 | TACACS+ |",
+        "| UDP 1812/1813 | RADIUS auth/accounting |"
+      ],
+      "keyPoints": [
+        "Voz/video en tiempo real usa UDP: retransmitir no sirve.",
+        "El campo Window de TCP implementa el control de flujo.",
+        "DNS usa UDP para consultas normales y TCP para transferencias de zona o respuestas grandes."
+      ],
+      "references": [
+        {
+          "title": "RFC 9293 — TCP",
+          "url": "https://www.rfc-editor.org/rfc/rfc9293"
+        },
+        {
+          "title": "RFC 768 — UDP",
+          "url": "https://www.rfc-editor.org/rfc/rfc768"
+        }
+      ]
+    },
+    {
+      "id": "ccna-t1-ipv4",
+      "objective": "1.6–1.7",
+      "title": "Direccionamiento IPv4 y subnetting",
+      "content": [
+        "### Método rápido (número mágico)",
+        "1. Identifica el **octeto interesante** (donde la máscara no es 255 ni 0).",
+        "2. Tamaño de bloque = 256 − valor de la máscara en ese octeto.",
+        "3. La red es el múltiplo del bloque ≤ al valor del host; el broadcast es el siguiente múltiplo − 1.",
+        "",
+        "Ejemplo: `172.16.45.200/21` → máscara 255.255.**248**.0 → bloque 8 → 45 está en 40–47 → red 172.16.40.0, broadcast 172.16.47.255, hosts .40.1–.47.254.",
+        "",
+        "| Prefijo | Máscara | Hosts |",
+        "|---|---|---|",
+        "| /24 | 255.255.255.0 | 254 |",
+        "| /25 | .128 | 126 |",
+        "| /26 | .192 | 62 |",
+        "| /27 | .224 | 30 |",
+        "| /28 | .240 | 14 |",
+        "| /29 | .248 | 6 |",
+        "| /30 | .252 | 2 |",
+        "| /31 | .254 | 2 (enlaces P2P, RFC 3021) |",
+        "| /32 | .255 | 1 (host/loopback) |",
+        "",
+        "Fórmulas: subredes = 2^(bits prestados); hosts = 2^(bits de host) − 2.",
+        "",
+        "### VLSM",
+        "Asigna primero las subredes más grandes y continúa en la siguiente dirección libre alineada al tamaño de bloque.",
+        "",
+        "### Rangos especiales",
+        "| Rango | Uso |",
+        "|---|---|",
+        "| 10.0.0.0/8, 172.16.0.0/12, 192.168.0.0/16 | Privadas (RFC 1918) |",
+        "| 127.0.0.0/8 | Loopback |",
+        "| 169.254.0.0/16 | Link-local / APIPA (falló DHCP) |",
+        "| 100.64.0.0/10 | CGNAT (RFC 6598) |",
+        "| 224.0.0.0/4 | Multicast |"
+      ],
+      "keyPoints": [
+        "172.16.0.0/12 va de 172.16.0.0 a 172.31.255.255.",
+        "Una IP 169.254.x.x en un cliente indica que DHCP falló.",
+        "En VLSM ordena de mayor a menor requerimiento de hosts.",
+        "Wildcard = 255.255.255.255 − máscara (útil en ACLs y OSPF)."
+      ],
+      "references": [
+        {
+          "title": "RFC 1918",
+          "url": "https://www.rfc-editor.org/rfc/rfc1918"
+        },
+        {
+          "title": "RFC 3021 — /31 en enlaces P2P",
+          "url": "https://www.rfc-editor.org/rfc/rfc3021"
+        }
+      ]
+    },
+    {
+      "id": "ccna-t1-ipv6",
+      "objective": "1.8–1.9",
+      "title": "IPv6: formato, prefijos y tipos de dirección",
+      "content": [
+        "128 bits en 8 hextetos. **Reglas de abreviatura**: quitar ceros a la izquierda de cada hexteto; `::` reemplaza **una sola vez** la secuencia más larga de hextetos en cero (si empatan, la primera). Minúsculas recomendadas (RFC 5952).",
+        "",
+        "| Tipo | Prefijo | Notas |",
+        "|---|---|---|",
+        "| Global unicast (GUA) | 2000::/3 | Enrutable en Internet |",
+        "| Unique local (ULA) | FC00::/7 (FD00::/8 en uso) | Equivalente a privadas |",
+        "| Link-local | FE80::/10 | Automática en toda interfaz IPv6; next hop de los protocolos de enrutamiento |",
+        "| Multicast | FF00::/8 | FF02::1 todos los nodos, FF02::2 todos los routers, FF02::5/6 OSPFv3, FF02::A EIGRP |",
+        "| Solicited-node | FF02::1:FFxx:xxxx | Últimos 24 bits de la unicast; usado por NDP |",
+        "| Anycast | (de unicast) | Misma dirección en varios nodos; llega al más cercano |",
+        "| Loopback / no especificada | ::1 / :: | |",
+        "",
+        "### EUI-64 modificado",
+        "MAC `001A.2B3C.4D5E` → partir `001A2B | 3C4D5E` → insertar `FFFE` → invertir el bit 7 del primer byte (00→02) → `021A:2BFF:FE3C:4D5E`.",
+        "",
+        "### Configuración",
+        "```",
+        "ipv6 unicast-routing",
+        "interface g0/0",
+        " ipv6 address 2001:db8:1:1::1/64",
+        " ipv6 address 2001:db8:1:2::/64 eui-64",
+        " ipv6 address fe80::1 link-local",
+        " ipv6 enable            ! solo link-local",
+        "```",
+        "",
+        "### NDP (ICMPv6)",
+        "RS (133) a FF02::2 → RA (134) con prefijo y gateway; NS (135)/NA (136) reemplazan a ARP y se usan en DAD.",
+        "**SLAAC**: el host toma el prefijo /64 del RA y genera su interface ID (EUI-64 o aleatorio). DHCPv6 stateless entrega DNS; stateful asigna direcciones."
+      ],
+      "keyPoints": [
+        "`::` solo una vez por dirección.",
+        "Los routers IPv6 usan la link-local del vecino como next hop.",
+        "Una /48 contiene 65 536 subredes /64.",
+        "IPv6 no tiene broadcast; ND usa multicast solicited-node."
+      ],
+      "references": [
+        {
+          "title": "RFC 4291 — IPv6 Addressing",
+          "url": "https://www.rfc-editor.org/rfc/rfc4291"
+        },
+        {
+          "title": "RFC 5952 — Text representation",
+          "url": "https://www.rfc-editor.org/rfc/rfc5952"
+        },
+        {
+          "title": "RFC 4861 — Neighbor Discovery",
+          "url": "https://www.rfc-editor.org/rfc/rfc4861"
+        }
+      ]
+    },
+    {
+      "id": "ccna-t1-clients",
+      "objective": "1.10",
+      "title": "Verificar parámetros IP en clientes",
+      "content": [
+        "| SO | IP / máscara / gateway | Detalle (MAC, DNS, DHCP) | Rutas |",
+        "|---|---|---|---|",
+        "| Windows | `ipconfig` | `ipconfig /all` | `route print`, `netstat -r` |",
+        "| macOS | `ifconfig` | `networksetup -getinfo Wi-Fi`, `scutil --dns` | `netstat -rn` |",
+        "| Linux | `ip addr` | `resolvectl status`, `/etc/resolv.conf` | `ip route` |",
+        "",
+        "Otras herramientas: `ping`, `tracert`/`traceroute`, `nslookup`, `arp -a`, `ipconfig /release` y `/renew`.",
+        "",
+        "Diagnóstico típico:",
+        "- Gateway fuera de la subred del host → no hay acceso remoto (sí local).",
+        "- Máscara incorrecta → algunos destinos locales se tratan como remotos (o viceversa).",
+        "- 169.254.x.x → no hubo respuesta DHCP.",
+        "- Ping por IP funciona pero por nombre no → DNS."
+      ],
+      "keyPoints": [
+        "`ipconfig /all` muestra MAC, DHCP, servidores DNS y concesión.",
+        "Verifica siempre que IP y gateway estén en la misma subred."
+      ],
+      "references": [
+        {
+          "title": "Microsoft — ipconfig",
+          "url": "https://learn.microsoft.com/windows-server/administration/windows-commands/ipconfig"
+        }
+      ]
+    },
+    {
+      "id": "ccna-t1-wireless",
+      "objective": "1.11",
+      "title": "Principios inalámbricos",
+      "content": [
+        "### Bandas y canales",
+        "- **2,4 GHz**: más alcance, solo 3 canales no solapados (**1, 6, 11**), más interferencia (microondas, Bluetooth).",
+        "- **5 GHz**: muchos canales no solapados, menor alcance, menos interferencia.",
+        "- **6 GHz** (Wi-Fi 6E/7): mucho espectro limpio.",
+        "",
+        "| Estándar | Nombre | Bandas |",
+        "|---|---|---|",
+        "| 802.11n | Wi-Fi 4 | 2,4 / 5 |",
+        "| 802.11ac | Wi-Fi 5 | 5 |",
+        "| 802.11ax | Wi-Fi 6/6E | 2,4 / 5 / 6 (OFDMA, BSS coloring, TWT) |",
+        "| 802.11be | Wi-Fi 7 | 2,4 / 5 / 6 |",
+        "",
+        "### Conceptos",
+        "- **SSID**: nombre de la red. **BSSID**: MAC de la radio del AP. **BSS**: AP + clientes. **ESS**: varios BSS con el mismo SSID (roaming).",
+        "- **RF**: reflexión (metal), absorción (agua, cuerpos, paredes), refracción, difracción, scattering. Multipath = varias copias con distinto retardo.",
+        "",
+        "### Seguridad",
+        "| Protocolo | Autenticación | Cifrado |",
+        "|---|---|---|",
+        "| WEP | Clave estática | RC4 (roto) |",
+        "| WPA | PSK / 802.1X | TKIP |",
+        "| WPA2 | PSK / 802.1X | AES-CCMP |",
+        "| WPA3 | **SAE** (Personal) / 802.1X (Enterprise) | AES-CCMP/GCMP; PMF obligatorio; forward secrecy |"
+      ],
+      "keyPoints": [
+        "Canales 1, 6, 11 en 2,4 GHz.",
+        "WPA3-Personal = SAE (resiste diccionario offline).",
+        "BSSID identifica la radio, SSID la red.",
+        "Personal = PSK; Enterprise = 802.1X + RADIUS."
+      ],
+      "references": [
+        {
+          "title": "Wi-Fi Alliance — WPA3",
+          "url": "https://www.wi-fi.org/discover-wi-fi/security"
+        }
+      ]
+    },
+    {
+      "id": "ccna-t1-virtualization",
+      "objective": "1.12",
+      "title": "Virtualización: servidores, contenedores y VRF",
+      "content": [
+        "- **Hipervisor tipo 1** (bare-metal): ESXi, Hyper-V, KVM. **Tipo 2** (hosted): VirtualBox, Workstation.",
+        "- **VM**: SO invitado completo sobre hardware virtual. **Contenedor**: comparte el kernel del host; ligero y rápido (Docker, Kubernetes).",
+        "- **vSwitch**: switch de software dentro del hipervisor; conecta vNICs y uplinks físicos, puede etiquetar VLANs.",
+        "- **VRF**: varias tablas de enrutamiento independientes en un mismo router → permite IPs solapadas y separación de clientes. VRF-lite = sin MPLS.",
+        "",
+        "```",
+        "vrf definition CLIENTE-A",
+        " address-family ipv4",
+        "interface g0/1",
+        " vrf forwarding CLIENTE-A",
+        " ip address 10.1.0.1 255.255.0.0",
+        "show ip route vrf CLIENTE-A",
+        "```"
+      ],
+      "keyPoints": [
+        "VRF = virtualización de capa 3; VLAN = virtualización de capa 2.",
+        "Contenedores comparten kernel; VMs no."
+      ],
+      "references": [
+        {
+          "title": "RFC 4364 — BGP/MPLS IP VPNs (concepto de VRF)",
+          "url": "https://www.rfc-editor.org/rfc/rfc4364"
+        }
+      ]
+    },
+    {
+      "id": "ccna-t1-switching",
+      "objective": "1.13",
+      "title": "Conceptos de switching",
+      "content": [
+        "1. **Aprendizaje**: el switch registra MAC **origen** + puerto + VLAN en la tabla MAC (CAM).",
+        "2. **Reenvío**: si la MAC destino está en la tabla (misma VLAN) → reenvía solo por ese puerto (**filtra** si es el mismo puerto de entrada).",
+        "3. **Flooding**: destino desconocido (unknown unicast), broadcast o multicast sin snooping → por todos los puertos de la VLAN excepto el de entrada.",
+        "4. **Aging**: entradas dinámicas expiran a los **300 s** sin tráfico.",
+        "",
+        "```",
+        "show mac address-table dynamic",
+        "show mac address-table interface g0/1",
+        "clear mac address-table dynamic",
+        "mac address-table aging-time 600",
+        "```",
+        "",
+        "Métodos: **store-and-forward** (verifica FCS, por defecto en Catalyst), **cut-through** (reenvía al leer la MAC destino), **fragment-free** (primeros 64 B)."
+      ],
+      "keyPoints": [
+        "Se aprende con la MAC de origen; se reenvía con la de destino.",
+        "La búsqueda es por VLAN + MAC: una MAC en otra VLAN no cuenta.",
+        "Aging por defecto 300 s."
+      ],
+      "references": [
+        {
+          "title": "Cisco — MAC address table",
+          "url": "https://www.cisco.com/c/en/us/td/docs/switches/lan/catalyst9300/software/release/17-12/configuration_guide/lyr2/b_1712_lyr2_9300_cg.html"
+        }
+      ]
+    }
+  ]
+}

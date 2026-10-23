@@ -1,0 +1,18 @@
+{
+  "id": "mep",
+  "name": "Prueba de Idoneidad MEP",
+  "code": "MEP",
+  "provider": "MEP Costa Rica",
+  "version": "—",
+  "enabled": false,
+  "description": "Prueba de idoneidad del Ministerio de Educación Pública. Contenido en preparación.",
+  "exam": {
+    "questionCount": 0,
+    "durationMinutes": 0,
+    "passPercent": 70,
+    "poolMultiplier": 3,
+    "notes": []
+  },
+  "domains": [],
+  "sources": []
+}

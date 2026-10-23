@@ -1,0 +1,95 @@
+{
+  "domainId": "2",
+  "topics": [
+    {
+      "id": "aws-t2-decoupling",
+      "objective": "2.1",
+      "title": "Arquitecturas escalables y desacopladas",
+      "content": [
+        "### Mensajería y eventos",
+        "| Servicio | Modelo | Claves de examen |",
+        "|---|---|---|",
+        "| SQS estándar | Cola pull | At-least-once, orden best-effort, throughput casi ilimitado, retención 1 min–14 días (4 por defecto), visibility timeout (30 s), DLQ, long polling (≤20 s) |",
+        "| SQS FIFO | Cola pull | Orden por MessageGroupId, exactly-once (deduplicación 5 min), 300 msg/s (3000 con batch; más en high throughput) |",
+        "| SNS | Pub/sub push | Fan-out a SQS, Lambda, HTTP, email, SMS; filtros por atributos |",
+        "| EventBridge | Bus de eventos | Reglas por patrón, SaaS partners, scheduler, archive & replay |",
+        "| Kinesis Data Streams | Stream | Orden por shard, varios consumidores, replay, retención hasta 365 días |",
+        "| Amazon Data Firehose | Entrega | Buffer → S3/Redshift/OpenSearch/Splunk sin consumidores |",
+        "| Amazon MQ | Broker | ActiveMQ/RabbitMQ para migrar apps con AMQP/MQTT/JMS |",
+        "| Step Functions | Orquestación | Retry/Catch, paralelo, saga, esperas humanas |",
+        "",
+        "### Patrones",
+        "- **Buffer con SQS** + ASG escalado por backlog por instancia.",
+        "- **Fan-out SNS → varias SQS**.",
+        "- **Capa web stateless**: sesiones en ElastiCache/DynamoDB.",
+        "- **Idempotencia** cuando hay reintentos.",
+        "- **Lambda**: asíncrona reintenta 2 veces → DLQ o destino on-failure; event source mapping para SQS/Kinesis.",
+        "",
+        "### Cómputo escalable",
+        "- **Auto Scaling**: target tracking (más simple), step/simple, scheduled, predictive; health check ELB; warm pools; AMIs doradas.",
+        "- **Contenedores**: ECS/EKS con Fargate (sin servidores).",
+        "- **API Gateway**: throttling, caché, authorizers."
+      ],
+      "keyPoints": [
+        "Orden estricto + sin duplicados → SQS FIFO.",
+        "Procesamiento duplicado → visibility timeout corto.",
+        "Varios consumidores independientes del mismo evento → SNS fan-out o EventBridge.",
+        "Replay de stream → Kinesis Data Streams."
+      ],
+      "references": [
+        { "title": "Amazon SQS Developer Guide", "url": "https://docs.aws.amazon.com/AWSSimpleQueueService/latest/SQSDeveloperGuide/welcome.html" },
+        { "title": "Reliability Pillar — Well-Architected", "url": "https://docs.aws.amazon.com/wellarchitected/latest/reliability-pillar/welcome.html" }
+      ]
+    },
+    {
+      "id": "aws-t2-ha",
+      "objective": "2.2",
+      "title": "Alta disponibilidad, tolerancia a fallos y DR",
+      "content": [
+        "### Multi-AZ por capa",
+        "| Capa | Cómo |",
+        "|---|---|",
+        "| Balanceo | ALB/NLB en varias AZs |",
+        "| Cómputo | ASG en varias AZs (capacidad suficiente si cae una AZ) |",
+        "| RDS | **Multi-AZ** (standby síncrona, failover automático por DNS); read replicas = escalar lecturas (asíncronas) |",
+        "| Aurora | 6 copias en 3 AZs; hasta 15 réplicas; failover < 30 s; **Global Database** (RPO ~1 s, RTO ~1 min) |",
+        "| DynamoDB | Multi-AZ por defecto; **global tables** multi-región activo-activo |",
+        "| ElastiCache Redis/Valkey | Réplicas + Multi-AZ con failover |",
+        "| EFS | Regional (multi-AZ) |",
+        "| NAT gateway | Uno por AZ |",
+        "",
+        "### Balanceadores",
+        "| ALB | NLB | GWLB |",
+        "|---|---|---|",
+        "| L7 HTTP/HTTPS/gRPC, rutas/host, redirect, WAF, auth Cognito | L4 TCP/UDP/TLS, ultra baja latencia, IP estática/EIP por AZ, PrivateLink | Appliances de terceros (GENEVE) |",
+        "",
+        "### Route 53",
+        "Políticas: simple, **failover**, **latency**, **weighted**, **geolocation**, geoproximity, multivalue, IP-based. Health checks; **alias** en el apex y gratis hacia recursos AWS.",
+        "**Global Accelerator**: IPs anycast estáticas, failover en segundos sin depender del DNS, TCP/UDP.",
+        "",
+        "### Estrategias de DR (de menor a mayor costo)",
+        "| Estrategia | RPO/RTO | Qué corre en DR |",
+        "|---|---|---|",
+        "| Backup & restore | Horas | Solo backups |",
+        "| Pilot light | Decenas de minutos | Datos replicados; cómputo apagado |",
+        "| Warm standby | Minutos | Copia reducida funcionando |",
+        "| Multi-site activo/activo | Casi cero | Todo a escala completa |",
+        "",
+        "Herramientas: **AWS Backup** (planes, cross-region/cross-account, Vault Lock), **S3 CRR/SRR** (requiere versioning), **Elastic Disaster Recovery** (replicación continua de servidores), snapshots EBS/RDS, PITR de RDS/DynamoDB.",
+        "",
+        "Híbrido: **Direct Connect** redundante o DX + VPN de respaldo; **Transit Gateway** como hub."
+      ],
+      "keyPoints": [
+        "Multi-AZ = disponibilidad; read replica = rendimiento de lectura.",
+        "ASG health check type ELB para reemplazar instancias con la app caída.",
+        "TCP/UDP global con failover rápido → Global Accelerator.",
+        "RTO/RPO de horas y barato → backup & restore."
+      ],
+      "references": [
+        { "title": "Disaster Recovery of Workloads on AWS", "url": "https://docs.aws.amazon.com/whitepapers/latest/disaster-recovery-workloads-on-aws/disaster-recovery-workloads-on-aws.html" },
+        { "title": "Amazon RDS Multi-AZ", "url": "https://docs.aws.amazon.com/AmazonRDS/latest/UserGuide/Concepts.MultiAZ.html" },
+        { "title": "Route 53 routing policies", "url": "https://docs.aws.amazon.com/Route53/latest/DeveloperGuide/routing-policy.html" }
+      ]
+    }
+  ]
+}

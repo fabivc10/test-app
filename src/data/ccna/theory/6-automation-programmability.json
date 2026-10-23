@@ -1,0 +1,177 @@
+{
+  "domainId": "6",
+  "topics": [
+    {
+      "id": "ccna-t6-planes-sdn",
+      "objective": "6.1–6.3",
+      "title": "Automatización, planos y arquitecturas basadas en controlador",
+      "content": [
+        "| Plano | Función | Ejemplos |",
+        "|---|---|---|",
+        "| Datos | Reenviar tráfico | Switching, routing por CEF, ACL, NAT, encapsulación |",
+        "| Control | Construir tablas | OSPF, STP, ARP, LACP |",
+        "| Gestión | Administrar el equipo | SSH, SNMP, Syslog, NTP |",
+        "",
+        "**SDN** centraliza el plano de control en un **controlador**:",
+        "- **NBI** (northbound): apps/scripts → controlador, normalmente REST.",
+        "- **SBI** (southbound): controlador → dispositivos (NETCONF, RESTCONF, OpenFlow, CLI/SSH, SNMP).",
+        "",
+        "**SD-Access** (Catalyst Center): **underlay** = red física IP (IS-IS); **overlay** = VXLAN (datos) + LISP (control) + políticas con SGT; **fabric** = conjunto.",
+        "",
+        "| Tradicional | Basada en controlador |",
+        "|---|---|",
+        "| Box-by-box por CLI | Política central, despliegue a muchos equipos |",
+        "| Errores e inconsistencias | Consistencia, rapidez, assurance |",
+        "| Plano de control distribuido | Plano de control (total o parcialmente) centralizado |",
+        "",
+        "**Beneficios de la automatización**: menos errores, consistencia, rapidez, escalabilidad, mejor uso del personal."
+      ],
+      "keyPoints": [
+        "NBI = hacia las apps (REST); SBI = hacia los dispositivos.",
+        "Underlay físico, overlay lógico (túneles).",
+        "OSPF/STP = plano de control."
+      ],
+      "references": [
+        { "title": "Cisco — SD-Access solution design guide", "url": "https://www.cisco.com/c/en/us/td/docs/solutions/CVD/Campus/cisco-sda-design-guide.html" }
+      ]
+    },
+    {
+      "id": "ccna-t6-ai",
+      "objective": "6.4",
+      "title": "IA generativa, IA predictiva y machine learning en operaciones de red",
+      "content": [
+        "| | IA predictiva / ML | IA generativa |",
+        "|---|---|---|",
+        "| Qué hace | Aprende de datos históricos para clasificar, detectar anomalías y pronosticar | Genera contenido nuevo (texto, código, configuraciones, resúmenes) |",
+        "| Ejemplos en redes | Pronóstico de capacidad, detección de anomalías en telemetría, baselining en Catalyst Center Assurance | Asistentes que explican salidas `show`, redactan configuraciones, documentan |",
+        "| Riesgo | Falsos positivos, datos de entrenamiento sesgados | Alucinaciones; fuga de datos sensibles |",
+        "",
+        "Tipos de ML: **supervisado** (datos etiquetados), **no supervisado** (clustering/anomalías sin etiquetas), **por refuerzo** (recompensa).",
+        "",
+        "Buenas prácticas: validar y probar todo lo que genere la IA, aplicar control de cambios, no compartir configuraciones con secretos en herramientas no aprobadas.",
+        "",
+        "La **telemetría** model-driven (push, YANG) alimenta estos modelos con datos frecuentes y estructurados."
+      ],
+      "keyPoints": [
+        "Predictiva = pronosticar; generativa = crear contenido.",
+        "Supervisado = datos etiquetados.",
+        "Siempre validar salidas de IA generativa."
+      ],
+      "references": [
+        { "title": "Cisco — AI in networking", "url": "https://www.cisco.com/site/us/en/solutions/artificial-intelligence/index.html" }
+      ]
+    },
+    {
+      "id": "ccna-t6-rest",
+      "objective": "6.5",
+      "title": "APIs REST",
+      "content": [
+        "Características: cliente-servidor, **stateless**, cacheable, interfaz uniforme, sobre HTTP(S).",
+        "",
+        "| CRUD | HTTP |",
+        "|---|---|",
+        "| Create | POST |",
+        "| Read | GET |",
+        "| Update | PUT (reemplaza) / PATCH (parcial) |",
+        "| Delete | DELETE |",
+        "",
+        "| Código | Significado |",
+        "|---|---|",
+        "| 200 OK / 201 Created / 204 No Content | Éxito |",
+        "| 400 Bad Request | Petición mal formada |",
+        "| 401 Unauthorized | Sin credenciales válidas |",
+        "| 403 Forbidden | Autenticado sin permisos |",
+        "| 404 Not Found | Recurso inexistente |",
+        "| 500 Internal Server Error | Falla del servidor |",
+        "",
+        "Headers: `Content-Type` (formato del body), `Accept` (formato deseado), `Authorization` / tokens.",
+        "",
+        "Modelado y transporte: **YANG** (modelo de datos), **NETCONF** (SSH TCP 830, XML), **RESTCONF** (HTTPS, JSON/XML)."
+      ],
+      "keyPoints": [
+        "POST crea, PUT reemplaza, PATCH modifica parcialmente.",
+        "401 ≠ 403.",
+        "NETCONF usa TCP 830."
+      ],
+      "references": [
+        { "title": "Cisco DevNet — REST API fundamentals", "url": "https://developer.cisco.com/learning/" }
+      ]
+    },
+    {
+      "id": "ccna-t6-config-mgmt",
+      "objective": "6.6",
+      "title": "Ansible y Terraform",
+      "content": [
+        "| | Ansible | Terraform |",
+        "|---|---|---|",
+        "| Enfoque | Gestión de configuración, procedimental (tareas en orden) | Infraestructura como código, **declarativo** |",
+        "| Lenguaje | Playbooks **YAML** | **HCL** |",
+        "| Agente | **Agentless** (SSH/APIs), modelo push | Agentless, usa APIs de proveedores |",
+        "| Estado | No guarda estado | Guarda un **state file**; `plan` y `apply` |",
+        "| Elementos | Inventario, playbooks, módulos, roles | Providers, resources, modules |",
+        "",
+        "```yaml",
+        "- name: Configurar VLANs",
+        "  hosts: switches",
+        "  gather_facts: no",
+        "  tasks:",
+        "    - cisco.ios.ios_vlans:",
+        "        config:",
+        "          - vlan_id: 10",
+        "            name: VENTAS",
+        "        state: merged",
+        "```",
+        "",
+        "Puppet y Chef (con agentes, modelo pull) aparecían en versiones anteriores del temario."
+      ],
+      "keyPoints": [
+        "Ansible = YAML + agentless + push.",
+        "Terraform = declarativo + HCL + state.",
+        "Git para versionar las configuraciones."
+      ],
+      "references": [
+        { "title": "Ansible — cisco.ios collection", "url": "https://docs.ansible.com/ansible/latest/collections/cisco/ios/index.html" },
+        { "title": "Terraform documentation", "url": "https://developer.hashicorp.com/terraform/docs" }
+      ]
+    },
+    {
+      "id": "ccna-t6-json",
+      "objective": "6.7",
+      "title": "Interpretar JSON",
+      "content": [
+        "```json",
+        "{",
+        "  \"hostname\": \"R1\",",
+        "  \"uptime_days\": 42,",
+        "  \"managed\": true,",
+        "  \"location\": null,",
+        "  \"interfaces\": [",
+        "    { \"name\": \"Gi0/0\", \"ip\": \"10.0.0.1\" },",
+        "    { \"name\": \"Gi0/1\", \"ip\": \"10.0.1.1\" }",
+        "  ]",
+        "}",
+        "```",
+        "",
+        "| Tipo | Ejemplo |",
+        "|---|---|",
+        "| Objeto | `{ \"clave\": valor }` |",
+        "| Arreglo | `[ v1, v2 ]` (índice desde 0) |",
+        "| String | `\"R1\"` (comillas dobles) |",
+        "| Número | `42` |",
+        "| Booleano | `true` / `false` |",
+        "| Nulo | `null` |",
+        "",
+        "Errores comunes: comillas simples, coma final, claves sin comillas.",
+        "`interfaces[1].ip` → `10.0.1.1`."
+      ],
+      "keyPoints": [
+        "Claves siempre entre comillas dobles.",
+        "Arreglos con [ ], objetos con { }.",
+        "Índices empiezan en 0."
+      ],
+      "references": [
+        { "title": "RFC 8259 — JSON", "url": "https://www.rfc-editor.org/rfc/rfc8259" }
+      ]
+    }
+  ]
+}

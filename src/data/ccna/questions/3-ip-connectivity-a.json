@@ -1,0 +1,491 @@
+[
+  {
+    "id": "ccna-d3-001",
+    "domain": "3",
+    "type": "single",
+    "difficulty": "hard",
+    "question": "R1 recibe un paquete con destino 10.1.1.70. Según la tabla de enrutamiento, ¿por qué interfaz lo reenvía?",
+    "exhibit": "```\nR1# show ip route\nGateway of last resort is 203.0.113.1 to network 0.0.0.0\nS*    0.0.0.0/0 [1/0] via 203.0.113.1\nO     10.1.0.0/16 [110/20] via 10.0.12.2, Gi0/1\nD     10.1.1.0/24 [90/30720] via 10.0.13.3, Gi0/2\nO     10.1.1.64/27 [110/30] via 10.0.14.4, Gi0/3\nS     10.1.1.0/25 [1/0] via 10.0.15.5\n```\n(10.0.15.5 es alcanzable por Gi0/4)",
+    "options": ["Gi0/3", "Gi0/2", "Gi0/4", "Gi0/1"],
+    "answer": [0],
+    "explanation": "El router elige la coincidencia más específica (longest prefix match). 10.1.1.70 está en 10.1.1.64/27 (.64–.95), en 10.1.1.0/25, en 10.1.1.0/24 y en 10.1.0.0/16. El /27 es el más largo, así que se usa Gi0/3; la AD y la métrica solo comparan rutas al mismo prefijo exacto."
+  },
+  {
+    "id": "ccna-d3-002",
+    "domain": "3",
+    "type": "single",
+    "difficulty": "hard",
+    "question": "Un router aprende 172.16.10.0/24 por OSPF, por EIGRP (interno) y tiene una ruta estática al mismo prefijo con `ip route 172.16.10.0 255.255.255.0 10.0.0.2 130`. ¿Qué ruta se instala?",
+    "options": ["La de EIGRP", "La de OSPF", "La estática", "Las tres, con balanceo de carga"],
+    "answer": [0],
+    "explanation": "Para el mismo prefijo se compara la distancia administrativa: EIGRP interno 90, OSPF 110 y la estática se configuró con AD 130 (floating static). Gana EIGRP; la estática solo se instalará si las dinámicas desaparecen."
+  },
+  {
+    "id": "ccna-d3-003",
+    "domain": "3",
+    "type": "single",
+    "difficulty": "medium",
+    "question": "¿Cuál es la distancia administrativa por defecto de OSPF?",
+    "options": ["110", "90", "120", "100"],
+    "answer": [0],
+    "explanation": "AD por defecto: conectada 0, estática 1, eBGP 20, EIGRP interno 90, OSPF 110, IS-IS 115, RIP 120, EIGRP externo 170, iBGP 200."
+  },
+  {
+    "id": "ccna-d3-004",
+    "domain": "3",
+    "type": "single",
+    "difficulty": "medium",
+    "question": "En la entrada `O 192.168.5.0/24 [110/65] via 10.0.0.2, 00:12:44, Serial0/0/0`, ¿qué representa el valor 65?",
+    "options": ["La métrica (costo OSPF)", "La distancia administrativa", "El número de saltos", "El tiempo de la ruta"],
+    "answer": [0],
+    "explanation": "Formato [AD/métrica]: 110 es la AD de OSPF y 65 el costo acumulado. 00:12:44 es el tiempo desde que se aprendió la ruta."
+  },
+  {
+    "id": "ccna-d3-005",
+    "domain": "3",
+    "type": "single",
+    "difficulty": "medium",
+    "question": "¿Qué código identifica en la tabla de rutas IPv4 una dirección de host asignada a una interfaz del propio router (/32)?",
+    "options": ["L", "C", "S", "O IA"],
+    "answer": [0],
+    "explanation": "Cada interfaz con IP genera una ruta C (connected, la red) y una L (local, /32 de la propia dirección). S es estática y O IA es OSPF inter-area."
+  },
+  {
+    "id": "ccna-d3-006",
+    "domain": "3",
+    "type": "single",
+    "difficulty": "medium",
+    "question": "¿Qué comando configura una ruta por defecto IPv4 hacia el next hop 203.0.113.1?",
+    "options": [
+      "ip route 0.0.0.0 0.0.0.0 203.0.113.1",
+      "ip default-gateway 203.0.113.1",
+      "ip route 0.0.0.0 255.255.255.255 203.0.113.1",
+      "default-information originate 203.0.113.1"
+    ],
+    "answer": [0],
+    "explanation": "La ruta por defecto es 0.0.0.0/0. `ip default-gateway` solo aplica cuando `ip routing` está deshabilitado (switch L2). `default-information originate` hace que OSPF anuncie una ruta por defecto existente."
+  },
+  {
+    "id": "ccna-d3-007",
+    "domain": "3",
+    "type": "single",
+    "difficulty": "hard",
+    "question": "R1 tiene el enlace principal a Internet por Gi0/0 (OSPF aprende la ruta por defecto desde el ISP-router) y un enlace de respaldo por Gi0/1 hacia 198.51.100.1. ¿Qué ruta estática configura correctamente el respaldo?",
+    "options": [
+      "ip route 0.0.0.0 0.0.0.0 198.51.100.1 115",
+      "ip route 0.0.0.0 0.0.0.0 198.51.100.1",
+      "ip route 0.0.0.0 0.0.0.0 198.51.100.1 100",
+      "ip route 0.0.0.0 0.0.0.0 198.51.100.1 1"
+    ],
+    "answer": [0],
+    "explanation": "Una floating static debe tener una AD mayor que la de la ruta principal (OSPF = 110). Con 115 solo se instala si la ruta OSPF desaparece. Con AD 1 o 100 la estática ganaría y siempre se usaría el respaldo."
+  },
+  {
+    "id": "ccna-d3-008",
+    "domain": "3",
+    "type": "single",
+    "difficulty": "medium",
+    "question": "¿Qué tipo de ruta estática apunta a una sola dirección IP?",
+    "options": ["Ruta de host (/32)", "Ruta de red", "Ruta sumarizada", "Ruta por defecto"],
+    "answer": [0],
+    "explanation": "Una ruta de host usa máscara 255.255.255.255 (/32 en IPv4, /128 en IPv6) para un único destino, p. ej. `ip route 10.9.9.9 255.255.255.255 10.0.0.2`."
+  },
+  {
+    "id": "ccna-d3-009",
+    "domain": "3",
+    "type": "single",
+    "difficulty": "hard",
+    "question": "Configuras `ip route 10.20.0.0 255.255.0.0 GigabitEthernet0/0` en un router cuyo Gi0/0 es Ethernet multiacceso. ¿Qué inconveniente tiene?",
+    "options": [
+      "El router hará ARP por cada destino y dependerá de proxy ARP en el vecino",
+      "La ruta no se instalará nunca",
+      "La ruta tendrá AD 0",
+      "No es posible configurar interfaces de salida en rutas estáticas"
+    ],
+    "answer": [0],
+    "explanation": "Una ruta estática solo con interfaz de salida en Ethernet hace que el router trate cada destino como conectado y envíe ARP por cada IP, requiriendo proxy ARP en el router vecino. Se recomienda usar next hop (o fully specified: interfaz + next hop). En enlaces punto a punto seriales no hay problema."
+  },
+  {
+    "id": "ccna-d3-010",
+    "domain": "3",
+    "type": "single",
+    "difficulty": "medium",
+    "question": "¿Qué comando configura una ruta estática IPv6 por defecto hacia el next hop 2001:db8:0:1::1?",
+    "options": [
+      "ipv6 route ::/0 2001:db8:0:1::1",
+      "ipv6 route 0::0/128 2001:db8:0:1::1",
+      "ip route ::/0 2001:db8:0:1::1",
+      "ipv6 default-gateway 2001:db8:0:1::1"
+    ],
+    "answer": [0],
+    "explanation": "La ruta por defecto IPv6 es ::/0 con `ipv6 route`. Además, el router debe tener `ipv6 unicast-routing` habilitado para reenviar paquetes IPv6."
+  },
+  {
+    "id": "ccna-d3-011",
+    "domain": "3",
+    "type": "single",
+    "difficulty": "hard",
+    "question": "Quieres una ruta estática IPv6 usando como next hop la dirección link-local FE80::2 del vecino conectado por Gi0/0. ¿Qué comando es válido?",
+    "options": [
+      "ipv6 route 2001:db8:50::/64 GigabitEthernet0/0 FE80::2",
+      "ipv6 route 2001:db8:50::/64 FE80::2",
+      "ipv6 route 2001:db8:50::/64 FE80::2 GigabitEthernet0/0 link-local",
+      "ipv6 route 2001:db8:50::/64 FE80::2%0"
+    ],
+    "answer": [0],
+    "explanation": "Las link-local no son únicas fuera del enlace, así que se debe indicar la interfaz de salida junto con el next hop link-local (fully specified). Sin interfaz, IOS rechaza la ruta."
+  },
+  {
+    "id": "ccna-d3-012",
+    "domain": "3",
+    "type": "single",
+    "difficulty": "medium",
+    "question": "¿Qué comando habilita el reenvío de paquetes IPv6 en un router Cisco?",
+    "options": ["ipv6 unicast-routing", "ipv6 enable", "ipv6 routing", "ip routing ipv6"],
+    "answer": [0],
+    "explanation": "`ipv6 unicast-routing` habilita el enrutamiento IPv6 (también necesario para enviar RAs). `ipv6 enable` en una interfaz solo genera la link-local."
+  },
+  {
+    "id": "ccna-d3-013",
+    "domain": "3",
+    "type": "single",
+    "difficulty": "medium",
+    "question": "¿Qué determina el Router ID de OSPF si no se configura `router-id` manualmente?",
+    "options": [
+      "La IP más alta de una interfaz loopback activa; si no hay, la IP más alta de una interfaz física activa",
+      "La IP más baja de cualquier interfaz",
+      "La MAC de la interfaz con más tráfico",
+      "La dirección del primer vecino OSPF"
+    ],
+    "answer": [0],
+    "explanation": "Orden: 1) `router-id` configurado, 2) IP más alta de loopback up/up, 3) IP más alta de interfaz física activa. El RID se fija al iniciar el proceso; cambiarlo requiere `clear ip ospf process`."
+  },
+  {
+    "id": "ccna-d3-014",
+    "domain": "3",
+    "type": "single",
+    "difficulty": "hard",
+    "question": "¿Qué comando habilita OSPF área 0 solo en la interfaz con IP 10.10.10.5/30?",
+    "options": [
+      "network 10.10.10.5 0.0.0.0 area 0",
+      "network 10.10.10.5 255.255.255.252 area 0",
+      "network 10.10.10.0 0.0.0.255 area 0",
+      "network 10.10.10.4 0.0.0.3 area 1"
+    ],
+    "answer": [0],
+    "explanation": "El comando `network` usa wildcard; 0.0.0.0 coincide exactamente con 10.10.10.5. Usar máscara normal es un error común. 0.0.0.255 podría incluir otras interfaces 10.10.10.x, y la última opción usa el área 1. Alternativa: `ip ospf 1 area 0` en la interfaz."
+  },
+  {
+    "id": "ccna-d3-015",
+    "domain": "3",
+    "type": "multiple",
+    "difficulty": "hard",
+    "question": "R1 y R2 están conectados por Ethernet y no forman adyacencia OSPF. ¿Qué dos diferencias impiden la adyacencia?",
+    "options": [
+      "Hello/Dead intervals distintos",
+      "Router IDs distintos",
+      "Subredes distintas en la interfaz compartida",
+      "Prioridades OSPF distintas",
+      "Costos de interfaz distintos"
+    ],
+    "answer": [0, 2],
+    "explanation": "Para ser vecinos deben coincidir: área, subred/máscara, hello/dead, autenticación, stub flags y MTU (para pasar de ExStart). Los RIDs deben ser distintos (iguales sí rompen), y prioridad y costo pueden diferir."
+  },
+  {
+    "id": "ccna-d3-016",
+    "domain": "3",
+    "type": "single",
+    "difficulty": "hard",
+    "question": "Dos routers OSPF quedan atascados en el estado EXSTART/EXCHANGE. ¿Cuál es la causa más probable?",
+    "options": ["MTU distinta en las interfaces", "Hello interval distinto", "Área distinta", "Router ID duplicado en otra parte de la red"],
+    "answer": [0],
+    "explanation": "La MTU se compara en los paquetes DBD; si no coincide, los routers se quedan en ExStart/Exchange. Hello o área distintos impiden siquiera llegar a 2-Way (no habría vecindad)."
+  },
+  {
+    "id": "ccna-d3-017",
+    "domain": "3",
+    "type": "single",
+    "difficulty": "medium",
+    "question": "En un segmento Ethernet (broadcast) con cuatro routers OSPF, ¿qué estado de vecino mantienen entre sí dos routers DROTHER?",
+    "options": ["2-WAY", "FULL", "EXSTART", "LOADING"],
+    "answer": [0],
+    "explanation": "En redes broadcast los DROTHER solo forman adyacencia completa (FULL) con el DR y el BDR; entre ellos se quedan en 2-WAY, lo cual es normal."
+  },
+  {
+    "id": "ccna-d3-018",
+    "domain": "3",
+    "type": "single",
+    "difficulty": "hard",
+    "question": "En un segmento broadcast, R1 tiene prioridad 1 y RID 1.1.1.1, R2 prioridad 1 y RID 2.2.2.2, R3 prioridad 0 y RID 3.3.3.3, R4 prioridad 10 y RID 0.0.0.4. Todos arrancan a la vez. ¿Quién es DR y quién BDR?",
+    "options": ["DR R4, BDR R2", "DR R3, BDR R2", "DR R2, BDR R1", "DR R4, BDR R3"],
+    "answer": [0],
+    "explanation": "Gana la prioridad más alta; en empate, el RID más alto. R4 (prioridad 10) es DR. R3 tiene prioridad 0 y no puede ser DR/BDR. Entre R1 y R2 (prioridad 1) gana R2 por RID mayor y queda como BDR."
+  },
+  {
+    "id": "ccna-d3-019",
+    "domain": "3",
+    "type": "single",
+    "difficulty": "hard",
+    "question": "Un segmento tiene DR = R1 y BDR = R2. Se agrega R5 con prioridad 255. ¿Qué ocurre?",
+    "options": [
+      "Nada; la elección de DR/BDR no es preemptive y R5 queda como DROTHER",
+      "R5 se convierte en DR inmediatamente",
+      "R5 se convierte en BDR y R2 pasa a DROTHER",
+      "Se repite la elección y R1 pasa a BDR"
+    ],
+    "answer": [0],
+    "explanation": "La elección OSPF de DR/BDR no tiene preemption. R5 solo llegará a BDR si R1 o R2 fallan (o si se reinicia el proceso)."
+  },
+  {
+    "id": "ccna-d3-020",
+    "domain": "3",
+    "type": "single",
+    "difficulty": "medium",
+    "question": "¿Qué comando cambia el tipo de red OSPF de una interfaz Ethernet entre dos routers para que no se elija DR/BDR?",
+    "options": ["ip ospf network point-to-point", "ip ospf priority 0", "passive-interface", "ip ospf network broadcast"],
+    "answer": [0],
+    "explanation": "`ip ospf network point-to-point` elimina la elección DR/BDR y acelera la adyacencia en enlaces con solo dos routers. Prioridad 0 en un solo lado no evita la elección y passive-interface impide la vecindad."
+  },
+  {
+    "id": "ccna-d3-021",
+    "domain": "3",
+    "type": "single",
+    "difficulty": "medium",
+    "question": "¿Qué efecto tiene `passive-interface Gi0/2` en el proceso OSPF?",
+    "options": [
+      "Deja de enviar hellos por Gi0/2, pero la red de Gi0/2 se sigue anunciando",
+      "La red de Gi0/2 deja de anunciarse",
+      "Gi0/2 solo recibe actualizaciones pero no las envía",
+      "Apaga la interfaz Gi0/2"
+    ],
+    "answer": [0],
+    "explanation": "Una interfaz pasiva no envía ni procesa hellos, así que no forma vecindades, pero su subred se incluye en los LSAs. Se usa en interfaces hacia LANs de usuarios."
+  },
+  {
+    "id": "ccna-d3-022",
+    "domain": "3",
+    "type": "single",
+    "difficulty": "hard",
+    "question": "Con el reference bandwidth por defecto (100 Mbps), ¿qué costo OSPF tienen una interfaz FastEthernet y una GigabitEthernet?",
+    "options": ["1 y 1", "10 y 1", "19 y 4", "100 y 10"],
+    "answer": [0],
+    "explanation": "Costo = reference bandwidth / bandwidth de la interfaz, mínimo 1. 100/100 = 1 y 100/1000 = 0,1 → 1. Por eso se recomienda `auto-cost reference-bandwidth` (p. ej., 100000) en todos los routers para distinguir enlaces rápidos."
+  },
+  {
+    "id": "ccna-d3-023",
+    "domain": "3",
+    "type": "single",
+    "difficulty": "medium",
+    "question": "¿Qué comando de OSPF anuncia a los vecinos la ruta por defecto que el router tiene configurada?",
+    "options": ["default-information originate", "redistribute static", "network 0.0.0.0 255.255.255.255 area 0", "ip default-network"],
+    "answer": [0],
+    "explanation": "`default-information originate` genera un LSA tipo 5 para 0.0.0.0/0 si el router tiene una ruta por defecto (o siempre con `always`). Los demás routers la verán como `O*E2`."
+  },
+  {
+    "id": "ccna-d3-024",
+    "domain": "3",
+    "type": "single",
+    "difficulty": "hard",
+    "question": "Según la salida, ¿qué afirmación es correcta?",
+    "exhibit": "```\nR1# show ip ospf neighbor\nNeighbor ID   Pri  State          Dead Time  Address       Interface\n2.2.2.2         1  FULL/DR        00:00:35   10.0.0.2      Gi0/0\n3.3.3.3         1  FULL/BDR       00:00:33   10.0.0.3      Gi0/0\n4.4.4.4         1  2WAY/DROTHER   00:00:31   10.0.0.4      Gi0/0\n5.5.5.5         0  FULL/  -       00:00:38   10.0.15.5     Gi0/1\n```",
+    "options": [
+      "R1 es DROTHER en Gi0/0 y Gi0/1 es un enlace point-to-point",
+      "R1 es el DR en Gi0/0",
+      "La adyacencia con 4.4.4.4 tiene un problema de MTU",
+      "5.5.5.5 tiene prioridad 0, por eso no hay DR en Gi0/1"
+    ],
+    "answer": [0],
+    "explanation": "R1 ve a otros como DR y BDR, y a 4.4.4.4 en 2WAY/DROTHER: eso solo pasa entre dos DROTHER, así que R1 es DROTHER. `FULL/ -` indica red point-to-point (sin DR). En P2P la columna Pri aparece en 0 porque no aplica."
+  },
+  {
+    "id": "ccna-d3-025",
+    "domain": "3",
+    "type": "single",
+    "difficulty": "medium",
+    "question": "¿A qué dirección multicast envían sus hellos los routers OSPFv2?",
+    "options": ["224.0.0.5", "224.0.0.6", "224.0.0.9", "224.0.0.10"],
+    "answer": [0],
+    "explanation": "224.0.0.5 = todos los routers OSPF (hellos y updates del DR); 224.0.0.6 = DR/BDR (updates de los DROTHER). 224.0.0.9 es RIPv2 y 224.0.0.10 EIGRP."
+  },
+  {
+    "id": "ccna-d3-026",
+    "domain": "3",
+    "type": "single",
+    "difficulty": "medium",
+    "question": "¿Cuáles son los temporizadores Hello y Dead por defecto de OSPF en una interfaz Ethernet?",
+    "options": ["10 s y 40 s", "5 s y 15 s", "30 s y 120 s", "10 s y 30 s"],
+    "answer": [0],
+    "explanation": "En broadcast y point-to-point, Hello = 10 s y Dead = 40 s (4×Hello). En NBMA son 30/120 s."
+  },
+  {
+    "id": "ccna-d3-027",
+    "domain": "3",
+    "type": "single",
+    "difficulty": "hard",
+    "question": "R1 tiene dos rutas OSPF hacia 10.50.0.0/24 con el mismo costo a través de distintos vecinos. ¿Qué hace por defecto?",
+    "options": [
+      "Instala ambas y balancea la carga (ECMP)",
+      "Instala solo la del vecino con RID más bajo",
+      "Instala solo la primera aprendida",
+      "Ninguna; marca la ruta como inconsistente"
+    ],
+    "answer": [0],
+    "explanation": "OSPF instala por defecto hasta 4 rutas de igual costo (`maximum-paths`) y balancea la carga entre ellas."
+  },
+  {
+    "id": "ccna-d3-028",
+    "domain": "3",
+    "type": "single",
+    "difficulty": "medium",
+    "question": "¿Qué algoritmo utiliza OSPF para calcular las rutas más cortas?",
+    "options": ["Dijkstra SPF", "Bellman-Ford", "DUAL", "Path vector"],
+    "answer": [0],
+    "explanation": "OSPF es link-state: cada router construye la LSDB y ejecuta Dijkstra (SPF). Bellman-Ford lo usan protocolos distance-vector como RIP, DUAL es de EIGRP y BGP es path vector."
+  },
+  {
+    "id": "ccna-d3-029",
+    "domain": "3",
+    "type": "single",
+    "difficulty": "medium",
+    "question": "¿Qué tipo de LSA genera cada router OSPF para describir sus enlaces dentro de un área?",
+    "options": ["Tipo 1 (Router LSA)", "Tipo 2 (Network LSA)", "Tipo 3 (Summary LSA)", "Tipo 5 (External LSA)"],
+    "answer": [0],
+    "explanation": "Todo router genera un LSA tipo 1 con sus enlaces. El DR genera el tipo 2 para cada segmento multiacceso, los ABR los tipo 3 y los ASBR los tipo 5."
+  },
+  {
+    "id": "ccna-d3-030",
+    "domain": "3",
+    "type": "single",
+    "difficulty": "hard",
+    "question": "Un router OSPF tiene interfaces en el área 0 y en el área 10. ¿Qué rol cumple?",
+    "options": ["ABR (Area Border Router)", "ASBR", "Backbone-only router", "DR"],
+    "answer": [0],
+    "explanation": "Un ABR conecta un área no-backbone con el área 0 y genera LSAs tipo 3. Un ASBR redistribuye rutas externas al dominio OSPF."
+  },
+  {
+    "id": "ccna-d3-031",
+    "domain": "3",
+    "type": "single",
+    "difficulty": "medium",
+    "question": "¿Qué comando verifica en qué interfaces está habilitado OSPF, su área, costo y estado (DR/BDR/P2P)?",
+    "options": ["show ip ospf interface brief", "show ip protocols", "show ip ospf database", "show ip route ospf"],
+    "answer": [0],
+    "explanation": "`show ip ospf interface brief` lista interfaces OSPF, proceso, área, IP, costo, estado y número de vecinos. `show ip protocols` muestra RID, redes y passive interfaces."
+  },
+  {
+    "id": "ccna-d3-032",
+    "domain": "3",
+    "type": "single",
+    "difficulty": "medium",
+    "question": "¿Cuál es el propósito de un protocolo FHRP como HSRP?",
+    "options": [
+      "Proveer un default gateway virtual redundante para los hosts",
+      "Balancear la carga entre enlaces WAN",
+      "Evitar bucles de capa 2",
+      "Sincronizar tablas de enrutamiento entre routers"
+    ],
+    "answer": [0],
+    "explanation": "Un FHRP (HSRP, VRRP, GLBP) hace que dos o más routers compartan una IP y MAC virtuales que los hosts usan como gateway. Si el activo falla, otro asume sin cambiar la configuración de los hosts."
+  },
+  {
+    "id": "ccna-d3-033",
+    "domain": "3",
+    "type": "single",
+    "difficulty": "hard",
+    "question": "¿Cuál es la MAC virtual de HSRP versión 1 para el grupo 10?",
+    "options": ["0000.0c07.ac0a", "0000.0c9f.f00a", "0000.5e00.010a", "0007.b400.0a01"],
+    "answer": [0],
+    "explanation": "HSRPv1 usa 0000.0c07.acXX (XX = grupo en hex; 10 = 0a). HSRPv2 usa 0000.0c9f.fXXX y VRRP 0000.5e00.01XX. GLBP usa 0007.b400.XXYY."
+  },
+  {
+    "id": "ccna-d3-034",
+    "domain": "3",
+    "type": "single",
+    "difficulty": "hard",
+    "question": "R1 tiene `standby 1 priority 110` y R2 la prioridad por defecto. R1 se reinicia y R2 se vuelve activo. Cuando R1 vuelve, sigue en standby. ¿Por qué?",
+    "options": [
+      "Falta `standby 1 preempt` en R1",
+      "La prioridad por defecto de R2 es 150",
+      "HSRP siempre mantiene al router con IP más alta como activo",
+      "R1 necesita `standby 1 track`"
+    ],
+    "answer": [0],
+    "explanation": "HSRP no hace preemption por defecto; aunque R1 tenga mayor prioridad (110 > 100 por defecto), no recupera el rol activo sin `standby 1 preempt`."
+  },
+  {
+    "id": "ccna-d3-035",
+    "domain": "3",
+    "type": "multiple",
+    "difficulty": "medium",
+    "question": "¿Qué dos afirmaciones describen correctamente a VRRP y GLBP?",
+    "options": [
+      "VRRP es un estándar abierto (RFC 5798)",
+      "GLBP balancea carga entre varios gateways usando varias MAC virtuales",
+      "VRRP es propietario de Cisco",
+      "GLBP es un estándar IETF",
+      "HSRP permite que varios routers activos respondan simultáneamente en el mismo grupo"
+    ],
+    "answer": [0, 1],
+    "explanation": "VRRP es estándar (roles master/backup) y GLBP (Cisco) permite balanceo con un AVG que asigna MACs virtuales a varios AVFs. HSRP y GLBP son de Cisco; HSRP tiene un solo router activo por grupo."
+  },
+  {
+    "id": "ccna-d3-036",
+    "domain": "3",
+    "type": "single",
+    "difficulty": "medium",
+    "question": "¿Cuál es la prioridad HSRP por defecto?",
+    "options": ["100", "0", "150", "255"],
+    "answer": [0],
+    "explanation": "La prioridad por defecto es 100 (rango 0–255). En empate gana la IP más alta de la interfaz."
+  },
+  {
+    "id": "ccna-d3-037",
+    "domain": "3",
+    "type": "single",
+    "difficulty": "hard",
+    "question": "Router-on-a-stick: R1 debe enrutar entre VLAN 10 (192.168.10.0/24) y VLAN 20 (192.168.20.0/24) por Gi0/0 conectado a un trunk. ¿Qué configuración de subinterfaz es correcta para la VLAN 20?",
+    "options": [
+      "`interface Gi0/0.20` → `encapsulation dot1Q 20` → `ip address 192.168.20.1 255.255.255.0`",
+      "`interface Gi0/0.20` → `ip address 192.168.20.1 255.255.255.0` (la VLAN se deduce del número)",
+      "`interface vlan 20` → `ip address 192.168.20.1 255.255.255.0`",
+      "`interface Gi0/0` → `switchport trunk allowed vlan 20`"
+    ],
+    "answer": [0],
+    "explanation": "Cada subinterfaz necesita `encapsulation dot1Q <vlan>` antes de la IP; el número de subinterfaz es solo un identificador. `interface vlan` (SVI) es para switches multicapa, y los routers no usan comandos `switchport`."
+  },
+  {
+    "id": "ccna-d3-038",
+    "domain": "3",
+    "type": "single",
+    "difficulty": "hard",
+    "question": "En un switch multicapa creaste SVIs para las VLANs 10 y 20 con sus IPs, pero los hosts no se comunican entre VLANs. Las SVIs están up/up. ¿Qué falta?",
+    "options": ["`ip routing`", "`no switchport` en las SVIs", "Un trunk hacia un router", "`encapsulation dot1q` en las SVIs"],
+    "answer": [0],
+    "explanation": "En muchos switches multicapa el enrutamiento IPv4 está deshabilitado por defecto; `ip routing` activa el routing entre SVIs. Las SVIs no admiten `no switchport` ni encapsulación."
+  },
+  {
+    "id": "ccna-d3-039",
+    "domain": "3",
+    "type": "single",
+    "difficulty": "hard",
+    "question": "¿Por qué una SVI (interface vlan 30) puede quedar en estado down/down aunque esté configurada con `no shutdown`?",
+    "options": [
+      "No existe la VLAN 30 o no hay ningún puerto activo (access o trunk que la permita) en la VLAN 30",
+      "Falta `ip routing`",
+      "La SVI necesita una MAC configurada manualmente",
+      "Las SVIs solo funcionan en la VLAN 1"
+    ],
+    "answer": [0],
+    "explanation": "Una SVI sube cuando la VLAN existe en la base de datos y al menos un puerto en esa VLAN está en forwarding (autostate). `ip routing` no afecta al estado de la interfaz."
+  },
+  {
+    "id": "ccna-d3-040",
+    "domain": "3",
+    "type": "single",
+    "difficulty": "hard",
+    "question": "¿Cuál es la ruta sumarizada más específica que incluye 172.16.8.0/24 a 172.16.15.0/24?",
+    "options": ["172.16.8.0/21", "172.16.8.0/22", "172.16.0.0/20", "172.16.8.0/20"],
+    "answer": [0],
+    "explanation": "Ocho redes /24 consecutivas que empiezan en un múltiplo de 8 (8–15) se resumen con 3 bits menos: /21. 172.16.8.0/21 cubre .8.0–.15.255 exactamente. /22 cubre solo 8–11, y /20 cubre 0–15 (menos específica)."
+  }
+]

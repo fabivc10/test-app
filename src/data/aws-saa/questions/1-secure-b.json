@@ -1,0 +1,373 @@
+[
+  {
+    "id": "aws-d1-031",
+    "domain": "1",
+    "type": "single",
+    "difficulty": "hard",
+    "question": "Los administradores acceden por SSH a instancias privadas mediante un bastion host. Seguridad quiere eliminar el bastion, cerrar el puerto 22 y registrar cada sesión. ¿Qué solución cumple con el MENOR esfuerzo operativo?",
+    "options": [
+      "AWS Systems Manager Session Manager con el SSM Agent y un rol que incluya AmazonSSMManagedInstanceCore; logs de sesión en S3/CloudWatch",
+      "Una VPN client-to-site y mantener SSH",
+      "EC2 Instance Connect a través de Internet con IPs públicas",
+      "Un NAT gateway para SSH entrante"
+    ],
+    "answer": [0],
+    "explanation": "Session Manager da acceso shell sin puertos entrantes, sin bastion ni llaves SSH, con control por IAM y registro de sesiones. Para instancias sin salida a Internet se usan interface endpoints de SSM. Un NAT gateway no admite conexiones entrantes."
+  },
+  {
+    "id": "aws-d1-032",
+    "domain": "1",
+    "type": "single",
+    "difficulty": "hard",
+    "question": "Tras un incidente de SSRF, la empresa quiere evitar que un atacante obtenga credenciales del rol de la instancia desde el servicio de metadatos con una simple petición GET. ¿Qué medida aplicar?",
+    "options": [
+      "Exigir IMDSv2 (HttpTokens=required) en las instancias",
+      "Deshabilitar los roles de IAM y usar access keys",
+      "Bloquear 169.254.169.254 con un security group",
+      "Cifrar los volúmenes EBS"
+    ],
+    "answer": [0],
+    "explanation": "IMDSv2 requiere un token de sesión obtenido mediante una petición PUT con un header, lo que mitiga la mayoría de los ataques SSRF. Los security groups no filtran el tráfico al link-local de metadatos."
+  },
+  {
+    "id": "aws-d1-033",
+    "domain": "1",
+    "type": "single",
+    "difficulty": "medium",
+    "question": "Una empresa quiere que todos los volúmenes EBS nuevos de una región se cifren automáticamente, sin depender de que cada equipo lo recuerde. ¿Qué hacer?",
+    "options": [
+      "Habilitar EBS encryption by default en la región (por cuenta)",
+      "Crear una regla de AWS Config que cifre los volúmenes existentes",
+      "Cifrar cada AMI manualmente",
+      "Usar SSE-S3"
+    ],
+    "answer": [0],
+    "explanation": "EBS encryption by default es un ajuste por región y cuenta que cifra todos los volúmenes y snapshots nuevos con la clave KMS elegida. No cifra los existentes (para eso: snapshot → copia cifrada → nuevo volumen)."
+  },
+  {
+    "id": "aws-d1-034",
+    "domain": "1",
+    "type": "single",
+    "difficulty": "hard",
+    "question": "Una API REST en Amazon API Gateway debe aceptar solo peticiones de usuarios autenticados en un Cognito user pool existente, con el MENOR código personalizado. ¿Qué configurar?",
+    "options": [
+      "Un Cognito user pool authorizer en API Gateway",
+      "Un Lambda authorizer que valide manualmente el JWT",
+      "API keys con usage plans",
+      "Una resource policy que permita solo ciertas IPs"
+    ],
+    "answer": [0],
+    "explanation": "El authorizer nativo de Cognito valida los tokens sin código. Un Lambda authorizer sirve para lógica personalizada o IdPs de terceros, pero requiere código. Las API keys son para limitar/medir uso, no para autenticación."
+  },
+  {
+    "id": "aws-d1-035",
+    "domain": "1",
+    "type": "single",
+    "difficulty": "hard",
+    "question": "Las instancias en una VPC acceden a S3 mediante un gateway endpoint. Seguridad quiere que desde esa VPC solo se pueda acceder a los buckets de la empresa, para evitar exfiltración a buckets externos. ¿Qué configurar?",
+    "options": [
+      "Una VPC endpoint policy que permita solo los ARNs de los buckets corporativos (o aws:ResourceOrgID de la organización)",
+      "Una NACL que bloquee el rango IP de S3",
+      "Un security group en el endpoint",
+      "Habilitar S3 Block Public Access"
+    ],
+    "answer": [0],
+    "explanation": "La endpoint policy controla qué acciones/recursos son accesibles a través del endpoint. Los gateway endpoints no tienen security groups, y Block Public Access no evita escribir en buckets de terceros."
+  },
+  {
+    "id": "aws-d1-036",
+    "domain": "1",
+    "type": "single",
+    "difficulty": "hard",
+    "question": "Un bucket S3 debe permitir acceso únicamente a principals de cuentas pertenecientes a la organización de AWS de la empresa, incluidas cuentas futuras. ¿Qué condición de bucket policy usar?",
+    "options": ["aws:PrincipalOrgID", "aws:SourceVpc", "aws:PrincipalAccount con todas las cuentas listadas", "aws:SecureTransport"],
+    "answer": [0],
+    "explanation": "`aws:PrincipalOrgID` compara la organización del principal; incluye automáticamente cuentas nuevas. Listar cuentas requiere mantenimiento y SourceVpc limita por VPC de origen, no por organización."
+  },
+  {
+    "id": "aws-d1-037",
+    "domain": "1",
+    "type": "single",
+    "difficulty": "hard",
+    "question": "Un proveedor externo necesita asumir un rol en la cuenta del cliente para monitorear recursos. ¿Qué se recomienda para evitar el problema del confused deputy?",
+    "options": [
+      "Requerir un External ID en la trust policy del rol",
+      "Compartir access keys del cliente con el proveedor",
+      "Permitir que cualquier cuenta asuma el rol",
+      "Usar una SCP que permita sts:AssumeRole"
+    ],
+    "answer": [0],
+    "explanation": "El External ID (condición sts:ExternalId) es un valor único que el proveedor debe enviar al asumir el rol, evitando que otro cliente del proveedor engañe a este para acceder a tus recursos."
+  },
+  {
+    "id": "aws-d1-038",
+    "domain": "1",
+    "type": "single",
+    "difficulty": "medium",
+    "question": "Un ALB debe servir HTTPS con un certificado de ACM y redirigir todo el tráfico HTTP a HTTPS. ¿Cómo se configura?",
+    "options": [
+      "Listener HTTPS:443 con el certificado ACM y listener HTTP:80 con una acción de redirect a HTTPS",
+      "Solo un listener HTTP:80 y cifrado en las instancias",
+      "Un Network Load Balancer con TCP:443 y redirección",
+      "CloudFront obligatorio para redirigir"
+    ],
+    "answer": [0],
+    "explanation": "El ALB admite acciones de redirect en sus listeners. El listener HTTPS termina TLS con el certificado de ACM. Un NLB no redirige peticiones HTTP."
+  },
+  {
+    "id": "aws-d1-039",
+    "domain": "1",
+    "type": "single",
+    "difficulty": "hard",
+    "question": "Una empresa necesita inspección profunda de paquetes (IPS/IDS stateful) y filtrado de dominios para todo el tráfico de salida a Internet de sus VPCs. ¿Qué servicio usar?",
+    "options": ["AWS Network Firewall", "Security groups", "Network ACLs", "AWS WAF"],
+    "answer": [0],
+    "explanation": "AWS Network Firewall ofrece reglas stateful compatibles con Suricata, filtrado por dominio/SNI e IPS a nivel de VPC. WAF es solo para HTTP en recursos específicos, y SGs/NACLs no inspeccionan contenido ni dominios."
+  },
+  {
+    "id": "aws-d1-040",
+    "domain": "1",
+    "type": "single",
+    "difficulty": "medium",
+    "question": "¿Qué servicio agrega en un solo panel los hallazgos de GuardDuty, Inspector, Macie y verificaciones de buenas prácticas (como CIS AWS Foundations)?",
+    "options": ["AWS Security Hub", "Amazon Detective", "AWS Trusted Advisor", "Amazon CloudWatch"],
+    "answer": [0],
+    "explanation": "Security Hub centraliza hallazgos en formato ASFF y ejecuta controles de estándares (CIS, AWS Foundational Security Best Practices, PCI DSS). Detective ayuda a investigar el origen de los hallazgos."
+  },
+  {
+    "id": "aws-d1-041",
+    "domain": "1",
+    "type": "single",
+    "difficulty": "hard",
+    "question": "Una aplicación en varias regiones cifra datos con KMS y necesita descifrar en otra región datos cifrados en la región principal, sin volver a cifrarlos ni hacer llamadas entre regiones. ¿Qué usar?",
+    "options": ["Claves KMS multi-Region", "Una clave KMS por región con el mismo alias", "AWS CloudHSM en una región", "SSE-S3"],
+    "answer": [0],
+    "explanation": "Las multi-Region keys comparten material de clave e ID de clave entre réplicas en distintas regiones, por lo que lo cifrado en una región se descifra en otra localmente. Claves distintas con el mismo alias no comparten material."
+  },
+  {
+    "id": "aws-d1-042",
+    "domain": "1",
+    "type": "single",
+    "difficulty": "hard",
+    "question": "Una aplicación en EC2 debe conectarse a Amazon RDS for MySQL sin almacenar contraseñas de base de datos, usando la identidad del rol de la instancia. ¿Qué característica usar?",
+    "options": ["Autenticación de base de datos con IAM (IAM database authentication)", "Cifrado TDE", "Un security group que permita la instancia", "RDS Proxy sin autenticación"],
+    "answer": [0],
+    "explanation": "IAM database authentication genera tokens temporales (15 min) firmados con las credenciales del rol, eliminando contraseñas estáticas. El security group controla red, no identidad."
+  },
+  {
+    "id": "aws-d1-043",
+    "domain": "1",
+    "type": "single",
+    "difficulty": "medium",
+    "question": "Una empresa necesita que los usuarios de una tabla DynamoDB solo puedan leer los ítems cuya partition key coincida con su ID de usuario. ¿Qué se usa?",
+    "options": [
+      "Una política IAM con la condición dynamodb:LeadingKeys",
+      "Una tabla distinta por usuario",
+      "DynamoDB Streams",
+      "Cifrado con una clave por usuario"
+    ],
+    "answer": [0],
+    "explanation": "La condición `dynamodb:LeadingKeys` permite control de acceso de grano fino por partition key (por ejemplo, con la variable del ID de Cognito)."
+  },
+  {
+    "id": "aws-d1-044",
+    "domain": "1",
+    "type": "single",
+    "difficulty": "hard",
+    "question": "Una plataforma de video en CloudFront debe permitir que solo suscriptores de pago vean CUALQUIER video de una sección, sin cambiar las URLs de los archivos. ¿Qué usar?",
+    "options": ["CloudFront signed cookies", "CloudFront signed URLs para cada archivo", "S3 presigned URLs", "Geo restriction"],
+    "answer": [0],
+    "explanation": "Signed cookies dan acceso a múltiples archivos restringidos sin cambiar las URLs. Las signed URLs sirven para un archivo concreto. Las presigned URLs de S3 omitirían CloudFront."
+  },
+  {
+    "id": "aws-d1-045",
+    "domain": "1",
+    "type": "single",
+    "difficulty": "medium",
+    "question": "Un equipo de seguridad quiere guardar registros del tráfico IP aceptado y rechazado por las interfaces de red de una VPC para analizar conexiones. ¿Qué habilitar?",
+    "options": ["VPC Flow Logs", "CloudTrail data events", "AWS Config", "S3 server access logs"],
+    "answer": [0],
+    "explanation": "VPC Flow Logs capturan metadatos del tráfico IP (origen, destino, puertos, acción ACCEPT/REJECT) a nivel de VPC, subred o ENI, enviándolos a CloudWatch Logs, S3 o Firehose. No capturan el contenido de los paquetes."
+  },
+  {
+    "id": "aws-d1-046",
+    "domain": "1",
+    "type": "single",
+    "difficulty": "hard",
+    "question": "Una empresa quiere crear un entorno multicuenta gobernado con guardrails preventivos y detectivos, cuentas de log archive y audit, y una fábrica de cuentas, con el MENOR esfuerzo. ¿Qué servicio usar?",
+    "options": ["AWS Control Tower", "AWS Organizations solo", "AWS Config Conformance Packs", "AWS Service Catalog"],
+    "answer": [0],
+    "explanation": "Control Tower configura una landing zone sobre Organizations con guardrails (SCPs y reglas de Config), cuentas de log archive/audit y Account Factory. Organizations sola requiere construir todo manualmente."
+  },
+  {
+    "id": "aws-d1-047",
+    "domain": "1",
+    "type": "single",
+    "difficulty": "hard",
+    "question": "Un equipo quiere otorgar permisos basados en atributos: los desarrolladores con tag `Project=Alpha` solo pueden administrar instancias EC2 con el mismo tag, sin crear políticas nuevas por proyecto. ¿Qué enfoque usar?",
+    "options": [
+      "ABAC con condiciones aws:ResourceTag/Project igual a aws:PrincipalTag/Project",
+      "RBAC con un rol por proyecto",
+      "Una SCP por proyecto",
+      "Security groups por proyecto"
+    ],
+    "answer": [0],
+    "explanation": "ABAC (attribute-based access control) usa tags de principals y recursos en las condiciones; una sola política escala a nuevos proyectos agregando tags."
+  },
+  {
+    "id": "aws-d1-048",
+    "domain": "1",
+    "type": "single",
+    "difficulty": "medium",
+    "question": "¿Qué práctica se recomienda para el usuario root de una cuenta AWS?",
+    "options": [
+      "Habilitar MFA, no crear access keys y usarlo solo para tareas que lo requieran",
+      "Usarlo para la administración diaria",
+      "Compartir sus credenciales con el equipo de operaciones",
+      "Crear access keys para scripts de automatización"
+    ],
+    "answer": [0],
+    "explanation": "El root tiene acceso total y no se puede restringir con políticas IAM. Se protege con MFA, sin access keys, y se usan identidades con mínimo privilegio para el trabajo diario."
+  },
+  {
+    "id": "aws-d1-049",
+    "domain": "1",
+    "type": "single",
+    "difficulty": "hard",
+    "question": "Una función Lambda en la cuenta A debe ser invocada por un bucket S3 cuando se suben objetos. ¿Qué permiso es necesario?",
+    "options": [
+      "Una resource-based policy en la función Lambda que permita a s3.amazonaws.com invocarla (con SourceArn del bucket)",
+      "Un rol de ejecución con s3:PutObject",
+      "Una bucket policy que permita lambda:InvokeFunction",
+      "Una SCP que permita lambda:*"
+    ],
+    "answer": [0],
+    "explanation": "Para que un servicio invoque Lambda se añade un permiso a la policy basada en recurso de la función (`lambda:InvokeFunction` para el principal s3.amazonaws.com). El rol de ejecución define lo que la función puede hacer, no quién la invoca."
+  },
+  {
+    "id": "aws-d1-050",
+    "domain": "1",
+    "type": "single",
+    "difficulty": "medium",
+    "question": "Una aplicación en contenedores de Amazon ECS en Fargate necesita una contraseña de base de datos. ¿Cuál es la forma más segura de proporcionarla?",
+    "options": [
+      "Referenciar un secreto de Secrets Manager (o parámetro SecureString) en la task definition",
+      "Escribirla en el Dockerfile",
+      "Pasarla como variable de entorno en texto plano en la task definition",
+      "Guardarla en el código fuente"
+    ],
+    "answer": [0],
+    "explanation": "ECS inyecta secretos desde Secrets Manager o Parameter Store en tiempo de ejecución usando el task execution role, sin exponerlos en la imagen ni en la definición."
+  },
+  {
+    "id": "aws-d1-051",
+    "domain": "1",
+    "type": "single",
+    "difficulty": "hard",
+    "question": "Una aplicación debe evitar que el tráfico de resolución DNS desde la VPC llegue a dominios maliciosos conocidos. ¿Qué servicio lo hace de forma administrada?",
+    "options": ["Route 53 Resolver DNS Firewall", "AWS WAF", "Security groups", "Amazon Inspector"],
+    "answer": [0],
+    "explanation": "Route 53 Resolver DNS Firewall filtra consultas DNS salientes de las VPCs usando listas de dominios (propias o administradas por AWS) y puede bloquear o alertar."
+  },
+  {
+    "id": "aws-d1-052",
+    "domain": "1",
+    "type": "single",
+    "difficulty": "medium",
+    "question": "Un sistema de archivos Amazon EFS contiene datos sensibles. ¿Cómo se garantiza el cifrado en tránsito entre las instancias y EFS?",
+    "options": [
+      "Montar con el EFS mount helper usando la opción tls",
+      "Habilitar cifrado en reposo al crear el sistema",
+      "Usar un gateway endpoint",
+      "Activar versionado"
+    ],
+    "answer": [0],
+    "explanation": "El mount helper (`amazon-efs-utils`) con `-o tls` cifra el tráfico NFS con TLS. El cifrado en reposo es otra configuración independiente que se define al crear el sistema de archivos."
+  },
+  {
+    "id": "aws-d1-053",
+    "domain": "1",
+    "type": "multiple",
+    "difficulty": "hard",
+    "question": "Una empresa debe asegurar que todos los objetos subidos a un bucket queden cifrados con SSE-KMS usando una clave concreta. ¿Qué DOS acciones lo garantizan?",
+    "options": [
+      "Configurar el cifrado por defecto del bucket con SSE-KMS y esa clave",
+      "Añadir una bucket policy que deniegue PutObject si s3:x-amz-server-side-encryption-aws-kms-key-id no coincide con la clave",
+      "Habilitar S3 Versioning",
+      "Habilitar S3 Inventory",
+      "Habilitar Requester Pays"
+    ],
+    "answer": [0, 1],
+    "explanation": "El cifrado por defecto aplica la clave cuando el cliente no especifica cifrado; la bucket policy con Deny impide que alguien suba con otra clave o tipo de cifrado. Versioning, Inventory y Requester Pays no controlan el cifrado."
+  },
+  {
+    "id": "aws-d1-054",
+    "domain": "1",
+    "type": "single",
+    "difficulty": "medium",
+    "question": "¿Qué ocurre cuando habilitas la rotación automática de una customer managed key de KMS?",
+    "options": [
+      "KMS genera nuevo material de clave periódicamente (por defecto cada año) y conserva el anterior para descifrar datos antiguos",
+      "Todos los datos se recifran automáticamente",
+      "Cambia el ARN de la clave",
+      "Las aplicaciones deben actualizar el ID de clave"
+    ],
+    "answer": [0],
+    "explanation": "La rotación automática crea nuevo material criptográfico manteniendo el mismo key ID/ARN; el material antiguo se conserva para descifrar. Los datos no se recifran. El periodo es configurable (90–2560 días)."
+  },
+  {
+    "id": "aws-d1-055",
+    "domain": "1",
+    "type": "single",
+    "difficulty": "hard",
+    "question": "Una empresa necesita que varias cuentas de AWS Organizations compartan subredes de una VPC central administrada por el equipo de redes. ¿Qué servicio lo permite?",
+    "options": ["AWS Resource Access Manager (VPC sharing)", "VPC peering entre todas las cuentas", "AWS PrivateLink", "AWS Direct Connect Gateway"],
+    "answer": [0],
+    "explanation": "Con RAM se comparten subredes (VPC sharing): las cuentas participantes lanzan recursos en subredes de la cuenta propietaria, que mantiene el control de la red (rutas, NACLs, gateways)."
+  },
+  {
+    "id": "aws-d1-056",
+    "domain": "1",
+    "type": "single",
+    "difficulty": "medium",
+    "question": "Las colas de Amazon SQS deben cifrar mensajes en reposo con una clave que la empresa controle. ¿Qué configurar?",
+    "options": ["SSE con una clave de KMS (SSE-KMS) en la cola", "SSL en el cliente solamente", "Un VPC endpoint", "Una DLQ"],
+    "answer": [0],
+    "explanation": "SQS admite cifrado del lado del servidor con SSE-SQS (claves gestionadas por SQS) o SSE-KMS con claves de KMS controladas por el cliente. TLS protege en tránsito, no en reposo."
+  },
+  {
+    "id": "aws-d1-057",
+    "domain": "1",
+    "type": "single",
+    "difficulty": "hard",
+    "question": "Una empresa tiene un Active Directory on-premises y quiere que aplicaciones en AWS (por ejemplo, instancias Windows y Amazon FSx for Windows) autentiquen contra él sin sincronizar contraseñas a la nube, manteniendo un directorio administrado en AWS. ¿Qué solución usar?",
+    "options": [
+      "AWS Managed Microsoft AD con una relación de confianza (trust) con el AD on-premises",
+      "Simple AD",
+      "Amazon Cognito",
+      "Usuarios IAM"
+    ],
+    "answer": [0],
+    "explanation": "AWS Managed Microsoft AD es un AD real que soporta trusts con el AD on-premises. AD Connector también evita almacenar datos en la nube, pero es un proxy sin directorio propio; Simple AD no soporta trusts."
+  },
+  {
+    "id": "aws-d1-058",
+    "domain": "1",
+    "type": "single",
+    "difficulty": "medium",
+    "question": "¿Qué tipo de política IAM tiene siempre precedencia cuando aplica?",
+    "options": ["Un Deny explícito", "Un Allow explícito", "El deny implícito", "La política más reciente"],
+    "answer": [0],
+    "explanation": "Lógica de evaluación: todo está implícitamente denegado; un Allow lo permite, pero cualquier Deny explícito en cualquier política aplicable (identidad, recurso, SCP, boundary, session) prevalece."
+  },
+  {
+    "id": "aws-d1-059",
+    "domain": "1",
+    "type": "single",
+    "difficulty": "hard",
+    "question": "Un equipo de análisis necesita dar a varios departamentos acceso a un mismo bucket de data lake, cada uno con su prefijo y su propia política, sin complicar una única bucket policy enorme. ¿Qué característica usar?",
+    "options": ["S3 Access Points", "S3 Object Lambda", "S3 Transfer Acceleration", "Requester Pays"],
+    "answer": [0],
+    "explanation": "Cada access point tiene su propio nombre, política y (opcionalmente) restricción a una VPC, simplificando el acceso compartido por equipos a un bucket. Object Lambda transforma datos al leerlos."
+  }
+]

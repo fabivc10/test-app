@@ -1,0 +1,214 @@
+{
+  "domainId": "4",
+  "topics": [
+    {
+      "id": "ccna-t4-nat",
+      "objective": "4.1",
+      "title": "NAT: estático, dinámico y PAT",
+      "content": [
+        "| Término | Significado |",
+        "|---|---|",
+        "| Inside local | IP del host interno vista desde dentro (privada) |",
+        "| Inside global | IP pública que representa al host interno |",
+        "| Outside local | IP del host externo vista desde dentro |",
+        "| Outside global | IP real del host externo |",
+        "",
+        "```",
+        "interface g0/0",
+        " ip nat inside",
+        "interface g0/1",
+        " ip nat outside",
+        "",
+        "! Estático 1:1 (servidor publicado)",
+        "ip nat inside source static 192.168.1.100 203.0.113.10",
+        "",
+        "! Dinámico con pool (1:1 mientras dure la traducción)",
+        "access-list 1 permit 192.168.1.0 0.0.0.255",
+        "ip nat pool PUB 203.0.113.20 203.0.113.23 netmask 255.255.255.248",
+        "ip nat inside source list 1 pool PUB",
+        "",
+        "! PAT con la IP de la interfaz",
+        "ip nat inside source list 1 interface g0/1 overload",
+        "",
+        "show ip nat translations",
+        "show ip nat statistics",
+        "clear ip nat translation *",
+        "```"
+      ],
+      "keyPoints": [
+        "PAT = overload: muchas IPs privadas → una pública diferenciada por puerto.",
+        "Dinámico sin overload: si se agota el pool, nuevos hosts fallan.",
+        "Error típico: olvidar `ip nat inside/outside` o ACL que no coincide con la LAN."
+      ],
+      "references": [
+        {
+          "title": "Cisco — NAT configuration",
+          "url": "https://www.cisco.com/c/en/us/support/docs/ip/network-address-translation-nat/13772-12.html"
+        }
+      ]
+    },
+    {
+      "id": "ccna-t4-ntp-dhcp-dns",
+      "objective": "4.2–4.3, 4.6",
+      "title": "NTP, DHCP y DNS",
+      "content": [
+        "### NTP (UDP 123)",
+        "```",
+        "ntp server 10.0.0.100          ! cliente",
+        "ntp master 3                   ! fuente de tiempo local (stratum 3)",
+        "clock timezone CST -6",
+        "show ntp status / show ntp associations",
+        "```",
+        "Stratum 1 = conectado a reloj de referencia; 16 = no sincronizado. Importante para logs, certificados y forense.",
+        "",
+        "### DHCP (UDP 67/68) — DORA",
+        "Discover (broadcast) → Offer → Request → Ack.",
+        "```",
+        "ip dhcp excluded-address 192.168.1.1 192.168.1.20",
+        "ip dhcp pool LAN",
+        " network 192.168.1.0 255.255.255.0",
+        " default-router 192.168.1.1",
+        " dns-server 8.8.8.8",
+        " lease 7",
+        "! Relay en la interfaz que recibe el broadcast",
+        "interface g0/0.20",
+        " ip helper-address 10.1.1.50",
+        "! Cliente DHCP",
+        "interface g0/1",
+        " ip address dhcp",
+        "show ip dhcp binding / show ip dhcp pool",
+        "```",
+        "",
+        "### DNS (UDP/TCP 53)",
+        "Registros: **A** (IPv4), **AAAA** (IPv6), **CNAME** (alias), **MX** (correo), **PTR** (inversa), **NS**.",
+        "```",
+        "ip name-server 8.8.8.8",
+        "ip domain-lookup",
+        "```"
+      ],
+      "keyPoints": [
+        "Exclusiones DHCP en modo global, no dentro del pool.",
+        "`ip helper-address` va en la interfaz del lado de los clientes.",
+        "Stratum 16 = sin sincronizar."
+      ],
+      "references": [
+        {
+          "title": "Cisco — Configuring DHCP server",
+          "url": "https://www.cisco.com/c/en/us/support/docs/ip/dynamic-address-allocation-resolution/27470-100.html"
+        }
+      ]
+    },
+    {
+      "id": "ccna-t4-snmp-syslog",
+      "objective": "4.4–4.5",
+      "title": "SNMP y Syslog",
+      "content": [
+        "### SNMP",
+        "- NMS (manager) consulta con **Get/GetNext/GetBulk** y modifica con **Set** (UDP 161).",
+        "- Agente notifica con **Trap** (sin ACK) o **Inform** (con ACK) a UDP 162.",
+        "- **MIB** organiza objetos identificados por **OIDs**.",
+        "- v1/v2c: community strings en claro. **v3**: usuarios + noAuthNoPriv / authNoPriv / **authPriv**.",
+        "",
+        "### Syslog (UDP 514)",
+        "| Nivel | Nombre |",
+        "|---|---|",
+        "| 0 | Emergencies |",
+        "| 1 | Alerts |",
+        "| 2 | Critical |",
+        "| 3 | Errors |",
+        "| 4 | Warnings |",
+        "| 5 | Notifications |",
+        "| 6 | Informational |",
+        "| 7 | Debugging |",
+        "",
+        "Formato: `seq: timestamp: %FACILITY-SEVERITY-MNEMONIC: descripción`.",
+        "```",
+        "logging host 10.0.0.50",
+        "logging trap warnings        ! envía 0-4",
+        "logging buffered 16384 informational",
+        "logging console critical",
+        "service timestamps log datetime msec",
+        "terminal monitor             ! ver logs en SSH",
+        "```"
+      ],
+      "keyPoints": [
+        "Configurar un nivel incluye todos los más severos (números menores).",
+        "Every Awesome Cisco Engineer Will Need Ice cream Daily.",
+        "SNMPv3 authPriv = autenticación + cifrado."
+      ],
+      "references": [
+        {
+          "title": "Cisco — Syslog severity levels",
+          "url": "https://www.cisco.com/c/en/us/td/docs/routers/access/wireless/software/guide/SysMsgLogging.html"
+        }
+      ]
+    },
+    {
+      "id": "ccna-t4-qos",
+      "objective": "4.7",
+      "title": "QoS: clasificación, marcado, colas, policing y shaping",
+      "content": [
+        "Requisitos de voz: latencia ≤ 150 ms, jitter ≤ 30 ms, pérdida ≤ 1 %.",
+        "",
+        "| Herramienta | Qué hace |",
+        "|---|---|",
+        "| Clasificación | Identifica tráfico (ACL, NBAR, marcas) |",
+        "| Marcado | DSCP (6 bits, capa 3) / CoS (3 bits PCP en 802.1Q) |",
+        "| Queuing | CBWFQ garantiza ancho de banda por clase; **LLQ** añade cola de prioridad estricta (con policer implícito) |",
+        "| Congestion avoidance | WRED descarta temprano tráfico de menor prioridad (evita sincronización global TCP) |",
+        "| Policing | Descarta/remarca el exceso; entrada o salida |",
+        "| Shaping | Encola el exceso (añade retardo); salida |",
+        "",
+        "Marcas comunes: **EF (46)** voz, **AF41 (34)** videoconferencia, **CS3 (24)** señalización, **AF21** datos transaccionales, **DF (0)** best effort.",
+        "",
+        "**Trust boundary**: clasificar/marcar lo más cerca del origen (teléfono IP de confianza)."
+      ],
+      "keyPoints": [
+        "Policing = drop/remark; shaping = buffer.",
+        "EF para voz en LLQ.",
+        "WRED actúa antes de que la cola se llene."
+      ],
+      "references": [
+        {
+          "title": "RFC 4594 — DiffServ Service Classes",
+          "url": "https://www.rfc-editor.org/rfc/rfc4594"
+        }
+      ]
+    },
+    {
+      "id": "ccna-t4-ssh-files",
+      "objective": "4.8–4.9",
+      "title": "SSH y transferencia de archivos (TFTP/FTP)",
+      "content": [
+        "SSH: ver el tema de acceso de gestión (dominio 2). Verificación: `show ip ssh`, `show ssh`.",
+        "",
+        "| Protocolo | Transporte | Autenticación |",
+        "|---|---|---|",
+        "| TFTP | UDP 69 | No |",
+        "| FTP | TCP 21 (control) / 20 (datos activo) | Usuario/contraseña en claro |",
+        "| SCP / SFTP | SSH (TCP 22) | Sí, cifrado |",
+        "",
+        "```",
+        "copy running-config startup-config",
+        "copy running-config tftp:",
+        "copy tftp: flash:",
+        "ip ftp username admin",
+        "ip ftp password Cl4v3",
+        "copy ftp://10.0.0.5/c2900.bin flash:",
+        "show flash:",
+        "boot system flash:c2900.bin",
+        "```"
+      ],
+      "keyPoints": [
+        "`copy origen destino`.",
+        "TFTP: simple, UDP, sin autenticación."
+      ],
+      "references": [
+        {
+          "title": "RFC 1350 — TFTP",
+          "url": "https://www.rfc-editor.org/rfc/rfc1350"
+        }
+      ]
+    }
+  ]
+}

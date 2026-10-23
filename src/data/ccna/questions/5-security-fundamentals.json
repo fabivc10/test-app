@@ -1,0 +1,570 @@
+[
+  {
+    "id": "ccna-d5-001",
+    "domain": "5",
+    "type": "single",
+    "difficulty": "medium",
+    "question": "¿Qué término describe una debilidad en un sistema que podría ser aprovechada por un atacante?",
+    "options": ["Vulnerabilidad", "Exploit", "Amenaza", "Mitigación"],
+    "answer": [0],
+    "explanation": "Vulnerabilidad = debilidad. Exploit = herramienta o técnica que la aprovecha. Amenaza = potencial de que alguien explote la vulnerabilidad. Mitigación = medida que reduce el riesgo."
+  },
+  {
+    "id": "ccna-d5-002",
+    "domain": "5",
+    "type": "single",
+    "difficulty": "medium",
+    "question": "Un atacante envía correos que suplantan al banco de los empleados dirigidos específicamente al director financiero. ¿Qué tipo de ataque es?",
+    "options": ["Spear phishing (whaling)", "Vishing", "Smishing", "Pharming"],
+    "answer": [0],
+    "explanation": "Phishing dirigido a una persona concreta es spear phishing; cuando apunta a ejecutivos se le llama whaling. Vishing usa voz, smishing SMS y pharming redirige DNS/tráfico a sitios falsos."
+  },
+  {
+    "id": "ccna-d5-003",
+    "domain": "5",
+    "type": "single",
+    "difficulty": "hard",
+    "question": "Un atacante en la LAN envía respuestas ARP gratuitas anunciando que la IP del gateway corresponde a su MAC. ¿Qué característica del switch mitiga este ataque?",
+    "options": ["Dynamic ARP Inspection (DAI)", "Port security", "BPDU Guard", "Storm control"],
+    "answer": [0],
+    "explanation": "DAI valida los mensajes ARP en puertos no confiables contra la tabla de bindings de DHCP snooping (o ACLs ARP) y descarta los que no coinciden, evitando ARP spoofing/man-in-the-middle."
+  },
+  {
+    "id": "ccna-d5-004",
+    "domain": "5",
+    "type": "single",
+    "difficulty": "hard",
+    "question": "Un usuario conecta un router doméstico que entrega direcciones DHCP a otros usuarios. ¿Qué configuración lo evita?",
+    "options": [
+      "DHCP snooping, con solo el uplink hacia el servidor DHCP legítimo como trusted",
+      "DAI en todos los puertos",
+      "Port security con máximo 1 MAC",
+      "ip helper-address en el switch"
+    ],
+    "answer": [0],
+    "explanation": "DHCP snooping descarta mensajes de servidor (OFFER/ACK) recibidos en puertos untrusted. Solo los puertos hacia el servidor legítimo o el relay se configuran con `ip dhcp snooping trust`."
+  },
+  {
+    "id": "ccna-d5-005",
+    "domain": "5",
+    "type": "single",
+    "difficulty": "hard",
+    "question": "Habilitaste `ip dhcp snooping` globalmente, pero ningún cliente obtiene dirección. ¿Qué falta?",
+    "options": [
+      "`ip dhcp snooping vlan <id>` y marcar el uplink como trusted",
+      "Deshabilitar la opción 82",
+      "Configurar DAI",
+      "Configurar port security"
+    ],
+    "answer": [0],
+    "explanation": "DHCP snooping debe habilitarse también por VLAN, y todos los puertos son untrusted por defecto: si el uplink hacia el servidor no es trusted, se descartan las OFFER. (La inserción de opción 82 también puede causar problemas con servidores que no la aceptan, pero el primer paso es la VLAN y el trust.)"
+  },
+  {
+    "id": "ccna-d5-006",
+    "domain": "5",
+    "type": "single",
+    "difficulty": "medium",
+    "question": "¿Cuál es la acción de violación por defecto de port security?",
+    "options": ["Shutdown (err-disabled)", "Restrict", "Protect", "Ninguna, solo registra"],
+    "answer": [0],
+    "explanation": "Por defecto es shutdown: el puerto pasa a err-disabled y se genera log/SNMP. restrict descarta y registra (incrementa el contador), protect descarta en silencio."
+  },
+  {
+    "id": "ccna-d5-007",
+    "domain": "5",
+    "type": "single",
+    "difficulty": "hard",
+    "question": "Según la salida, ¿qué pasa si se conecta una tercera MAC al puerto?",
+    "exhibit": "```\nSW1# show port-security interface fa0/5\nPort Security              : Enabled\nPort Status                : Secure-up\nViolation Mode             : Restrict\nAging Time                 : 0 mins\nMaximum MAC Addresses      : 2\nTotal MAC Addresses        : 2\nConfigured MAC Addresses   : 0\nSticky MAC Addresses       : 2\nLast Source Address:Vlan   : 0050.7966.6800:10\nSecurity Violation Count   : 0\n```",
+    "options": [
+      "Las tramas de la tercera MAC se descartan, se genera un log y el contador de violaciones aumenta; el puerto sigue activo",
+      "El puerto pasa a err-disabled",
+      "La tercera MAC reemplaza a la más antigua",
+      "Las tramas se descartan sin registro ni contador"
+    ],
+    "answer": [0],
+    "explanation": "En modo restrict se descartan tramas de MACs no autorizadas, se envía syslog/SNMP y se incrementa Security Violation Count. El puerto sigue up. Shutdown lo deshabilitaría y protect no registraría."
+  },
+  {
+    "id": "ccna-d5-008",
+    "domain": "5",
+    "type": "single",
+    "difficulty": "medium",
+    "question": "¿Qué hace `switchport port-security mac-address sticky`?",
+    "options": [
+      "Aprende dinámicamente las MACs y las añade a la running-config como direcciones seguras",
+      "Fija la MAC del switch en el puerto",
+      "Impide que el puerto aprenda direcciones",
+      "Guarda las MACs solo en la tabla MAC volátil"
+    ],
+    "answer": [0],
+    "explanation": "Las sticky se aprenden dinámicamente y se escriben en la running-config; si se guarda la configuración (`copy run start`) persisten tras un reinicio."
+  },
+  {
+    "id": "ccna-d5-009",
+    "domain": "5",
+    "type": "single",
+    "difficulty": "hard",
+    "question": "Un puerto está en err-disabled por una violación de port security. ¿Cómo lo recuperas manualmente tras eliminar la causa?",
+    "options": ["`shutdown` y luego `no shutdown` en la interfaz", "`clear port-security`", "`no switchport port-security`", "Reiniciar el switch obligatoriamente"],
+    "answer": [0],
+    "explanation": "Un puerto err-disabled se recupera con shutdown/no shutdown, o automáticamente con `errdisable recovery cause psecure-violation` y un intervalo."
+  },
+  {
+    "id": "ccna-d5-010",
+    "domain": "5",
+    "type": "single",
+    "difficulty": "hard",
+    "question": "Debes bloquear que la red 192.168.10.0/24 acceda por Telnet a cualquier destino, permitiendo todo lo demás. ¿Qué ACL extendida es correcta?",
+    "options": [
+      "`access-list 110 deny tcp 192.168.10.0 0.0.0.255 any eq 23` y `access-list 110 permit ip any any`",
+      "`access-list 110 deny tcp any 192.168.10.0 0.0.0.255 eq 23` y `access-list 110 permit ip any any`",
+      "`access-list 10 deny 192.168.10.0 0.0.0.255` y `access-list 10 permit any`",
+      "`access-list 110 deny tcp 192.168.10.0 0.0.0.255 any eq 23` sin más líneas"
+    ],
+    "answer": [0],
+    "explanation": "Origen 192.168.10.0/24, destino any, puerto destino 23. Sin `permit ip any any` el deny implícito bloquearía todo. Una ACL estándar (10) no puede filtrar por puerto y la segunda opción invierte origen y destino."
+  },
+  {
+    "id": "ccna-d5-011",
+    "domain": "5",
+    "type": "single",
+    "difficulty": "medium",
+    "question": "¿Dónde se recomienda aplicar una ACL estándar?",
+    "options": ["Lo más cerca posible del destino", "Lo más cerca posible del origen", "Siempre en la interfaz WAN", "En las líneas de consola"],
+    "answer": [0],
+    "explanation": "Las ACL estándar solo filtran por origen; aplicarlas cerca del origen bloquearía ese tráfico hacia todos los destinos. Por eso van cerca del destino. Las extendidas, al ser específicas, van cerca del origen."
+  },
+  {
+    "id": "ccna-d5-012",
+    "domain": "5",
+    "type": "single",
+    "difficulty": "hard",
+    "question": "¿Qué wildcard coincide con los hosts 172.16.32.0 a 172.16.47.255?",
+    "options": ["0.0.15.255", "0.0.16.255", "255.255.240.0", "0.0.31.255"],
+    "answer": [0],
+    "explanation": "El rango 32–47 en el tercer octeto son 16 valores (/20). Wildcard = 255.255.255.255 − 255.255.240.0 = 0.0.15.255. Se usaría `172.16.32.0 0.0.15.255`."
+  },
+  {
+    "id": "ccna-d5-013",
+    "domain": "5",
+    "type": "single",
+    "difficulty": "hard",
+    "question": "Una ACL tiene estas líneas en orden: `10 permit ip 10.1.0.0 0.0.255.255 any`, `20 deny ip host 10.1.5.5 any`. ¿Qué ocurre con el tráfico de 10.1.5.5?",
+    "options": [
+      "Se permite, porque coincide primero con la línea 10",
+      "Se deniega, porque la línea 20 es más específica",
+      "Se deniega por el deny implícito",
+      "Depende de la dirección de aplicación"
+    ],
+    "answer": [0],
+    "explanation": "Las ACL se evalúan de arriba hacia abajo y se detienen en la primera coincidencia. 10.1.5.5 coincide con la línea 10 y se permite; la línea 20 nunca se alcanza. Las entradas específicas deben ir primero."
+  },
+  {
+    "id": "ccna-d5-014",
+    "domain": "5",
+    "type": "single",
+    "difficulty": "medium",
+    "question": "¿Cuántas ACL IPv4 se pueden aplicar como máximo a una interfaz?",
+    "options": ["Una por dirección (una de entrada y una de salida)", "Una en total", "Dos por dirección", "Ilimitadas"],
+    "answer": [0],
+    "explanation": "Regla: una ACL por protocolo, por interfaz y por dirección. Para IPv4: una inbound y una outbound."
+  },
+  {
+    "id": "ccna-d5-015",
+    "domain": "5",
+    "type": "single",
+    "difficulty": "hard",
+    "question": "Quieres permitir solo que la red de administración 10.99.0.0/24 haga SSH al router. ¿Qué configuración es correcta?",
+    "options": [
+      "`access-list 5 permit 10.99.0.0 0.0.0.255` y en `line vty 0 15`: `access-class 5 in`",
+      "`access-list 5 permit 10.99.0.0 0.0.0.255` y en Gi0/0: `ip access-group 5 in`",
+      "`access-list 5 permit 10.99.0.0 255.255.255.0` y `access-class 5 out` en las VTY",
+      "`line vty 0 15` → `ip access-group 5 in`"
+    ],
+    "answer": [0],
+    "explanation": "Para restringir acceso remoto al propio dispositivo se aplica una ACL estándar a las líneas VTY con `access-class <acl> in`. `ip access-group` filtraría todo el tráfico de la interfaz."
+  },
+  {
+    "id": "ccna-d5-016",
+    "domain": "5",
+    "type": "single",
+    "difficulty": "hard",
+    "question": "En una ACL extendida nombrada, ¿cómo insertas una nueva entrada antes de la línea 20 existente?",
+    "options": [
+      "Entrar a `ip access-list extended NOMBRE` y escribir la entrada con número de secuencia 15",
+      "Borrar la ACL completa y recrearla",
+      "Las ACL nombradas no admiten inserciones",
+      "Usar `access-list NOMBRE insert 20`"
+    ],
+    "answer": [0],
+    "explanation": "Las ACL nombradas (y las numeradas editadas en modo ACL) usan números de secuencia, por defecto de 10 en 10. Una entrada con secuencia 15 se inserta entre la 10 y la 20; también se pueden borrar líneas con `no 20`."
+  },
+  {
+    "id": "ccna-d5-017",
+    "domain": "5",
+    "type": "multiple",
+    "difficulty": "hard",
+    "question": "¿Qué dos sentencias ACL coinciden únicamente con el host 192.168.1.10?",
+    "options": [
+      "permit host 192.168.1.10",
+      "permit 192.168.1.10 0.0.0.0",
+      "permit 192.168.1.10 255.255.255.255",
+      "permit 192.168.1.10 0.0.0.255",
+      "permit any 192.168.1.10"
+    ],
+    "answer": [0, 1],
+    "explanation": "`host x` equivale a wildcard 0.0.0.0. Una wildcard 255.255.255.255 equivale a `any`, y 0.0.0.255 abarcaría toda la /24."
+  },
+  {
+    "id": "ccna-d5-018",
+    "domain": "5",
+    "type": "single",
+    "difficulty": "medium",
+    "question": "¿Qué ventaja tiene `enable secret` frente a `enable password`?",
+    "options": [
+      "Almacena la contraseña con un hash fuerte (por defecto MD5/tipo 5 o superior) y tiene precedencia si ambos existen",
+      "Permite contraseñas más largas",
+      "Cifra todas las contraseñas del archivo de configuración",
+      "Solo se aplica a las líneas VTY"
+    ],
+    "answer": [0],
+    "explanation": "`enable secret` guarda un hash (tipo 5, 8 o 9) y anula a `enable password` si ambos están configurados. `service password-encryption` solo aplica un cifrado tipo 7 débil y reversible a las contraseñas en texto plano."
+  },
+  {
+    "id": "ccna-d5-019",
+    "domain": "5",
+    "type": "single",
+    "difficulty": "medium",
+    "question": "¿Qué hace `service password-encryption`?",
+    "options": [
+      "Ofusca con cifrado tipo 7 (reversible) las contraseñas en texto plano de la configuración",
+      "Aplica SHA-256 a todas las contraseñas",
+      "Obliga a usar contraseñas complejas",
+      "Cifra el tráfico Telnet"
+    ],
+    "answer": [0],
+    "explanation": "Solo evita la lectura casual (shoulder surfing). El tipo 7 se revierte fácilmente; para protección real se usan `secret` (tipos 8/9)."
+  },
+  {
+    "id": "ccna-d5-020",
+    "domain": "5",
+    "type": "single",
+    "difficulty": "medium",
+    "question": "¿Qué ejemplo representa autenticación multifactor (MFA)?",
+    "options": [
+      "Contraseña + código de un token o app en el teléfono",
+      "Contraseña + PIN",
+      "Usuario + contraseña",
+      "Dos contraseñas distintas"
+    ],
+    "answer": [0],
+    "explanation": "MFA combina factores de categorías distintas: algo que sabes (contraseña/PIN), algo que tienes (token, teléfono, tarjeta) y algo que eres (biometría). Contraseña + PIN son dos factores del mismo tipo."
+  },
+  {
+    "id": "ccna-d5-021",
+    "domain": "5",
+    "type": "single",
+    "difficulty": "medium",
+    "question": "En AAA, ¿qué función registra qué comandos ejecutó un administrador y cuándo?",
+    "options": ["Accounting", "Authentication", "Authorization", "Auditing"],
+    "answer": [0],
+    "explanation": "Authentication = quién eres; Authorization = qué puedes hacer; Accounting = qué hiciste (registro de sesiones y comandos)."
+  },
+  {
+    "id": "ccna-d5-022",
+    "domain": "5",
+    "type": "single",
+    "difficulty": "hard",
+    "question": "Con `aaa new-model` y `aaa authentication login default group tacacs+ local`, ¿qué sucede si el servidor TACACS+ no responde?",
+    "options": [
+      "Se usa la base de usuarios local como respaldo",
+      "Se deniega el acceso a todos",
+      "Se permite el acceso sin autenticación",
+      "Se usa la contraseña de enable"
+    ],
+    "answer": [0],
+    "explanation": "Los métodos se prueban en orden. Si TACACS+ no está disponible (error, no rechazo), se intenta `local`. Si el servidor responde con un rechazo, no se pasa al siguiente método."
+  },
+  {
+    "id": "ccna-d5-023",
+    "domain": "5",
+    "type": "single",
+    "difficulty": "medium",
+    "question": "¿Qué componentes participan en una autenticación 802.1X?",
+    "options": [
+      "Supplicant (cliente), authenticator (switch/WLC) y authentication server (RADIUS)",
+      "Cliente, servidor DHCP y servidor DNS",
+      "Supplicant, router y firewall",
+      "AP, WLC y servidor TACACS+"
+    ],
+    "answer": [0],
+    "explanation": "El supplicant envía credenciales EAP; el authenticator (switch o WLC) controla el puerto y retransmite EAP sobre RADIUS al servidor de autenticación (p. ej., Cisco ISE)."
+  },
+  {
+    "id": "ccna-d5-024",
+    "domain": "5",
+    "type": "single",
+    "difficulty": "medium",
+    "question": "Una empresa necesita conectar permanentemente la red de su sucursal con la sede por Internet de forma cifrada, sin software en los PCs. ¿Qué solución usa?",
+    "options": ["VPN IPsec site-to-site", "VPN de acceso remoto con cliente", "SSH", "GRE sin cifrado"],
+    "answer": [0],
+    "explanation": "Una VPN site-to-site se establece entre gateways (routers/firewalls) y es transparente para los hosts. La VPN de acceso remoto (cliente AnyConnect/Secure Client o SSL/TLS) es para usuarios individuales. GRE solo encapsula, no cifra."
+  },
+  {
+    "id": "ccna-d5-025",
+    "domain": "5",
+    "type": "multiple",
+    "difficulty": "hard",
+    "question": "¿Qué dos servicios proporciona IPsec?",
+    "options": ["Confidencialidad mediante cifrado (p. ej., AES)", "Integridad y autenticación del origen de los datos (HMAC)", "Asignación dinámica de direcciones IP a los hosts", "Compresión obligatoria", "Enrutamiento dinámico"],
+    "answer": [0, 1],
+    "explanation": "IPsec ofrece confidencialidad (ESP con AES), integridad (HMAC-SHA), autenticación de peers (PSK/certificados vía IKE) y anti-replay. No es un protocolo de enrutamiento ni de direccionamiento."
+  },
+  {
+    "id": "ccna-d5-026",
+    "domain": "5",
+    "type": "single",
+    "difficulty": "hard",
+    "question": "¿Qué protocolo de IPsec proporciona cifrado del payload?",
+    "options": ["ESP (protocolo IP 50)", "AH (protocolo IP 51)", "IKE (UDP 500)", "GRE (protocolo IP 47)"],
+    "answer": [0],
+    "explanation": "ESP cifra y autentica; AH solo autentica (sin cifrado) y no funciona con NAT. IKE negocia las SAs y GRE es un protocolo de túnel sin seguridad."
+  },
+  {
+    "id": "ccna-d5-027",
+    "domain": "5",
+    "type": "single",
+    "difficulty": "medium",
+    "question": "¿Qué elemento de un programa de seguridad consiste en enseñar periódicamente a los usuarios a reconocer phishing?",
+    "options": ["Concientización de usuarios (user awareness)", "Control de acceso físico", "Política de contraseñas", "Segmentación de red"],
+    "answer": [0],
+    "explanation": "Los programas de seguridad incluyen user awareness (campañas, phishing simulado), formación específica por rol y control de acceso físico (tarjetas, cerraduras, biometría)."
+  },
+  {
+    "id": "ccna-d5-028",
+    "domain": "5",
+    "type": "single",
+    "difficulty": "medium",
+    "question": "Un atacante inunda un switch con miles de MACs falsas hasta llenar la tabla CAM, haciendo que el switch inunde todo el tráfico. ¿Cómo se mitiga?",
+    "options": ["Port security con límite de MACs", "DHCP snooping", "Root Guard", "VTP transparent"],
+    "answer": [0],
+    "explanation": "MAC flooding se mitiga limitando el número de MACs por puerto con port security. Las demás funciones protegen contra otros ataques."
+  },
+  {
+    "id": "ccna-d5-029",
+    "domain": "5",
+    "type": "single",
+    "difficulty": "hard",
+    "question": "¿Qué ataque de VLAN hopping aprovecha que el switch elimina la etiqueta de la VLAN nativa?",
+    "options": ["Double tagging", "Switch spoofing", "MAC flooding", "ARP poisoning"],
+    "answer": [0],
+    "explanation": "En double tagging el atacante (en la VLAN nativa) envía tramas con dos etiquetas; el primer switch retira la externa (nativa) y reenvía por el trunk con la interna. Se mitiga usando una VLAN nativa no utilizada o etiquetando la nativa. Switch spoofing abusa de DTP."
+  },
+  {
+    "id": "ccna-d5-030",
+    "domain": "5",
+    "type": "single",
+    "difficulty": "medium",
+    "question": "¿Qué ataque consiste en saturar un servidor con tráfico desde miles de equipos comprometidos?",
+    "options": ["DDoS", "Man-in-the-middle", "Spoofing", "Reconocimiento"],
+    "answer": [0],
+    "explanation": "Un DDoS usa una botnet para agotar recursos del objetivo. Un DoS proviene de una sola fuente."
+  },
+  {
+    "id": "ccna-d5-031",
+    "domain": "5",
+    "type": "single",
+    "difficulty": "medium",
+    "question": "¿Qué protocolo de seguridad inalámbrica usar en una red corporativa nueva para obtener el máximo nivel de protección?",
+    "options": ["WPA3-Enterprise", "WPA2-Personal", "WPA-TKIP", "WEP"],
+    "answer": [0],
+    "explanation": "WPA3-Enterprise combina 802.1X con protección de tramas de gestión (PMF obligatorio) y, opcionalmente, el modo de 192 bits. WPA2-Personal usa PSK compartida; WPA/TKIP y WEP son inseguros."
+  },
+  {
+    "id": "ccna-d5-032",
+    "domain": "5",
+    "type": "single",
+    "difficulty": "hard",
+    "question": "En el GUI del WLC creas una WLAN con WPA2-PSK. ¿Qué parámetros configuras en Security > Layer 2?",
+    "options": [
+      "WPA2 Policy, cifrado AES, Auth Key Mgmt = PSK y la passphrase",
+      "802.1X y la IP del servidor RADIUS",
+      "Web Authentication y una ACL de preautenticación",
+      "WEP de 104 bits"
+    ],
+    "answer": [0],
+    "explanation": "Para WPA2-Personal: Layer 2 Security = WPA+WPA2, WPA2 Policy con encriptación AES (CCMP), Auth Key Management = PSK y formato ASCII de la clave."
+  },
+  {
+    "id": "ccna-d5-033",
+    "domain": "5",
+    "type": "single",
+    "difficulty": "medium",
+    "question": "¿Qué ventaja de seguridad aporta un certificado digital frente a una contraseña para autenticar dispositivos?",
+    "options": [
+      "Se basa en criptografía de clave pública y no se transmite un secreto reutilizable",
+      "No caduca nunca",
+      "No requiere ninguna infraestructura",
+      "Es más fácil de memorizar"
+    ],
+    "answer": [0],
+    "explanation": "La autenticación con certificados demuestra la posesión de la clave privada sin enviarla. Requiere una PKI (CA) y los certificados sí tienen fecha de expiración y pueden revocarse."
+  },
+  {
+    "id": "ccna-d5-034",
+    "domain": "5",
+    "type": "single",
+    "difficulty": "hard",
+    "question": "Una ACL extendida se aplicó con `ip access-group 120 out` en Gi0/1 (LAN), pero el tráfico desde la LAN sigue sin filtrarse. ¿Por qué?",
+    "options": [
+      "La ACL de salida en la interfaz LAN filtra el tráfico que entra a la LAN, no el que sale de ella",
+      "Las ACL extendidas solo se pueden aplicar inbound",
+      "Falta `ip access-group 120` en la consola",
+      "Las ACL no filtran tráfico de LAN"
+    ],
+    "answer": [0],
+    "explanation": "La dirección se interpreta desde el router: `out` en la interfaz LAN afecta a paquetes que el router envía hacia la LAN. Para filtrar lo que viene de la LAN se aplica `in` en esa interfaz (o `out` en la interfaz de salida)."
+  },
+  {
+    "id": "ccna-d5-035",
+    "domain": "5",
+    "type": "single",
+    "difficulty": "hard",
+    "question": "¿Qué permite la línea `access-list 101 permit tcp any host 10.0.0.10 eq 443 established`?",
+    "options": [
+      "Solo segmentos TCP con ACK o RST activados (tráfico de sesiones ya iniciadas)",
+      "Solo nuevas conexiones TCP hacia 10.0.0.10:443",
+      "Todo el tráfico TCP hacia 10.0.0.10",
+      "Todo el tráfico HTTPS en ambas direcciones"
+    ],
+    "answer": [0],
+    "explanation": "La palabra `established` coincide con segmentos TCP con ACK o RST, es decir, no con el SYN inicial. Es un filtrado rudimentario para tráfico de retorno, no un firewall stateful."
+  },
+  {
+    "id": "ccna-d5-036",
+    "domain": "5",
+    "type": "single",
+    "difficulty": "medium",
+    "question": "¿Qué medida de control de acceso físico protege los equipos de red?",
+    "options": ["Racks y cuartos de comunicaciones cerrados con control por tarjeta", "Contraseña de enable", "ACL en VTY", "SSH"],
+    "answer": [0],
+    "explanation": "Quien tiene acceso físico puede usar la consola o recuperar contraseñas. Cuartos cerrados, tarjetas, cámaras y registros de acceso son controles físicos."
+  },
+  {
+    "id": "ccna-d5-037",
+    "domain": "5",
+    "type": "single",
+    "difficulty": "medium",
+    "question": "¿Qué comando crea un usuario local con contraseña almacenada como hash en IOS?",
+    "options": ["username admin secret Cl4v3$egura", "username admin password Cl4v3$egura", "user admin hash Cl4v3$egura", "aaa user admin Cl4v3$egura"],
+    "answer": [0],
+    "explanation": "`username <nombre> secret <pwd>` guarda un hash. Con `password` se almacena en texto plano (o tipo 7 con password-encryption)."
+  },
+  {
+    "id": "ccna-d5-038",
+    "domain": "5",
+    "type": "single",
+    "difficulty": "hard",
+    "question": "¿Qué función de seguridad se configura con `login block-for 120 attempts 5 within 60`?",
+    "options": [
+      "Bloquea los intentos de login durante 120 s si hay 5 fallos en 60 s",
+      "Bloquea al usuario 5 minutos tras 120 intentos",
+      "Cierra sesiones inactivas tras 120 s",
+      "Limita a 5 sesiones VTY simultáneas"
+    ],
+    "answer": [0],
+    "explanation": "Es una protección contra fuerza bruta: entra en quiet period de 120 s tras 5 intentos fallidos en 60 s. Para inactividad se usa `exec-timeout`."
+  },
+  {
+    "id": "ccna-d5-039",
+    "domain": "5",
+    "type": "multiple",
+    "difficulty": "hard",
+    "question": "¿Qué dos requisitos tiene Dynamic ARP Inspection para funcionar con hosts que usan DHCP?",
+    "options": [
+      "DHCP snooping habilitado en la VLAN para construir la tabla de bindings",
+      "Los uplinks entre switches/hacia el router configurados como `ip arp inspection trust`",
+      "Port security en todos los puertos",
+      "Que todos los hosts usen IP estática",
+      "Que el switch tenga `ip routing`"
+    ],
+    "answer": [0, 1],
+    "explanation": "DAI valida ARP contra la DHCP snooping binding table y, por defecto, todos los puertos son untrusted; los enlaces de infraestructura deben ser trusted para no descartar ARP legítimos. Para hosts estáticos se usan ARP ACLs."
+  },
+  {
+    "id": "ccna-d5-040",
+    "domain": "5",
+    "type": "single",
+    "difficulty": "medium",
+    "question": "¿Qué componente de la tríada CIA garantiza que los datos no fueron modificados en tránsito?",
+    "options": ["Integridad", "Confidencialidad", "Disponibilidad", "No repudio"],
+    "answer": [0],
+    "explanation": "Integridad = datos no alterados (hash/HMAC). Confidencialidad = solo personas autorizadas (cifrado). Disponibilidad = accesible cuando se necesita."
+  },
+  {
+    "id": "ccna-d5-041",
+    "domain": "5",
+    "type": "single",
+    "difficulty": "hard",
+    "question": "Necesitas una ACL que permita DNS desde la LAN 10.1.1.0/24 hacia el servidor 8.8.8.8. ¿Qué entrada es la más precisa?",
+    "options": [
+      "permit udp 10.1.1.0 0.0.0.255 host 8.8.8.8 eq 53",
+      "permit udp host 8.8.8.8 eq 53 10.1.1.0 0.0.0.255",
+      "permit tcp 10.1.1.0 0.0.0.255 host 8.8.8.8 eq 443",
+      "permit ip 10.1.1.0 0.0.0.255 any"
+    ],
+    "answer": [0],
+    "explanation": "Las consultas DNS van por UDP 53 (TCP 53 para respuestas grandes/transferencias) desde la LAN al servidor; el puerto destino es 53. La segunda opción describe el tráfico de respuesta y la última es demasiado amplia."
+  },
+  {
+    "id": "ccna-d5-042",
+    "domain": "5",
+    "type": "single",
+    "difficulty": "medium",
+    "question": "¿Qué tipo de malware se replica por sí mismo a través de la red sin intervención del usuario?",
+    "options": ["Gusano (worm)", "Troyano", "Virus", "Spyware"],
+    "answer": [0],
+    "explanation": "Los gusanos se propagan explotando vulnerabilidades de red sin intervención. Un virus necesita que el usuario ejecute un archivo infectado y un troyano se disfraza de software legítimo."
+  },
+  {
+    "id": "ccna-d5-043",
+    "domain": "5",
+    "type": "single",
+    "difficulty": "hard",
+    "question": "¿Qué protege PMF (802.11w), obligatorio en WPA3?",
+    "options": [
+      "Las tramas de gestión (deauthentication/disassociation) frente a falsificación",
+      "Las tramas de datos con AES",
+      "El tráfico CAPWAP",
+      "La asignación de canales"
+    ],
+    "answer": [0],
+    "explanation": "Protected Management Frames cifra/autentica tramas de gestión, evitando ataques de desautenticación masiva usados para forzar reconexiones o DoS."
+  },
+  {
+    "id": "ccna-d5-044",
+    "domain": "5",
+    "type": "single",
+    "difficulty": "medium",
+    "question": "¿Qué comando aplica un tiempo de inactividad de 5 minutos a la consola?",
+    "options": ["`line console 0` → `exec-timeout 5 0`", "`line console 0` → `timeout 300`", "`session-timeout 5` global", "`login block-for 300`"],
+    "answer": [0],
+    "explanation": "`exec-timeout <min> <seg>` cierra la sesión inactiva. `exec-timeout 0 0` la desactiva (no recomendado en producción)."
+  },
+  {
+    "id": "ccna-d5-045",
+    "domain": "5",
+    "type": "single",
+    "difficulty": "hard",
+    "question": "Una ACL IPv6 se aplica en una interfaz. ¿Qué diferencia clave tiene su deny implícito respecto a IPv4?",
+    "options": [
+      "Antes del deny implícito, IPv6 permite implícitamente ND (NS/NA), por lo que un `deny ipv6 any any` explícito puede romper la resolución de vecinos",
+      "Las ACL IPv6 no tienen deny implícito",
+      "Las ACL IPv6 permiten todo por defecto",
+      "Las ACL IPv6 solo se aplican a la salida"
+    ],
+    "answer": [0],
+    "explanation": "Las ACL IPv6 incluyen implícitamente `permit icmp any any nd-na`, `permit icmp any any nd-ns` y `deny ipv6 any any`. Si se agrega un deny explícito total al final, ND (equivalente a ARP) se bloquea. Se aplican con `ipv6 traffic-filter`."
+  }
+]

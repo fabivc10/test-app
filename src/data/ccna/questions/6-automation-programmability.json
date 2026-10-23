@@ -1,0 +1,378 @@
+[
+  {
+    "id": "ccna-d6-001",
+    "domain": "6",
+    "type": "single",
+    "difficulty": "medium",
+    "question": "En una arquitectura SDN, ¿qué plano se centraliza en el controlador?",
+    "options": ["Plano de control", "Plano de datos", "Plano físico", "Plano de gestión de energía"],
+    "answer": [0],
+    "explanation": "SDN separa el plano de control (decisiones: rutas, políticas), que se centraliza en el controlador, del plano de datos (reenvío), que permanece en los dispositivos."
+  },
+  {
+    "id": "ccna-d6-002",
+    "domain": "6",
+    "type": "single",
+    "difficulty": "medium",
+    "question": "¿Qué interfaz usa un controlador SDN para comunicarse con los dispositivos de red?",
+    "options": ["Southbound API (SBI)", "Northbound API (NBI)", "East-West API", "CLI de consola"],
+    "answer": [0],
+    "explanation": "La SBI conecta el controlador con los dispositivos (NETCONF, RESTCONF, OpenFlow, SSH/CLI, SNMP). La NBI expone el controlador a aplicaciones y scripts (normalmente REST). East-West comunica controladores entre sí."
+  },
+  {
+    "id": "ccna-d6-003",
+    "domain": "6",
+    "type": "single",
+    "difficulty": "medium",
+    "question": "Un script Python consulta el inventario de Cisco Catalyst Center (DNA Center) mediante su API REST. ¿Qué interfaz está usando?",
+    "options": ["Northbound API", "Southbound API", "OpenFlow", "SNMP traps"],
+    "answer": [0],
+    "explanation": "Las aplicaciones y scripts usan la NBI (REST) del controlador; el controlador usa SBIs para hablar con los dispositivos."
+  },
+  {
+    "id": "ccna-d6-004",
+    "domain": "6",
+    "type": "single",
+    "difficulty": "hard",
+    "question": "En Cisco SD-Access, ¿qué describe el *underlay*?",
+    "options": [
+      "La red física IP de switches y enlaces que provee conectividad entre los nodos del fabric",
+      "Los túneles VXLAN que transportan el tráfico de usuarios",
+      "Las políticas de grupo (SGT) de los usuarios",
+      "El controlador que gestiona la red"
+    ],
+    "answer": [0],
+    "explanation": "El underlay es la red física (en SD-Access, IP enrutada típicamente con IS-IS). El overlay es la red virtual creada sobre ella (VXLAN en el plano de datos, LISP en el plano de control). El fabric es el conjunto underlay + overlay."
+  },
+  {
+    "id": "ccna-d6-005",
+    "domain": "6",
+    "type": "multiple",
+    "difficulty": "hard",
+    "question": "¿Qué dos afirmaciones comparan correctamente la gestión tradicional con la basada en controlador?",
+    "options": [
+      "En la tradicional, cada dispositivo se configura individualmente (box-by-box)",
+      "Con controlador, las políticas se definen centralmente y se despliegan a muchos dispositivos",
+      "Con controlador, los dispositivos dejan de reenviar tráfico por sí mismos",
+      "La gestión tradicional ofrece mayor consistencia de configuración",
+      "Con controlador ya no se necesitan protocolos de enrutamiento en ningún caso"
+    ],
+    "answer": [0, 1],
+    "explanation": "La gestión tradicional es por dispositivo (CLI) y propensa a errores e inconsistencias. Con controlador se gestiona por intención/política de forma centralizada. El plano de datos sigue en los dispositivos y el underlay sigue usando protocolos de enrutamiento."
+  },
+  {
+    "id": "ccna-d6-006",
+    "domain": "6",
+    "type": "single",
+    "difficulty": "medium",
+    "question": "¿Qué método HTTP se usa en una API REST para obtener información sin modificarla?",
+    "options": ["GET", "POST", "PUT", "DELETE"],
+    "answer": [0],
+    "explanation": "CRUD ↔ HTTP: Create = POST, Read = GET, Update = PUT (reemplaza) / PATCH (parcial), Delete = DELETE."
+  },
+  {
+    "id": "ccna-d6-007",
+    "domain": "6",
+    "type": "single",
+    "difficulty": "medium",
+    "question": "¿Qué operación CRUD corresponde al método POST?",
+    "options": ["Create", "Read", "Update", "Delete"],
+    "answer": [0],
+    "explanation": "POST crea un recurso nuevo. PUT/PATCH actualizan y DELETE elimina."
+  },
+  {
+    "id": "ccna-d6-008",
+    "domain": "6",
+    "type": "single",
+    "difficulty": "hard",
+    "question": "Una llamada a la API devuelve el código HTTP 401. ¿Qué significa?",
+    "options": [
+      "Unauthorized: faltan credenciales válidas o el token es inválido",
+      "Forbidden: el usuario está autenticado pero no tiene permisos",
+      "Not Found: el recurso no existe",
+      "Created: el recurso se creó correctamente"
+    ],
+    "answer": [0],
+    "explanation": "2xx éxito (200 OK, 201 Created, 204 No Content), 4xx error del cliente (400 Bad Request, 401 Unauthorized, 403 Forbidden, 404 Not Found), 5xx error del servidor."
+  },
+  {
+    "id": "ccna-d6-009",
+    "domain": "6",
+    "type": "multiple",
+    "difficulty": "medium",
+    "question": "¿Qué dos características definen a una API REST?",
+    "options": [
+      "Stateless: cada petición contiene toda la información necesaria",
+      "Arquitectura cliente-servidor sobre HTTP/HTTPS",
+      "Requiere mantener una sesión TCP permanente con el servidor",
+      "Solo admite XML como formato de datos",
+      "Usa exclusivamente UDP"
+    ],
+    "answer": [0, 1],
+    "explanation": "REST es cliente-servidor, sin estado, cacheable y con interfaz uniforme sobre HTTP(S). Admite JSON (lo más común), XML, YAML, etc."
+  },
+  {
+    "id": "ccna-d6-010",
+    "domain": "6",
+    "type": "single",
+    "difficulty": "hard",
+    "question": "¿Qué tipo de dato es el valor de la clave `interfaces` en este JSON?",
+    "exhibit": "```json\n{\n  \"hostname\": \"R1\",\n  \"interfaces\": [\n    { \"name\": \"Gi0/0\", \"ip\": \"10.0.0.1\", \"enabled\": true },\n    { \"name\": \"Gi0/1\", \"ip\": \"10.0.1.1\", \"enabled\": false }\n  ]\n}\n```",
+    "options": ["Un arreglo (array) de objetos", "Un objeto con dos claves", "Un string", "Un booleano"],
+    "answer": [0],
+    "explanation": "Los corchetes `[ ]` delimitan un arreglo; cada elemento entre llaves `{ }` es un objeto con pares clave-valor. `enabled` es booleano y `hostname` un string."
+  },
+  {
+    "id": "ccna-d6-011",
+    "domain": "6",
+    "type": "single",
+    "difficulty": "hard",
+    "question": "¿Cuál de estos fragmentos es JSON válido?",
+    "options": [
+      "`{\"vlan\": 10, \"name\": \"USERS\", \"active\": true}`",
+      "`{'vlan': 10, 'name': 'USERS'}`",
+      "`{\"vlan\": 10, \"name\": \"USERS\",}`",
+      "`{vlan: 10, name: \"USERS\"}`"
+    ],
+    "answer": [0],
+    "explanation": "JSON exige comillas dobles en claves y strings, no admite comas finales y las claves siempre van entre comillas. Los números y booleanos (`true`/`false`) van sin comillas."
+  },
+  {
+    "id": "ccna-d6-012",
+    "domain": "6",
+    "type": "single",
+    "difficulty": "medium",
+    "question": "¿Qué herramienta de gestión de configuración es agentless y usa playbooks en YAML ejecutados mediante SSH?",
+    "options": ["Ansible", "Puppet", "Chef", "SNMP"],
+    "answer": [0],
+    "explanation": "Ansible no requiere agente en los dispositivos (usa SSH o APIs) y define tareas en playbooks YAML con un modelo push. Puppet y Chef tradicionalmente usan agentes y un modelo pull."
+  },
+  {
+    "id": "ccna-d6-013",
+    "domain": "6",
+    "type": "single",
+    "difficulty": "medium",
+    "question": "¿Qué herramienta se usa principalmente para infraestructura como código declarativa, aprovisionando recursos (por ejemplo, en nubes) a partir de archivos HCL?",
+    "options": ["Terraform", "Ansible", "Syslog", "NETCONF"],
+    "answer": [0],
+    "explanation": "Terraform (HashiCorp) es declarativo: describes el estado deseado en HCL y calcula un plan para alcanzarlo, guardando un archivo de estado. Ansible es más procedimental y orientado a configuración."
+  },
+  {
+    "id": "ccna-d6-014",
+    "domain": "6",
+    "type": "multiple",
+    "difficulty": "medium",
+    "question": "¿Qué dos beneficios aporta la automatización de redes?",
+    "options": [
+      "Menos errores humanos y configuraciones más consistentes",
+      "Despliegue más rápido de cambios a escala",
+      "Elimina la necesidad de documentación",
+      "Elimina la necesidad de seguridad",
+      "Hace innecesario el monitoreo"
+    ],
+    "answer": [0, 1],
+    "explanation": "La automatización reduce errores, estandariza configuraciones, acelera despliegues y libera tiempo del personal. No reemplaza la documentación, la seguridad ni el monitoreo."
+  },
+  {
+    "id": "ccna-d6-015",
+    "domain": "6",
+    "type": "single",
+    "difficulty": "hard",
+    "question": "¿Qué tipo de inteligencia artificial analiza datos históricos de telemetría para anticipar que un enlace se saturará la próxima semana?",
+    "options": ["IA predictiva (machine learning)", "IA generativa", "Sistema experto basado solo en reglas fijas", "SNMP polling"],
+    "answer": [0],
+    "explanation": "La IA predictiva usa modelos de ML entrenados con datos históricos para pronosticar eventos (capacidad, fallos, anomalías). La IA generativa crea contenido nuevo (texto, configuraciones, resúmenes) a partir de prompts."
+  },
+  {
+    "id": "ccna-d6-016",
+    "domain": "6",
+    "type": "single",
+    "difficulty": "medium",
+    "question": "Un ingeniero pide a un asistente de IA que redacte la configuración de una VLAN y explique una salida de `show`. ¿Qué tipo de IA es y qué precaución aplica?",
+    "options": [
+      "IA generativa; el resultado debe revisarse y validarse antes de aplicarlo",
+      "IA predictiva; puede aplicarse sin revisar",
+      "Machine learning supervisado; no requiere validación",
+      "Un controlador SDN; aplica la configuración automáticamente"
+    ],
+    "answer": [0],
+    "explanation": "La IA generativa produce contenido nuevo, pero puede cometer errores (alucinaciones). Las configuraciones generadas deben revisarse, probarse y aplicarse bajo control de cambios. Tampoco se deben compartir datos sensibles con herramientas no aprobadas."
+  },
+  {
+    "id": "ccna-d6-017",
+    "domain": "6",
+    "type": "single",
+    "difficulty": "medium",
+    "question": "¿Qué tipo de aprendizaje automático entrena un modelo con datos etiquetados (por ejemplo, tráfico marcado como normal o malicioso)?",
+    "options": ["Aprendizaje supervisado", "Aprendizaje no supervisado", "Aprendizaje por refuerzo", "Clustering"],
+    "answer": [0],
+    "explanation": "El aprendizaje supervisado usa ejemplos con su etiqueta correcta. El no supervisado busca patrones sin etiquetas (clustering, detección de anomalías) y el de refuerzo aprende por recompensa."
+  },
+  {
+    "id": "ccna-d6-018",
+    "domain": "6",
+    "type": "single",
+    "difficulty": "hard",
+    "question": "¿Qué protocolo de la SBI usa el puerto TCP 830 sobre SSH y modelos de datos YANG con codificación XML?",
+    "options": ["NETCONF", "RESTCONF", "OpenFlow", "SNMPv3"],
+    "answer": [0],
+    "explanation": "NETCONF corre sobre SSH (TCP 830), usa RPCs en XML y modelos YANG. RESTCONF expone los modelos YANG mediante HTTPS con JSON o XML. OpenFlow programa tablas de flujo."
+  },
+  {
+    "id": "ccna-d6-019",
+    "domain": "6",
+    "type": "single",
+    "difficulty": "medium",
+    "question": "¿Qué es YANG?",
+    "options": [
+      "Un lenguaje de modelado de datos que define la estructura de configuración y estado de los dispositivos",
+      "Un protocolo de transporte para APIs",
+      "Un formato de serialización como JSON",
+      "Un sistema operativo de red"
+    ],
+    "answer": [0],
+    "explanation": "YANG modela los datos; protocolos como NETCONF/RESTCONF los transportan y codificaciones como XML/JSON los serializan."
+  },
+  {
+    "id": "ccna-d6-020",
+    "domain": "6",
+    "type": "single",
+    "difficulty": "hard",
+    "question": "En una petición REST, ¿para qué se usa normalmente el header `Content-Type: application/json`?",
+    "options": [
+      "Indica que el cuerpo de la petición/respuesta está codificado en JSON",
+      "Indica las credenciales del usuario",
+      "Indica la versión del protocolo HTTP",
+      "Pide al servidor que cifre la respuesta"
+    ],
+    "answer": [0],
+    "explanation": "`Content-Type` describe el formato del body enviado; `Accept` indica el formato que el cliente desea recibir. La autenticación suele ir en `Authorization` o en un header de token (p. ej., `X-Auth-Token`)."
+  },
+  {
+    "id": "ccna-d6-021",
+    "domain": "6",
+    "type": "single",
+    "difficulty": "medium",
+    "question": "¿Qué plano de un dispositivo de red se encarga de reenviar paquetes según las tablas ya construidas?",
+    "options": ["Plano de datos", "Plano de control", "Plano de gestión", "Plano de aplicación"],
+    "answer": [0],
+    "explanation": "El plano de datos (forwarding) reenvía, encapsula y aplica ACLs. El de control construye las tablas (OSPF, STP, ARP) y el de gestión permite administrar el equipo (SSH, SNMP, syslog)."
+  },
+  {
+    "id": "ccna-d6-022",
+    "domain": "6",
+    "type": "single",
+    "difficulty": "medium",
+    "question": "¿A qué plano pertenecen protocolos como OSPF y STP?",
+    "options": ["Control", "Datos", "Gestión", "Usuario"],
+    "answer": [0],
+    "explanation": "OSPF, STP, ARP, BGP o LACP intercambian mensajes para construir el estado que usa el plano de datos; por eso pertenecen al plano de control."
+  },
+  {
+    "id": "ccna-d6-023",
+    "domain": "6",
+    "type": "single",
+    "difficulty": "hard",
+    "question": "¿Qué ventaja ofrece Cisco Catalyst Center (antes DNA Center) frente a la gestión tradicional por CLI?",
+    "options": [
+      "Gestión basada en intención con aprovisionamiento, assurance y analítica centralizados",
+      "Elimina la necesidad de switches de acceso",
+      "Reemplaza a STP en todas las redes",
+      "Funciona solo con dispositivos de terceros"
+    ],
+    "answer": [0],
+    "explanation": "Catalyst Center ofrece Intent-Based Networking: diseño, políticas, aprovisionamiento automático, assurance (telemetría y analítica, incluida IA/ML) y APIs northbound."
+  },
+  {
+    "id": "ccna-d6-024",
+    "domain": "6",
+    "type": "single",
+    "difficulty": "medium",
+    "question": "En JSON, ¿cómo se representa un valor vacío o nulo?",
+    "options": ["null", "None", "nil", "\"\""],
+    "answer": [0],
+    "explanation": "JSON usa `null`. `None` es Python y `nil` es Ruby/Go; `\"\"` es un string vacío, no un nulo."
+  },
+  {
+    "id": "ccna-d6-025",
+    "domain": "6",
+    "type": "single",
+    "difficulty": "hard",
+    "question": "¿Qué devuelve normalmente una API REST tras un POST exitoso que crea un recurso?",
+    "options": ["201 Created", "200 OK siempre", "204 No Content siempre", "302 Found"],
+    "answer": [0],
+    "explanation": "La convención para creación exitosa es 201 Created, a menudo con la URI del recurso. 200 OK es típico de GET y 204 de DELETE/PUT sin cuerpo."
+  },
+  {
+    "id": "ccna-d6-026",
+    "domain": "6",
+    "type": "single",
+    "difficulty": "medium",
+    "question": "¿Qué caracteriza a una red overlay?",
+    "options": [
+      "Una red lógica construida mediante túneles sobre una red física existente",
+      "La red de cableado físico",
+      "La red de gestión fuera de banda",
+      "Una red sin direcciones IP"
+    ],
+    "answer": [0],
+    "explanation": "Un overlay (VXLAN, GRE, IPsec, LISP) crea conectividad lógica sobre el underlay. Permite segmentación y movilidad independientes de la topología física."
+  },
+  {
+    "id": "ccna-d6-027",
+    "domain": "6",
+    "type": "multiple",
+    "difficulty": "hard",
+    "question": "¿Qué dos afirmaciones sobre Ansible son correctas?",
+    "options": [
+      "Usa un inventario para definir los dispositivos gestionados",
+      "Los playbooks se escriben en YAML",
+      "Requiere instalar un agente en cada switch",
+      "Usa un modelo pull donde los dispositivos consultan al servidor",
+      "Solo funciona con dispositivos Linux"
+    ],
+    "answer": [0, 1],
+    "explanation": "Ansible usa inventario (hosts/grupos) y playbooks YAML; es agentless y push desde el nodo de control, con módulos para Cisco IOS, NX-OS, etc."
+  },
+  {
+    "id": "ccna-d6-028",
+    "domain": "6",
+    "type": "single",
+    "difficulty": "medium",
+    "question": "¿Qué ventaja tiene usar un sistema de control de versiones (por ejemplo, Git) para configuraciones de red?",
+    "options": [
+      "Historial de cambios, revisiones y posibilidad de revertir a una versión anterior",
+      "Cifra automáticamente las configuraciones",
+      "Aplica las configuraciones a los dispositivos sin herramientas adicionales",
+      "Reemplaza el respaldo de las configuraciones"
+    ],
+    "answer": [0],
+    "explanation": "Git aporta trazabilidad (quién cambió qué y cuándo), revisión por pares y rollback. Para aplicar cambios se combina con herramientas como Ansible o Terraform."
+  },
+  {
+    "id": "ccna-d6-029",
+    "domain": "6",
+    "type": "single",
+    "difficulty": "hard",
+    "question": "Según el JSON, ¿cuál es el valor de `response[1].ipAddress`?",
+    "exhibit": "```json\n{\n  \"response\": [\n    { \"hostname\": \"SW1\", \"ipAddress\": \"10.10.1.11\" },\n    { \"hostname\": \"SW2\", \"ipAddress\": \"10.10.1.12\" },\n    { \"hostname\": \"R1\",  \"ipAddress\": \"10.10.1.1\" }\n  ],\n  \"version\": \"1.0\"\n}\n```",
+    "options": ["10.10.1.12", "10.10.1.11", "10.10.1.1", "1.0"],
+    "answer": [0],
+    "explanation": "Los índices de arreglos empiezan en 0: response[0] es SW1, response[1] es SW2 con 10.10.1.12."
+  },
+  {
+    "id": "ccna-d6-030",
+    "domain": "6",
+    "type": "single",
+    "difficulty": "medium",
+    "question": "¿Qué ventaja ofrece la telemetría con streaming (model-driven telemetry) frente al polling SNMP tradicional?",
+    "options": [
+      "Los dispositivos envían datos de forma continua (push) con mayor frecuencia y menor carga",
+      "No requiere red",
+      "Solo funciona con dispositivos antiguos",
+      "Reemplaza a los protocolos de enrutamiento"
+    ],
+    "answer": [0],
+    "explanation": "En la telemetría push el dispositivo transmite datos estructurados (modelos YANG) periódicamente o por cambio, sin que el colector consulte cada objeto. Es la base para analítica y modelos de IA/ML en assurance."
+  }
+]

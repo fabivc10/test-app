@@ -1,0 +1,724 @@
+[
+  {
+    "id": "ccna-d1-001",
+    "domain": "1",
+    "type": "single",
+    "difficulty": "medium",
+    "question": "Un host tiene la dirección 172.16.45.200/21. ¿Cuál es la dirección de broadcast de su subred?",
+    "options": ["172.16.47.255", "172.16.45.255", "172.16.63.255", "172.16.40.255"],
+    "answer": [0],
+    "explanation": "/21 = 255.255.248.0; el octeto interesante es el tercero con bloques de 8 (0, 8, 16, 24, 32, 40, 48…). 45 cae en el bloque 40–47, así que la red es 172.16.40.0 y el broadcast 172.16.47.255. 172.16.45.255 sería el broadcast de un /24.",
+    "reference": { "title": "RFC 950 — Internet Standard Subnetting Procedure", "url": "https://www.rfc-editor.org/rfc/rfc950" }
+  },
+  {
+    "id": "ccna-d1-002",
+    "domain": "1",
+    "type": "single",
+    "difficulty": "medium",
+    "question": "Debes dividir 10.0.0.0/8 en subredes que admitan al menos 500 hosts cada una, maximizando la cantidad de subredes. ¿Qué longitud de prefijo usas?",
+    "options": ["/22", "/23", "/24", "/25"],
+    "answer": [1],
+    "explanation": "Hosts = 2^(bits de host) − 2. /23 deja 9 bits: 2^9 − 2 = 510 ≥ 500. /24 solo da 254. /22 también sirve (1022) pero produce menos subredes, por lo que no maximiza su número."
+  },
+  {
+    "id": "ccna-d1-003",
+    "domain": "1",
+    "type": "multiple",
+    "difficulty": "medium",
+    "question": "¿Cuáles de estas direcciones son direcciones de host válidas en la subred 192.168.10.64/27?",
+    "options": ["192.168.10.64", "192.168.10.65", "192.168.10.94", "192.168.10.95", "192.168.10.96"],
+    "answer": [1, 2],
+    "explanation": "/27 usa bloques de 32: la subred va de .64 (red) a .95 (broadcast). Hosts válidos: .65–.94. .96 pertenece a la siguiente subred (192.168.10.96/27)."
+  },
+  {
+    "id": "ccna-d1-004",
+    "domain": "1",
+    "type": "single",
+    "difficulty": "medium",
+    "question": "¿Cuál de las siguientes direcciones pertenece a un rango privado definido en RFC 1918?",
+    "options": ["172.32.10.5", "172.20.10.5", "192.186.1.1", "169.254.10.5"],
+    "answer": [1],
+    "explanation": "RFC 1918 define 10.0.0.0/8, 172.16.0.0/12 (172.16.0.0–172.31.255.255) y 192.168.0.0/16. 172.32.x.x queda fuera del /12, 192.186.x.x es pública (no confundir con 192.168) y 169.254.0.0/16 es link-local (APIPA), no RFC 1918.",
+    "reference": { "title": "RFC 1918", "url": "https://www.rfc-editor.org/rfc/rfc1918" }
+  },
+  {
+    "id": "ccna-d1-005",
+    "domain": "1",
+    "type": "single",
+    "difficulty": "hard",
+    "question": "¿Cuál es la representación canónica (RFC 5952) de `2001:0db8:0000:0000:0a00:0000:0000:0001`?",
+    "options": ["2001:db8::a00:0:0:1", "2001:db8:0:0:a00::1", "2001:db8::a::1", "2001:db8::a00::1"],
+    "answer": [0],
+    "explanation": "Se eliminan ceros a la izquierda (0db8→db8, 0a00→a00) y `::` reemplaza la secuencia más larga de grupos en cero. Hay dos secuencias de igual longitud (2 grupos); RFC 5952 indica comprimir la primera. `2001:db8:0:0:a00::1` es válida pero no canónica; usar `::` dos veces es inválido; `a` en lugar de `a00` cambia el valor.",
+    "reference": { "title": "RFC 5952", "url": "https://www.rfc-editor.org/rfc/rfc5952" }
+  },
+  {
+    "id": "ccna-d1-006",
+    "domain": "1",
+    "type": "single",
+    "difficulty": "hard",
+    "question": "Una interfaz con MAC `001A.2B3C.4D5E` está configurada con `ipv6 address 2001:db8:1:1::/64 eui-64`. ¿Qué dirección IPv6 obtiene?",
+    "options": [
+      "2001:db8:1:1:21a:2bff:fe3c:4d5e",
+      "2001:db8:1:1:1a:2bff:fe3c:4d5e",
+      "2001:db8:1:1:21a:2bfe:ff3c:4d5e",
+      "2001:db8:1:1:1a2b:3cff:fe4d:5e"
+    ],
+    "answer": [0],
+    "explanation": "EUI-64 modificado: se parte la MAC en dos (001A2B | 3C4D5E), se inserta FFFE en el medio y se invierte el 7.º bit (bit U/L) del primer byte: 00 → 02. Resultado 021A:2BFF:FE3C:4D5E → 21a:2bff:fe3c:4d5e.",
+    "reference": { "title": "RFC 4291 Apéndice A", "url": "https://www.rfc-editor.org/rfc/rfc4291#appendix-A" }
+  },
+  {
+    "id": "ccna-d1-007",
+    "domain": "1",
+    "type": "single",
+    "difficulty": "medium",
+    "question": "¿Qué tipo de dirección IPv6 se genera automáticamente en toda interfaz con IPv6 habilitado y es la que usan OSPFv3 y EIGRPv6 como next hop?",
+    "options": ["Global unicast", "Unique local", "Link-local", "Anycast"],
+    "answer": [2],
+    "explanation": "La link-local (FE80::/10) existe en toda interfaz IPv6, no se enruta fuera del enlace y es la dirección de origen de los mensajes de los protocolos de enrutamiento IPv6; por eso aparece como next hop en `show ipv6 route`."
+  },
+  {
+    "id": "ccna-d1-008",
+    "domain": "1",
+    "type": "single",
+    "difficulty": "medium",
+    "question": "Una empresa quiere direcciones IPv6 para uso interno que no se enruten en Internet, similares a RFC 1918. ¿Qué rango debe usar?",
+    "options": ["FE80::/10", "FC00::/7", "2000::/3", "FF00::/8"],
+    "answer": [1],
+    "explanation": "Las Unique Local Addresses (ULA) usan FC00::/7; en la práctica FD00::/8 (bit L=1). FE80::/10 es link-local (no sale del enlace), 2000::/3 es global unicast y FF00::/8 multicast.",
+    "reference": { "title": "RFC 4193 — Unique Local IPv6 Unicast Addresses", "url": "https://www.rfc-editor.org/rfc/rfc4193" }
+  },
+  {
+    "id": "ccna-d1-009",
+    "domain": "1",
+    "type": "single",
+    "difficulty": "medium",
+    "question": "Un host IPv6 envía un Router Solicitation al arrancar. ¿A qué dirección de destino lo envía?",
+    "options": ["FF02::1", "FF02::2", "FF02::5", "FF02::1:FF00:0/104"],
+    "answer": [1],
+    "explanation": "RS (ICMPv6 tipo 133) se envía a FF02::2, el grupo de todos los routers del enlace. Los routers responden con RA a FF02::1 (todos los nodos) o en unicast. FF02::5 es OSPFv3 y FF02::1:FFxx:xxxx es solicited-node multicast."
+  },
+  {
+    "id": "ccna-d1-010",
+    "domain": "1",
+    "type": "single",
+    "difficulty": "medium",
+    "question": "¿Qué describe mejor una dirección IPv6 anycast?",
+    "options": [
+      "Una dirección asignada a varios dispositivos; el paquete se entrega al más cercano según el enrutamiento",
+      "Una dirección que entrega el paquete a todos los miembros de un grupo",
+      "Una dirección que solo es válida dentro del enlace local",
+      "Una dirección que reemplaza al broadcast de IPv4"
+    ],
+    "answer": [0],
+    "explanation": "Anycast usa el mismo formato que unicast pero se configura en varios nodos; el enrutamiento entrega al más cercano (por métrica). Entregar a todos los miembros es multicast. IPv6 no tiene broadcast; su función la cubre multicast (FF02::1)."
+  },
+  {
+    "id": "ccna-d1-011",
+    "domain": "1",
+    "type": "multiple",
+    "difficulty": "medium",
+    "question": "¿Qué dos protocolos usan UDP como transporte?",
+    "options": ["SSH", "TFTP", "FTP", "SNMP", "Telnet"],
+    "answer": [1, 3],
+    "explanation": "TFTP (UDP 69) y SNMP (UDP 161/162) usan UDP. SSH (TCP 22), FTP (TCP 20/21) y Telnet (TCP 23) usan TCP."
+  },
+  {
+    "id": "ccna-d1-012",
+    "domain": "1",
+    "type": "multiple",
+    "difficulty": "medium",
+    "question": "¿Qué dos características son propias de TCP y no de UDP?",
+    "options": [
+      "Control de flujo mediante ventanas (windowing)",
+      "Encabezado de 8 bytes",
+      "Establecimiento de sesión con three-way handshake",
+      "Entrega best-effort sin acuses de recibo",
+      "Adecuado para tráfico de voz en tiempo real"
+    ],
+    "answer": [0, 2],
+    "explanation": "TCP es orientado a conexión: handshake SYN/SYN-ACK/ACK, números de secuencia, ACK, retransmisión y windowing. El encabezado de 8 bytes, la entrega best-effort y la preferencia para voz/video en tiempo real son características de UDP."
+  },
+  {
+    "id": "ccna-d1-013",
+    "domain": "1",
+    "type": "single",
+    "difficulty": "medium",
+    "question": "¿Qué campo del encabezado TCP usa el receptor para indicar cuántos bytes puede aceptar antes de que el emisor espere un ACK?",
+    "options": ["Sequence Number", "Acknowledgment Number", "Window", "Urgent Pointer"],
+    "answer": [2],
+    "explanation": "El campo Window anuncia el tamaño de la ventana de recepción (control de flujo). Sequence y Acknowledgment Number ordenan y confirman datos; Urgent Pointer casi no se usa."
+  },
+  {
+    "id": "ccna-d1-014",
+    "domain": "1",
+    "type": "single",
+    "difficulty": "medium",
+    "question": "¿Qué combinación de protocolo de transporte y puerto usa NTP?",
+    "options": ["TCP 123", "UDP 123", "UDP 161", "TCP 514"],
+    "answer": [1],
+    "explanation": "NTP usa UDP 123. UDP 161 es SNMP (agente) y 514 es Syslog (UDP 514 por defecto)."
+  },
+  {
+    "id": "ccna-d1-015",
+    "domain": "1",
+    "type": "single",
+    "difficulty": "hard",
+    "question": "Los usuarios conectados a SW1 reportan lentitud. Revisas la interfaz uplink hacia SW2. ¿Cuál es la causa más probable?",
+    "exhibit": "```\nSW1# show interfaces gigabitEthernet0/1\nGigabitEthernet0/1 is up, line protocol is up (connected)\n  Hardware is Gigabit Ethernet, address is 0c1a.3b44.0001\n  Half-duplex, 100Mb/s, media type is 10/100/1000BaseTX\n  ...\n     0 runts, 0 giants, 0 throttles\n     12 input errors, 9 CRC, 0 frame, 0 overrun, 0 ignored\n     0 output errors, 1842 collisions, 0 interface resets\n     0 babbles, 1307 late collision, 0 deferred\n```",
+    "options": [
+      "Incompatibilidad de dúplex: SW1 está en half-duplex y SW2 probablemente en full-duplex",
+      "El cable excede los 100 m y genera atenuación",
+      "La MTU está mal configurada y se producen giants",
+      "El puerto está en err-disabled por port security"
+    ],
+    "answer": [0],
+    "explanation": "Las late collisions en un enlace punto a punto son el síntoma clásico de duplex mismatch: el lado half-duplex detecta colisiones después de los primeros 64 bytes porque el otro extremo (full) transmite sin escuchar. Suele ocurrir cuando un lado tiene velocidad/dúplex fijos y el otro autonegocia. No hay giants y la interfaz está up/up, así que no es MTU ni err-disabled.",
+    "reference": { "title": "Cisco — Troubleshooting Ethernet", "url": "https://www.cisco.com/c/en/us/support/docs/interfaces-modules/port-adapters/12768-eth-collisions.html" }
+  },
+  {
+    "id": "ccna-d1-016",
+    "domain": "1",
+    "type": "single",
+    "difficulty": "medium",
+    "question": "Una interfaz full-duplex muestra un número creciente de errores CRC y ninguna colisión. ¿Cuál es la causa más probable?",
+    "options": [
+      "Cableado dañado, interferencia electromagnética o conector defectuoso",
+      "Duplex mismatch",
+      "Demasiado tráfico broadcast",
+      "Desajuste de VLAN nativa"
+    ],
+    "answer": [0],
+    "explanation": "CRC indica que la trama llegó corrupta (FCS no coincide): típicamente problemas de capa 1 como cable dañado, EMI o conectores. Un duplex mismatch produce además colisiones (late collisions) en el lado half. Broadcasts y VLAN nativa no corrompen el FCS."
+  },
+  {
+    "id": "ccna-d1-017",
+    "domain": "1",
+    "type": "single",
+    "difficulty": "medium",
+    "question": "En la salida de `show interfaces`, ¿qué representa el contador *runts*?",
+    "options": [
+      "Tramas menores a 64 bytes descartadas",
+      "Tramas mayores a 1518 bytes",
+      "Tramas recibidas cuando el buffer estaba lleno",
+      "Colisiones detectadas después de los primeros 64 bytes"
+    ],
+    "answer": [0],
+    "explanation": "Runts son tramas por debajo del mínimo de Ethernet (64 bytes), a menudo resultado de colisiones. Giants exceden el máximo (1518, o 1522 con 802.1Q). Overruns/ignored tienen que ver con buffers y las late collisions se cuentan aparte."
+  },
+  {
+    "id": "ccna-d1-018",
+    "domain": "1",
+    "type": "multiple",
+    "difficulty": "medium",
+    "question": "¿Qué dos afirmaciones describen la fibra monomodo (SMF) frente a la multimodo (MMF)?",
+    "options": [
+      "Tiene un núcleo más pequeño (~9 µm)",
+      "Normalmente usa LEDs como fuente de luz",
+      "Alcanza distancias mucho mayores",
+      "Es más barata en transceptores y se usa en distancias cortas dentro del edificio",
+      "Sufre más dispersión modal"
+    ],
+    "answer": [0, 2],
+    "explanation": "SMF tiene núcleo de ~9 µm, usa láser y llega a decenas de km porque un solo modo de luz elimina la dispersión modal. MMF (50/62.5 µm) es la que usa LEDs/VCSEL económicos, distancias cortas y sufre dispersión modal."
+  },
+  {
+    "id": "ccna-d1-019",
+    "domain": "1",
+    "type": "single",
+    "difficulty": "medium",
+    "question": "Debes conectar dos switches antiguos por puertos FastEthernet que no soportan Auto-MDIX. ¿Qué cable usas?",
+    "options": ["Straight-through", "Crossover", "Rollover", "Fibra monomodo con conectores LC"],
+    "answer": [1],
+    "explanation": "Dispositivos iguales (switch-switch, router-router, PC-PC) necesitan crossover si no hay Auto-MDIX, porque ambos transmiten por los mismos pares. Straight-through se usa entre dispositivos distintos (PC-switch). Rollover es el cable de consola."
+  },
+  {
+    "id": "ccna-d1-020",
+    "domain": "1",
+    "type": "single",
+    "difficulty": "medium",
+    "question": "Un access point requiere 25,5 W en el PSE para operar con todas sus radios. ¿Qué estándar PoE mínimo debe soportar el switch?",
+    "options": ["802.3af (PoE)", "802.3at (PoE+)", "802.3bt Type 4", "Cisco UPOE+"],
+    "answer": [1],
+    "explanation": "802.3af entrega hasta 15,4 W por puerto; 802.3at (PoE+) hasta 30 W en el PSE (25,5 W en el dispositivo). 802.3bt (60/90 W) también funcionaría pero no es el mínimo."
+  },
+  {
+    "id": "ccna-d1-021",
+    "domain": "1",
+    "type": "single",
+    "difficulty": "medium",
+    "question": "¿Qué afirmación describe correctamente una arquitectura spine-leaf en un data center?",
+    "options": [
+      "Cada leaf se conecta a todos los spines y los spines no se conectan entre sí",
+      "Los servidores se conectan directamente a los spines",
+      "Los leaf switches se conectan entre sí en malla completa",
+      "Es una topología en estrella con un único spine central"
+    ],
+    "answer": [0],
+    "explanation": "En spine-leaf cada leaf (donde se conectan servidores, firewalls, etc.) tiene un enlace a cada spine; ni spines ni leaves se interconectan entre pares. Así cualquier servidor está a la misma cantidad de saltos (leaf-spine-leaf) y la latencia es predecible."
+  },
+  {
+    "id": "ccna-d1-022",
+    "domain": "1",
+    "type": "single",
+    "difficulty": "medium",
+    "question": "Un campus mediano combina las capas de core y distribución en un mismo par de switches. ¿Cómo se llama este diseño?",
+    "options": ["Three-tier", "Collapsed core (two-tier)", "Spine-leaf", "Full mesh WAN"],
+    "answer": [1],
+    "explanation": "Collapsed core o diseño de dos capas fusiona core y distribución, reduciendo costo en campus pequeños/medianos. Three-tier separa access, distribution y core."
+  },
+  {
+    "id": "ccna-d1-023",
+    "domain": "1",
+    "type": "multiple",
+    "difficulty": "medium",
+    "question": "En una arquitectura de campus de tres capas, ¿qué dos funciones son típicas de la capa de acceso?",
+    "options": [
+      "Conexión de dispositivos finales y suministro de PoE",
+      "Seguridad de puerto y control de acceso 802.1X",
+      "Conmutación de alta velocidad entre bloques de distribución",
+      "Agregación de rutas y punto de políticas entre VLANs",
+      "Conexión directa a los proveedores WAN"
+    ],
+    "answer": [0, 1],
+    "explanation": "Access conecta endpoints (PCs, teléfonos, APs), entrega PoE y aplica seguridad de puerto/802.1X. Agregación, políticas y routing inter-VLAN son de distribución; la conmutación rápida entre bloques es del core."
+  },
+  {
+    "id": "ccna-d1-024",
+    "domain": "1",
+    "type": "single",
+    "difficulty": "medium",
+    "question": "¿Qué dispositivo se coloca en línea para analizar el tráfico contra firmas y bloquear ataques en tiempo real?",
+    "options": ["IDS", "IPS", "Wireless LAN controller", "Switch de capa 2"],
+    "answer": [1],
+    "explanation": "Un IPS trabaja en línea y puede descartar el tráfico malicioso. Un IDS recibe una copia (SPAN/TAP) y solo alerta. Los NGFW suelen integrar funciones de IPS además de filtrado por aplicación (AVC) y URL."
+  },
+  {
+    "id": "ccna-d1-025",
+    "domain": "1",
+    "type": "multiple",
+    "difficulty": "hard",
+    "question": "¿Qué dos capacidades distinguen a un next-generation firewall (NGFW) de un firewall stateful tradicional?",
+    "options": [
+      "Identificación y control de aplicaciones (AVC) independiente del puerto",
+      "Seguimiento del estado de las conexiones TCP",
+      "Prevención de intrusiones (IPS) integrada",
+      "Filtrado por dirección IP de origen y destino",
+      "Traducción de direcciones (NAT)"
+    ],
+    "answer": [0, 2],
+    "explanation": "Un NGFW añade inspección de capa 7: AVC, IPS, filtrado de URL y protección contra malware. El seguimiento de estado, el filtrado por IP/puerto y NAT ya los ofrecen los firewalls stateful clásicos."
+  },
+  {
+    "id": "ccna-d1-026",
+    "domain": "1",
+    "type": "single",
+    "difficulty": "medium",
+    "question": "¿Cuál es la función principal de un Wireless LAN Controller (WLC) en una red con lightweight APs?",
+    "options": [
+      "Gestionar de forma centralizada la configuración, RF y autenticación de los APs",
+      "Proveer el enlace WAN hacia Internet",
+      "Suministrar alimentación PoE a los APs",
+      "Actuar como servidor DHCP obligatorio para los clientes"
+    ],
+    "answer": [0],
+    "explanation": "El WLC centraliza la gestión de los lightweight APs mediante CAPWAP: configuración, gestión de RF (canales y potencia), WLANs, roaming y seguridad. PoE lo da el switch, y DHCP puede estar en cualquier lugar."
+  },
+  {
+    "id": "ccna-d1-027",
+    "domain": "1",
+    "type": "single",
+    "difficulty": "medium",
+    "question": "Una empresa contrata máquinas virtuales en la nube; el proveedor gestiona el hardware y la virtualización, mientras la empresa administra el sistema operativo, el middleware y las aplicaciones. ¿Qué modelo de servicio es?",
+    "options": ["SaaS", "PaaS", "IaaS", "On-premises"],
+    "answer": [2],
+    "explanation": "En IaaS el cliente gestiona desde el SO hacia arriba. En PaaS el proveedor también gestiona SO y runtime (el cliente solo despliega código), y en SaaS el cliente solo usa la aplicación.",
+    "reference": { "title": "NIST SP 800-145 — Definition of Cloud Computing", "url": "https://csrc.nist.gov/pubs/sp/800/145/final" }
+  },
+  {
+    "id": "ccna-d1-028",
+    "domain": "1",
+    "type": "multiple",
+    "difficulty": "medium",
+    "question": "Según NIST, ¿qué dos características son esenciales del cloud computing?",
+    "options": ["On-demand self-service", "Hardware dedicado para cada cliente", "Rapid elasticity", "Contratos de capacidad fija a 3 años", "Gestión manual de aprovisionamiento por el proveedor"],
+    "answer": [0, 2],
+    "explanation": "NIST define cinco características: on-demand self-service, broad network access, resource pooling, rapid elasticity y measured service. El hardware dedicado, la capacidad fija y el aprovisionamiento manual contradicen esas características.",
+    "reference": { "title": "NIST SP 800-145", "url": "https://csrc.nist.gov/pubs/sp/800/145/final" }
+  },
+  {
+    "id": "ccna-d1-029",
+    "domain": "1",
+    "type": "single",
+    "difficulty": "medium",
+    "question": "Estás diseñando la cobertura de 2,4 GHz con varios APs adyacentes en América. ¿Qué conjunto de canales evita la interferencia de canal adyacente?",
+    "options": ["1, 6, 11", "1, 5, 9", "2, 7, 12", "1, 4, 8, 11"],
+    "answer": [0],
+    "explanation": "En 2,4 GHz los canales de 20/22 MHz están separados solo 5 MHz; los únicos tres que no se solapan en Norteamérica son 1, 6 y 11."
+  },
+  {
+    "id": "ccna-d1-030",
+    "domain": "1",
+    "type": "multiple",
+    "difficulty": "medium",
+    "question": "¿Qué dos afirmaciones son ciertas sobre la banda de 5 GHz comparada con 2,4 GHz?",
+    "options": [
+      "Ofrece muchos más canales no solapados",
+      "Tiene mayor alcance y atraviesa mejor las paredes",
+      "Tiene menor alcance a igual potencia",
+      "Solo admite el estándar 802.11b",
+      "Solo tiene tres canales no solapados"
+    ],
+    "answer": [0, 2],
+    "explanation": "5 GHz tiene más de 20 canales de 20 MHz no solapados y sufre más atenuación (menor alcance) que 2,4 GHz. 802.11b es exclusivo de 2,4 GHz y la limitación de tres canales es de 2,4 GHz."
+  },
+  {
+    "id": "ccna-d1-031",
+    "domain": "1",
+    "type": "single",
+    "difficulty": "medium",
+    "question": "¿Qué identifica de forma única a una radio de AP que anuncia una WLAN?",
+    "options": ["SSID", "BSSID", "ESS", "Canal"],
+    "answer": [1],
+    "explanation": "El BSSID es la dirección MAC de la radio del AP para un BSS. El SSID es el nombre de la red (puede repetirse en muchos APs para formar un ESS que permite roaming)."
+  },
+  {
+    "id": "ccna-d1-032",
+    "domain": "1",
+    "type": "single",
+    "difficulty": "medium",
+    "question": "¿Qué método de autenticación introduce WPA3-Personal para reemplazar el handshake PSK de WPA2 y resistir ataques de diccionario offline?",
+    "options": ["SAE (Simultaneous Authentication of Equals)", "TKIP", "802.1X con EAP-TLS", "WEP con claves de 104 bits"],
+    "answer": [0],
+    "explanation": "WPA3-Personal usa SAE (Dragonfly), que evita que capturar el handshake permita un ataque de diccionario offline y aporta forward secrecy. 802.1X/EAP es el modo Enterprise; TKIP y WEP son obsoletos."
+  },
+  {
+    "id": "ccna-d1-033",
+    "domain": "1",
+    "type": "single",
+    "difficulty": "medium",
+    "question": "¿Qué protocolo de cifrado es obligatorio en WPA2?",
+    "options": ["TKIP/RC4", "CCMP con AES", "GCMP-256", "WEP"],
+    "answer": [1],
+    "explanation": "WPA2 exige AES-CCMP. TKIP era la transición de WPA1, GCMP-256 aparece en WPA3-Enterprise 192-bit y WEP está roto."
+  },
+  {
+    "id": "ccna-d1-034",
+    "domain": "1",
+    "type": "single",
+    "difficulty": "medium",
+    "question": "Una señal Wi-Fi rebota en un archivador metálico y llega al cliente por varios caminos con diferentes retardos. ¿Qué fenómeno inicial ocurrió en el metal?",
+    "options": ["Absorción", "Reflexión", "Refracción", "Dispersión (scattering)"],
+    "answer": [1],
+    "explanation": "Las superficies metálicas reflejan la señal, lo que provoca multipath. La absorción ocurre en agua, cuerpos o paredes gruesas; la refracción es el cambio de dirección al atravesar medios de distinta densidad y el scattering ocurre en superficies irregulares."
+  },
+  {
+    "id": "ccna-d1-035",
+    "domain": "1",
+    "type": "single",
+    "difficulty": "medium",
+    "question": "¿Qué tipo de hipervisor se instala directamente sobre el hardware sin un sistema operativo anfitrión?",
+    "options": ["Tipo 1 (bare-metal)", "Tipo 2 (hosted)", "Motor de contenedores", "Hipervisor anidado"],
+    "answer": [0],
+    "explanation": "Los hipervisores tipo 1 (ESXi, Hyper-V Server, KVM) corren sobre el hardware y son los usados en data centers. Los tipo 2 (VirtualBox, VMware Workstation) corren sobre un SO anfitrión."
+  },
+  {
+    "id": "ccna-d1-036",
+    "domain": "1",
+    "type": "single",
+    "difficulty": "medium",
+    "question": "¿Qué diferencia principal hay entre un contenedor y una máquina virtual?",
+    "options": [
+      "El contenedor comparte el kernel del sistema operativo anfitrión; la VM incluye su propio SO completo",
+      "El contenedor necesita un hipervisor tipo 1",
+      "La VM arranca más rápido porque no carga un SO",
+      "El contenedor emula hardware virtual completo"
+    ],
+    "answer": [0],
+    "explanation": "Los contenedores aíslan procesos compartiendo el kernel del host, por eso son ligeros y arrancan en segundos. Cada VM tiene su SO invitado sobre hardware virtual emulado por el hipervisor."
+  },
+  {
+    "id": "ccna-d1-037",
+    "domain": "1",
+    "type": "single",
+    "difficulty": "hard",
+    "question": "Un proveedor debe conectar en el mismo router a dos clientes que usan ambos 10.1.0.0/16 sin que sus tráficos se mezclen. ¿Qué tecnología lo permite?",
+    "options": ["VRF", "VLAN", "HSRP", "Subinterfaces router-on-a-stick"],
+    "answer": [0],
+    "explanation": "VRF (Virtual Routing and Forwarding) crea tablas de enrutamiento independientes en un mismo router, permitiendo espacios de direcciones solapados. Las VLANs separan dominios de capa 2 pero comparten la tabla de rutas global."
+  },
+  {
+    "id": "ccna-d1-038",
+    "domain": "1",
+    "type": "single",
+    "difficulty": "medium",
+    "question": "Un switch recibe una trama unicast cuya MAC destino no está en su tabla de direcciones MAC. ¿Qué hace?",
+    "options": [
+      "La inunda por todos los puertos de la misma VLAN excepto el de entrada",
+      "La descarta y envía un ARP request",
+      "La envía solo por el puerto trunk",
+      "La envía al default gateway"
+    ],
+    "answer": [0],
+    "explanation": "Es una unknown unicast: el switch la inunda (flooding) por todos los puertos de la VLAN salvo el de llegada. Cuando el destino responda, el switch aprenderá su MAC. ARP es un protocolo de capa 3 que el switch de capa 2 no usa para reenviar."
+  },
+  {
+    "id": "ccna-d1-039",
+    "domain": "1",
+    "type": "single",
+    "difficulty": "medium",
+    "question": "¿Qué información usa un switch para poblar su tabla de direcciones MAC?",
+    "options": [
+      "La MAC de origen de las tramas recibidas y el puerto por el que llegaron",
+      "La MAC de destino de las tramas recibidas",
+      "Las respuestas ARP que el switch envía",
+      "Los mensajes CDP de los vecinos"
+    ],
+    "answer": [0],
+    "explanation": "El switch aprende examinando la MAC de origen y asociándola al puerto/VLAN de entrada. La MAC de destino se usa para decidir el reenvío (forward/filter/flood)."
+  },
+  {
+    "id": "ccna-d1-040",
+    "domain": "1",
+    "type": "single",
+    "difficulty": "medium",
+    "question": "¿Cuál es el tiempo de envejecimiento (aging time) por defecto de las entradas dinámicas en la tabla MAC de un switch Cisco?",
+    "options": ["60 segundos", "300 segundos", "14 400 segundos", "Las entradas no expiran"],
+    "answer": [1],
+    "explanation": "Por defecto es 300 s (5 minutos); se puede cambiar con `mac address-table aging-time`. 14 400 s (4 h) es el timeout por defecto de la caché ARP en IOS."
+  },
+  {
+    "id": "ccna-d1-041",
+    "domain": "1",
+    "type": "single",
+    "difficulty": "hard",
+    "question": "SW1 recibe por Gi0/3 una trama en la VLAN 10 con MAC origen `0050.7966.6801` y destino `0050.7966.6803`. ¿Qué hace SW1?",
+    "exhibit": "```\nSW1# show mac address-table dynamic\n          Mac Address Table\n-------------------------------------------\nVlan    Mac Address       Type        Ports\n----    -----------       --------    -----\n  10    0050.7966.6801    DYNAMIC     Gi0/3\n  20    0050.7966.6803    DYNAMIC     Gi0/5\n  10    0050.7966.6804    DYNAMIC     Gi0/6\n```",
+    "options": [
+      "Inunda la trama por todos los puertos de la VLAN 10 excepto Gi0/3",
+      "Reenvía la trama solo por Gi0/5",
+      "Descarta la trama porque el destino está en otra VLAN",
+      "Reenvía la trama por Gi0/5 y Gi0/6"
+    ],
+    "answer": [0],
+    "explanation": "La tabla MAC se consulta por VLAN + MAC. La MAC destino solo existe en la VLAN 20, así que para la VLAN 10 es un unknown unicast y se inunda por los puertos de la VLAN 10 (excepto el de entrada). El switch nunca reenvía una trama de una VLAN a otra."
+  },
+  {
+    "id": "ccna-d1-042",
+    "domain": "1",
+    "type": "single",
+    "difficulty": "medium",
+    "question": "Un router tiene tres interfaces Ethernet activas, cada una conectada a un switch distinto sin VLANs adicionales. Cada switch tiene 8 PCs. ¿Cuántos dominios de broadcast hay?",
+    "options": ["1", "3", "24", "27"],
+    "answer": [1],
+    "explanation": "Cada interfaz de router delimita un dominio de broadcast; los switches no los separan (salvo con VLANs). Hay 3. En cambio, cada puerto de switch es un dominio de colisión independiente."
+  },
+  {
+    "id": "ccna-d1-043",
+    "domain": "1",
+    "type": "single",
+    "difficulty": "hard",
+    "question": "Un usuario puede hacer ping a otros PCs de su oficina pero no a ningún servidor fuera de su subred. Según la salida, ¿cuál es el problema?",
+    "exhibit": "```\nC:\\> ipconfig\nEthernet adapter Ethernet0:\n   IPv4 Address. . . . . . . . . . . : 192.168.1.50\n   Subnet Mask . . . . . . . . . . . : 255.255.255.0\n   Default Gateway . . . . . . . . . : 192.168.2.1\n```",
+    "options": [
+      "El default gateway no pertenece a la subred del host",
+      "La máscara de subred es incorrecta para una red clase C",
+      "Falta configurar el servidor DNS",
+      "La dirección IP es de un rango APIPA"
+    ],
+    "answer": [0],
+    "explanation": "El host está en 192.168.1.0/24 y su gateway 192.168.2.1 está fuera de esa subred, por lo que no puede hacer ARP hacia él ni enviar tráfico remoto. La comunicación local funciona porque no necesita gateway. Un DNS ausente afectaría nombres, no pings por IP."
+  },
+  {
+    "id": "ccna-d1-044",
+    "domain": "1",
+    "type": "single",
+    "difficulty": "medium",
+    "question": "En un equipo Linux moderno, ¿qué comando muestra la ruta por defecto (default gateway)?",
+    "options": ["ip route show", "ipconfig /all", "show ip route", "arp -a"],
+    "answer": [0],
+    "explanation": "`ip route` (o `ip route show`) muestra la tabla de rutas, incluida la línea `default via …`. `ipconfig /all` es de Windows, `show ip route` es de Cisco IOS y `arp -a` muestra la caché ARP."
+  },
+  {
+    "id": "ccna-d1-045",
+    "domain": "1",
+    "type": "single",
+    "difficulty": "medium",
+    "question": "En Windows, ¿qué comando muestra la dirección MAC del adaptador, los servidores DNS y si DHCP está habilitado?",
+    "options": ["ipconfig", "ipconfig /all", "netstat -r", "nslookup"],
+    "answer": [1],
+    "explanation": "`ipconfig /all` muestra la información detallada: dirección física (MAC), DHCP habilitado, servidor DHCP, DNS y concesión. `ipconfig` solo muestra IP, máscara y gateway."
+  },
+  {
+    "id": "ccna-d1-046",
+    "domain": "1",
+    "type": "single",
+    "difficulty": "medium",
+    "question": "Un PC configurado con DHCP muestra la dirección 169.254.33.10/16. ¿Qué indica?",
+    "options": [
+      "El PC no obtuvo respuesta de un servidor DHCP y se autoasignó una dirección APIPA",
+      "El servidor DHCP asignó una dirección del pool privado",
+      "El PC está usando NAT",
+      "El PC tiene IPv6 deshabilitado"
+    ],
+    "answer": [0],
+    "explanation": "169.254.0.0/16 es link-local IPv4 (APIPA). Windows se la asigna cuando no recibe DHCPOFFER. Indica un problema con DHCP: servidor caído, falta de `ip helper-address`, VLAN incorrecta o puerto bloqueado."
+  },
+  {
+    "id": "ccna-d1-047",
+    "domain": "1",
+    "type": "single",
+    "difficulty": "hard",
+    "question": "Con VLSM sobre 192.168.1.0/24, asignas en orden la primera subred posible a cada segmento empezando por el mayor: 60 hosts, 28 hosts, 12 hosts y un enlace punto a punto. ¿Cuál es la dirección de red del segmento de 12 hosts?",
+    "options": ["192.168.1.96/28", "192.168.1.64/28", "192.168.1.112/28", "192.168.1.80/28"],
+    "answer": [0],
+    "explanation": "60 hosts → /26: 192.168.1.0–63. 28 hosts → /27: 192.168.1.64–95. 12 hosts → /28: 192.168.1.96–111. El enlace /30 iría en 192.168.1.112."
+  },
+  {
+    "id": "ccna-d1-048",
+    "domain": "1",
+    "type": "single",
+    "difficulty": "medium",
+    "question": "¿A qué subred pertenece el host 10.10.130.5/18?",
+    "options": ["10.10.128.0/18", "10.10.130.0/18", "10.10.64.0/18", "10.10.0.0/18"],
+    "answer": [0],
+    "explanation": "/18 = 255.255.192.0; el tercer octeto avanza en bloques de 64 (0, 64, 128, 192). 130 está en el bloque 128–191, por lo que la red es 10.10.128.0/18."
+  },
+  {
+    "id": "ccna-d1-049",
+    "domain": "1",
+    "type": "single",
+    "difficulty": "medium",
+    "question": "Te asignan el prefijo 2001:db8:acad::/48 y usarás /64 para cada LAN. ¿Cuántas subredes /64 puedes crear?",
+    "options": ["256", "4096", "65 536", "16 777 216"],
+    "answer": [2],
+    "explanation": "De /48 a /64 hay 16 bits de subred (el cuarto hexteto completo): 2^16 = 65 536 subredes /64."
+  },
+  {
+    "id": "ccna-d1-050",
+    "domain": "1",
+    "type": "single",
+    "difficulty": "medium",
+    "question": "¿Qué mensaje ICMPv6 usa un host para comprobar que la dirección IPv6 que acaba de generar no está en uso (DAD)?",
+    "options": ["Neighbor Solicitation", "Router Advertisement", "Echo Request", "Redirect"],
+    "answer": [0],
+    "explanation": "Duplicate Address Detection envía un Neighbor Solicitation (tipo 135) a la dirección solicited-node de la dirección tentativa. Si alguien responde con NA, la dirección está duplicada."
+  },
+  {
+    "id": "ccna-d1-051",
+    "domain": "1",
+    "type": "multiple",
+    "difficulty": "hard",
+    "question": "Un host usa SLAAC en una LAN con un router que envía RAs con el prefijo 2001:db8:10:1::/64. ¿Qué dos afirmaciones son ciertas?",
+    "options": [
+      "El host construye su dirección global combinando el prefijo del RA con un identificador de interfaz de 64 bits",
+      "El host necesita obligatoriamente un servidor DHCPv6 stateful para obtener la dirección",
+      "El host usa la dirección link-local del router como default gateway",
+      "El router asigna al host una dirección concreta dentro del RA",
+      "SLAAC requiere un prefijo /56"
+    ],
+    "answer": [0, 2],
+    "explanation": "Con SLAAC el host toma el prefijo /64 del RA y genera el interface ID (EUI-64 o aleatorio). El gateway es la link-local de origen del RA. El router no asigna direcciones individuales y SLAAC requiere un prefijo /64."
+  },
+  {
+    "id": "ccna-d1-052",
+    "domain": "1",
+    "type": "single",
+    "difficulty": "medium",
+    "question": "¿Qué categoría de cable de par trenzado es la mínima que soporta 10GBASE-T hasta 100 metros?",
+    "options": ["Cat5e", "Cat6", "Cat6a", "Cat3"],
+    "answer": [2],
+    "explanation": "Cat6a soporta 10GBASE-T a 100 m. Cat6 solo llega a ~37–55 m a 10 Gbps y Cat5e está pensado para 1 Gbps."
+  },
+  {
+    "id": "ccna-d1-053",
+    "domain": "1",
+    "type": "single",
+    "difficulty": "medium",
+    "question": "¿Qué método de conmutación recibe la trama completa y verifica el FCS antes de reenviarla?",
+    "options": ["Store-and-forward", "Cut-through", "Fragment-free", "Fast-forward"],
+    "answer": [0],
+    "explanation": "Store-and-forward almacena toda la trama y descarta las que tienen FCS incorrecto. Cut-through reenvía al leer la MAC destino (menor latencia, propaga errores) y fragment-free espera los primeros 64 bytes."
+  },
+  {
+    "id": "ccna-d1-054",
+    "domain": "1",
+    "type": "single",
+    "difficulty": "medium",
+    "question": "¿Cuál es el tamaño mínimo del encabezado TCP y el tamaño del encabezado UDP, respectivamente?",
+    "options": ["20 bytes y 8 bytes", "8 bytes y 20 bytes", "20 bytes y 20 bytes", "32 bytes y 8 bytes"],
+    "answer": [0],
+    "explanation": "TCP tiene un encabezado mínimo de 20 bytes (hasta 60 con opciones). UDP siempre tiene 8 bytes: puertos origen/destino, longitud y checksum."
+  },
+  {
+    "id": "ccna-d1-055",
+    "domain": "1",
+    "type": "single",
+    "difficulty": "medium",
+    "question": "¿Qué hace un firewall stateful con el tráfico de retorno de una sesión iniciada desde la red interna?",
+    "options": [
+      "Lo permite automáticamente porque coincide con una entrada de su tabla de estado",
+      "Lo bloquea salvo que exista una ACL entrante explícita",
+      "Lo envía al IPS para inspección obligatoria",
+      "Lo traduce siempre con PAT"
+    ],
+    "answer": [0],
+    "explanation": "El firewall stateful registra cada sesión saliente (IPs, puertos, estado TCP) y permite dinámicamente las respuestas correspondientes. Un filtro stateless (ACL tradicional) necesitaría reglas explícitas para el retorno."
+  },
+  {
+    "id": "ccna-d1-056",
+    "domain": "1",
+    "type": "single",
+    "difficulty": "medium",
+    "question": "¿Qué estándar Wi-Fi introdujo OFDMA y BSS coloring para mejorar la eficiencia en entornos densos?",
+    "options": ["802.11n (Wi-Fi 4)", "802.11ac (Wi-Fi 5)", "802.11ax (Wi-Fi 6)", "802.11g"],
+    "answer": [2],
+    "explanation": "802.11ax (Wi-Fi 6/6E) incorpora OFDMA, BSS coloring, MU-MIMO en uplink y Target Wake Time. 802.11ac introdujo MU-MIMO downlink en 5 GHz."
+  },
+  {
+    "id": "ccna-d1-057",
+    "domain": "1",
+    "type": "single",
+    "difficulty": "medium",
+    "question": "En un servidor con hipervisor, ¿qué componente conecta las VMs entre sí y con la NIC física del host?",
+    "options": ["Virtual switch (vSwitch)", "VRF", "Controlador SDN", "Load balancer"],
+    "answer": [0],
+    "explanation": "El vSwitch es un switch de software dentro del hipervisor que conmuta tramas entre vNICs y hacia las NICs físicas (uplinks), y puede etiquetar VLANs."
+  },
+  {
+    "id": "ccna-d1-058",
+    "domain": "1",
+    "type": "single",
+    "difficulty": "medium",
+    "question": "`show interfaces status` muestra un puerto de acceso como `notconnect`. ¿Cuál es la causa más probable?",
+    "options": [
+      "No hay cable conectado o el dispositivo del otro extremo está apagado",
+      "El puerto fue apagado con `shutdown`",
+      "Port security deshabilitó el puerto",
+      "La VLAN asignada no existe"
+    ],
+    "answer": [0],
+    "explanation": "`notconnect` indica que no se detecta enlace físico. `shutdown` aparece como `disabled`, una violación de port security como `err-disabled`, y una VLAN inexistente deja el puerto `inactive`."
+  },
+  {
+    "id": "ccna-d1-059",
+    "domain": "1",
+    "type": "single",
+    "difficulty": "hard",
+    "question": "¿Cuántos hosts utilizables tiene la subred 172.20.0.0/20 y cuál es su último host?",
+    "options": ["4094; 172.20.15.254", "4094; 172.20.16.254", "4096; 172.20.15.255", "2046; 172.20.7.254"],
+    "answer": [0],
+    "explanation": "/20 deja 12 bits de host: 2^12 − 2 = 4094 hosts. El bloque en el tercer octeto es de 16, por lo que la subred va de 172.20.0.0 a 172.20.15.255 (broadcast); el último host es 172.20.15.254."
+  },
+  {
+    "id": "ccna-d1-060",
+    "domain": "1",
+    "type": "single",
+    "difficulty": "medium",
+    "question": "¿Qué dirección IPv6 es el equivalente al loopback 127.0.0.1 de IPv4?",
+    "options": ["::1", "::", "FE80::1", "FF02::1"],
+    "answer": [0],
+    "explanation": "::1/128 es la dirección de loopback. :: (todo ceros) es la dirección no especificada, usada como origen durante DAD; FE80::1 es una link-local y FF02::1 el multicast de todos los nodos."
+  }
+]

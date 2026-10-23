@@ -1,0 +1,462 @@
+[
+  {
+    "id": "ccna-d3-041",
+    "domain": "3",
+    "type": "single",
+    "difficulty": "hard",
+    "question": "R1 debe enviar un paquete a 192.168.50.10. ¿Qué hace?",
+    "exhibit": "```\nR1# show ip route\nGateway of last resort is not set\n      10.0.0.0/8 is variably subnetted, 2 subnets, 2 masks\nC        10.0.12.0/30 is directly connected, GigabitEthernet0/1\nL        10.0.12.1/32 is directly connected, GigabitEthernet0/1\nO     192.168.40.0/24 [110/2] via 10.0.12.2, GigabitEthernet0/1\nO     192.168.60.0/24 [110/2] via 10.0.12.2, GigabitEthernet0/1\n```",
+    "options": [
+      "Descarta el paquete y envía un ICMP Destination Unreachable al origen",
+      "Lo reenvía a 10.0.12.2 porque es el único vecino",
+      "Lo inunda por todas las interfaces",
+      "Hace ARP por 192.168.50.10 en Gi0/1"
+    ],
+    "answer": [0],
+    "explanation": "No hay ruta que coincida con 192.168.50.10 y no hay gateway of last resort. El router descarta el paquete y normalmente responde con ICMP unreachable (network unreachable). Los routers no inundan paquetes."
+  },
+  {
+    "id": "ccna-d3-042",
+    "domain": "3",
+    "type": "single",
+    "difficulty": "medium",
+    "question": "¿Qué indica el código `O IA` en la tabla de rutas?",
+    "options": ["Ruta OSPF inter-area (LSA tipo 3)", "Ruta OSPF intra-area", "Ruta OSPF externa tipo 1", "Ruta inalcanzable"],
+    "answer": [0],
+    "explanation": "`O` es intra-area, `O IA` inter-area (aprendida por un ABR mediante LSA 3), `O E1/E2` externas (LSA 5) y `O N1/N2` externas NSSA."
+  },
+  {
+    "id": "ccna-d3-043",
+    "domain": "3",
+    "type": "single",
+    "difficulty": "hard",
+    "question": "R1 tiene estas rutas para el mismo prefijo: OSPF [110/30] y OSPF [110/20] por distintos vecinos. ¿Qué se instala?",
+    "options": ["Solo la de métrica 20", "Ambas con balanceo", "Solo la de métrica 30", "La primera aprendida"],
+    "answer": [0],
+    "explanation": "Con el mismo protocolo (misma AD), gana la métrica menor. Solo hay ECMP si las métricas son iguales."
+  },
+  {
+    "id": "ccna-d3-044",
+    "domain": "3",
+    "type": "single",
+    "difficulty": "hard",
+    "question": "Un ping desde PC-A (10.1.1.10) a PC-B (10.2.2.10) falla. Un traceroute muestra respuestas de R1 (10.1.1.1) y R2 (10.0.0.2), y luego asteriscos. R2 tiene una ruta conectada a 10.2.2.0/24 y PC-B tiene gateway 10.2.2.1 (R2). ¿Cuál es la causa más probable?",
+    "options": [
+      "R2 no tiene ruta de regreso hacia 10.1.1.0/24 o PC-B tiene un firewall local que bloquea ICMP",
+      "R1 no tiene ruta hacia 10.2.2.0/24",
+      "PC-A tiene mal configurada la máscara",
+      "Hay un bucle de enrutamiento entre R1 y R2"
+    ],
+    "answer": [0],
+    "explanation": "Que R2 responda indica que el tráfico llega hasta R2 (R1 sí tiene ruta) y que R2 puede responder a PC-A. Si PC-B no responde, el problema está en el último salto: ruta de retorno, el firewall del host o su gateway. Un bucle mostraría saltos repetidos alternando entre R1 y R2."
+  },
+  {
+    "id": "ccna-d3-045",
+    "domain": "3",
+    "type": "single",
+    "difficulty": "medium",
+    "question": "¿Qué mecanismo usa traceroute (en Cisco/Linux) para descubrir cada salto?",
+    "options": [
+      "Envía paquetes con TTL creciente y recibe ICMP Time Exceeded de cada router",
+      "Envía ARP a cada router del camino",
+      "Usa la opción Record Route en todos los paquetes",
+      "Consulta la tabla de rutas de cada router mediante SNMP"
+    ],
+    "answer": [0],
+    "explanation": "Traceroute envía sondas con TTL = 1, 2, 3…; cada router que decrementa el TTL a 0 descarta el paquete y devuelve ICMP Time Exceeded, revelando su IP. Cisco/Linux usan UDP por defecto; Windows (tracert) usa ICMP Echo."
+  },
+  {
+    "id": "ccna-d3-046",
+    "domain": "3",
+    "type": "single",
+    "difficulty": "hard",
+    "question": "En una salida de `ping` desde un router Cisco aparece `U.U.U`. ¿Qué significa?",
+    "options": [
+      "Un router en el camino responde con ICMP Destination Unreachable",
+      "El destino respondió correctamente",
+      "Hubo timeouts sin respuesta",
+      "Se recibió un paquete de tipo desconocido"
+    ],
+    "answer": [0],
+    "explanation": "`!` éxito, `.` timeout, `U` destination unreachable recibido, `Q` source quench, `M` no se pudo fragmentar, `?` tipo desconocido. Los puntos alternos se deben al rate-limit de ICMP unreachable en IOS."
+  },
+  {
+    "id": "ccna-d3-047",
+    "domain": "3",
+    "type": "single",
+    "difficulty": "hard",
+    "question": "R1 tiene `ip route 10.30.0.0 255.255.0.0 10.0.0.2` pero la ruta no aparece en `show ip route`. ¿Cuál es la causa más probable?",
+    "options": [
+      "El next hop 10.0.0.2 no es alcanzable: no hay ruta conectada ni otra ruta hacia él",
+      "Las rutas estáticas solo aparecen con `show ip route static`",
+      "La AD por defecto de la estática es demasiado alta",
+      "OSPF bloquea las rutas estáticas"
+    ],
+    "answer": [0],
+    "explanation": "Una estática recursiva solo se instala si el next hop se resuelve en la tabla de rutas. Si la interfaz hacia 10.0.0.0/30 está caída (o no existe ruta), la estática no se instala. La AD de una estática es 1."
+  },
+  {
+    "id": "ccna-d3-048",
+    "domain": "3",
+    "type": "multiple",
+    "difficulty": "hard",
+    "question": "¿Qué dos configuraciones OSPF son equivalentes para habilitar OSPF área 0 en Gi0/1 (10.0.12.1/30)?",
+    "options": [
+      "`router ospf 1` → `network 10.0.12.0 0.0.0.3 area 0`",
+      "`interface Gi0/1` → `ip ospf 1 area 0`",
+      "`router ospf 1` → `network 10.0.12.0 255.255.255.252 area 0`",
+      "`interface Gi0/1` → `ospf area 0`",
+      "`router ospf 1` → `interface Gi0/1 area 0`"
+    ],
+    "answer": [0, 1],
+    "explanation": "OSPF se habilita con `network <ip> <wildcard> area <n>` o directamente en la interfaz con `ip ospf <proceso> area <n>`. Usar máscara en vez de wildcard no hace lo esperado, y las otras dos sintaxis no existen en IOS."
+  },
+  {
+    "id": "ccna-d3-049",
+    "domain": "3",
+    "type": "single",
+    "difficulty": "medium",
+    "question": "¿Qué comando cambia manualmente el costo OSPF de una interfaz a 50?",
+    "options": ["ip ospf cost 50", "bandwidth 50", "ospf metric 50", "auto-cost reference-bandwidth 50"],
+    "answer": [0],
+    "explanation": "`ip ospf cost 50` fija el costo directamente. Cambiar `bandwidth` altera el costo de forma indirecta (y afecta otros protocolos), y `auto-cost` cambia la referencia para todas las interfaces."
+  },
+  {
+    "id": "ccna-d3-050",
+    "domain": "3",
+    "type": "single",
+    "difficulty": "hard",
+    "question": "R1 y R2 forman vecindad OSPF, pero R1 no instala rutas hacia la LAN de R2 (192.168.2.0/24). En R2, `show ip protocols` lista `Routing for Networks: 10.0.12.0 0.0.0.3 area 0`. ¿Qué falta?",
+    "options": [
+      "Habilitar OSPF en la interfaz LAN de R2 (red 192.168.2.0/24)",
+      "Configurar `passive-interface` en la LAN de R2",
+      "Igualar los Router IDs",
+      "Configurar `default-information originate` en R2"
+    ],
+    "answer": [0],
+    "explanation": "R2 solo tiene OSPF en el enlace hacia R1, así que no anuncia su LAN. Hay que incluirla (`network 192.168.2.0 0.0.0.255 area 0`) y, preferiblemente, marcarla pasiva. passive-interface por sí solo no la anuncia."
+  },
+  {
+    "id": "ccna-d3-051",
+    "domain": "3",
+    "type": "single",
+    "difficulty": "medium",
+    "question": "¿Qué tipo de paquete OSPF contiene los LSAs completos enviados en respuesta a una solicitud?",
+    "options": ["LSU (Link-State Update)", "DBD", "LSR", "Hello"],
+    "answer": [0],
+    "explanation": "Hello descubre/mantiene vecinos, DBD resume la LSDB, LSR solicita LSAs faltantes, LSU los envía y LSAck confirma su recepción."
+  },
+  {
+    "id": "ccna-d3-052",
+    "domain": "3",
+    "type": "single",
+    "difficulty": "hard",
+    "question": "¿Qué ruta usará R1 para alcanzar 10.10.10.10?",
+    "exhibit": "```\nR1# show ip route 10.10.10.10\nRouting entry for 10.10.10.0/24\n  Known via \"ospf 1\", distance 110, metric 3, type intra area\n  Last update from 10.0.13.3 on GigabitEthernet0/2, 00:01:10 ago\n  Routing Descriptor Blocks:\n  * 10.0.12.2, from 2.2.2.2, 00:01:10 ago, via GigabitEthernet0/1\n      Route metric is 3, traffic share count is 1\n    10.0.13.3, from 3.3.3.3, 00:01:10 ago, via GigabitEthernet0/2\n      Route metric is 3, traffic share count is 1\n```",
+    "options": [
+      "Balancea entre 10.0.12.2 y 10.0.13.3 porque ambas rutas tienen costo 3",
+      "Solo 10.0.12.2, por tener asterisco",
+      "Solo 10.0.13.3, por ser la última actualización",
+      "Usa la ruta por defecto"
+    ],
+    "answer": [0],
+    "explanation": "Hay dos descriptors con igual métrica y traffic share 1:1: es ECMP. El asterisco solo indica cuál camino se usará para el próximo paquete en process switching, no que sea el único."
+  },
+  {
+    "id": "ccna-d3-053",
+    "domain": "3",
+    "type": "single",
+    "difficulty": "medium",
+    "question": "¿Qué dirección multicast usa OSPFv3 para enviar hellos a todos los routers OSPF?",
+    "options": ["FF02::5", "FF02::6", "FF02::1", "FF02::A"],
+    "answer": [0],
+    "explanation": "OSPFv3 usa FF02::5 (todos los routers OSPF) y FF02::6 (DR/BDR), equivalentes a 224.0.0.5 y 224.0.0.6. FF02::A es EIGRPv6."
+  },
+  {
+    "id": "ccna-d3-054",
+    "domain": "3",
+    "type": "single",
+    "difficulty": "hard",
+    "question": "Un host tiene la ruta por defecto hacia la IP virtual de HSRP 10.1.1.1. R1 (activo) pierde su enlace WAN, pero su interfaz LAN sigue arriba. ¿Qué configuración hace que R2 asuma el rol activo?",
+    "options": [
+      "En R1: `standby 1 track` sobre la interfaz WAN (o un objeto) con decremento suficiente, y `standby 1 preempt` en R2",
+      "Aumentar el hello de HSRP",
+      "Configurar HSRP versión 2",
+      "Configurar el mismo grupo en la WAN"
+    ],
+    "answer": [0],
+    "explanation": "El object tracking reduce la prioridad de R1 cuando cae su WAN; para que R2 tome el control necesita preempt (y su prioridad debe superar la prioridad decrementada de R1). Sin tracking, R1 sigue activo porque su LAN está arriba y genera un agujero negro."
+  },
+  {
+    "id": "ccna-d3-055",
+    "domain": "3",
+    "type": "single",
+    "difficulty": "medium",
+    "question": "¿Qué comando muestra el estado de HSRP (activo/standby, IP virtual, prioridad)?",
+    "options": ["show standby brief", "show hsrp", "show vrrp brief", "show ip hsrp"],
+    "answer": [0],
+    "explanation": "`show standby` y `show standby brief` muestran el estado HSRP. `show vrrp` corresponde a VRRP."
+  },
+  {
+    "id": "ccna-d3-056",
+    "domain": "3",
+    "type": "single",
+    "difficulty": "hard",
+    "question": "¿Qué ruta sumarizada IPv6 cubre exactamente 2001:db8:0:10::/64 hasta 2001:db8:0:13::/64?",
+    "options": ["2001:db8:0:10::/62", "2001:db8:0:10::/60", "2001:db8::/48", "2001:db8:0:10::/63"],
+    "answer": [0],
+    "explanation": "El cuarto hexteto va de 0x10 a 0x13: cuatro valores consecutivos alineados (2 bits). 64 − 2 = /62. /63 cubriría solo 10–11 y /60 cubriría 10–1F."
+  },
+  {
+    "id": "ccna-d3-057",
+    "domain": "3",
+    "type": "single",
+    "difficulty": "medium",
+    "question": "¿Qué ventaja tiene el enrutamiento dinámico frente al estático en una red grande?",
+    "options": [
+      "Se adapta automáticamente a cambios y fallas de topología",
+      "Consume menos CPU y memoria",
+      "Es más seguro porque no intercambia información",
+      "No requiere configuración"
+    ],
+    "answer": [0],
+    "explanation": "Los protocolos dinámicos descubren rutas y reconvergen ante fallos. Las estáticas no consumen recursos ni anuncian información, pero no escalan ni se adaptan solas."
+  },
+  {
+    "id": "ccna-d3-058",
+    "domain": "3",
+    "type": "single",
+    "difficulty": "hard",
+    "question": "En R1 configuras `ip route 0.0.0.0 0.0.0.0 Gi0/0 203.0.113.1`. ¿Cómo se llama este tipo de ruta y qué ventaja tiene?",
+    "options": [
+      "Fully specified; no requiere búsqueda recursiva y el router no tiene que hacer ARP por cada destino",
+      "Floating static; solo se usa como respaldo",
+      "Recursive; usa la tabla para encontrar la interfaz",
+      "Host route; solo aplica a 203.0.113.1"
+    ],
+    "answer": [0],
+    "explanation": "Indicar interfaz de salida y next hop (fully specified) evita la búsqueda recursiva y, en Ethernet, hace ARP solo para el next hop. Además, si la interfaz cae la ruta se retira."
+  },
+  {
+    "id": "ccna-d3-059",
+    "domain": "3",
+    "type": "single",
+    "difficulty": "medium",
+    "question": "¿Qué representa la línea `Gateway of last resort is 10.0.0.1 to network 0.0.0.0`?",
+    "options": [
+      "El router tiene una ruta por defecto y la usará cuando ninguna otra ruta coincida",
+      "El router es el default gateway de la LAN",
+      "La red 10.0.0.0 está caída",
+      "OSPF está anunciando la red 0.0.0.0"
+    ],
+    "answer": [0],
+    "explanation": "Indica que existe una ruta por defecto instalada (estática o aprendida). Se usa cuando no hay una coincidencia más específica."
+  },
+  {
+    "id": "ccna-d3-060",
+    "domain": "3",
+    "type": "single",
+    "difficulty": "hard",
+    "question": "Con `ip ospf priority 0` en todas las interfaces de los routers de un segmento Ethernet, ¿qué sucede?",
+    "options": [
+      "No se elige DR ni BDR y los routers quedan en 2-WAY sin intercambiar LSAs",
+      "Se elige el DR por Router ID",
+      "Los routers forman adyacencias FULL entre todos",
+      "OSPF cambia automáticamente a point-to-point"
+    ],
+    "answer": [0],
+    "explanation": "En redes broadcast se necesita un DR para que los DROTHER sincronicen la LSDB. Si ninguno es elegible, no hay DR; los routers se quedan en 2-WAY y no se intercambian rutas por ese segmento."
+  },
+  {
+    "id": "ccna-d3-061",
+    "domain": "3",
+    "type": "single",
+    "difficulty": "medium",
+    "question": "¿Qué estado OSPF indica que dos routers vecinos sincronizaron completamente su LSDB?",
+    "options": ["FULL", "2-WAY", "LOADING", "EXCHANGE"],
+    "answer": [0],
+    "explanation": "Secuencia: Down → Init → 2-Way → ExStart → Exchange → Loading → Full. Full indica adyacencia completa y LSDB sincronizada."
+  },
+  {
+    "id": "ccna-d3-062",
+    "domain": "3",
+    "type": "single",
+    "difficulty": "hard",
+    "question": "R1 ve a R2 en estado INIT de forma permanente. ¿Qué indica?",
+    "options": [
+      "R1 recibe hellos de R2, pero R2 no está viendo los hellos de R1 (su RID no aparece en el hello de R2)",
+      "La MTU no coincide",
+      "Ambos tienen la misma prioridad",
+      "Ya están sincronizando la LSDB"
+    ],
+    "answer": [0],
+    "explanation": "INIT significa que R1 recibió un hello de R2 que aún no incluye el RID de R1 en su lista de vecinos. Suele deberse a comunicación unidireccional, ACLs que bloquean 224.0.0.5 en un sentido o problemas de autenticación en un extremo."
+  },
+  {
+    "id": "ccna-d3-063",
+    "domain": "3",
+    "type": "single",
+    "difficulty": "medium",
+    "question": "¿Qué comando muestra solo las rutas aprendidas por OSPF?",
+    "options": ["show ip route ospf", "show ip ospf route", "show ospf routes", "show ip route | include C"],
+    "answer": [0],
+    "explanation": "`show ip route ospf` filtra la tabla de rutas por protocolo. `show ip ospf database` muestra la LSDB, no la tabla de rutas."
+  },
+  {
+    "id": "ccna-d3-064",
+    "domain": "3",
+    "type": "single",
+    "difficulty": "hard",
+    "question": "¿Qué sucede con los paquetes cuyo TTL llega a 0 en un router?",
+    "options": [
+      "El router los descarta y envía ICMP Time Exceeded al origen",
+      "El router los reenvía con TTL 255",
+      "El router los envía a la ruta por defecto",
+      "El router los almacena hasta que el TTL se renueve"
+    ],
+    "answer": [0],
+    "explanation": "Cada router decrementa el TTL; si llega a 0 descarta el paquete y envía ICMP Time Exceeded (tipo 11). Esto previene bucles infinitos y es la base de traceroute."
+  },
+  {
+    "id": "ccna-d3-065",
+    "domain": "3",
+    "type": "single",
+    "difficulty": "hard",
+    "question": "R1 recibe un paquete para 172.16.4.130. ¿Qué entrada usa?",
+    "exhibit": "```\nO    172.16.4.0/25 [110/2] via 10.0.0.2\nO    172.16.4.128/26 [110/5] via 10.0.0.6\nS    172.16.4.0/24 [1/0] via 10.0.0.10\nS*   0.0.0.0/0 [1/0] via 10.0.0.14\n```",
+    "options": ["172.16.4.128/26 via 10.0.0.6", "172.16.4.0/24 via 10.0.0.10", "172.16.4.0/25 via 10.0.0.2", "0.0.0.0/0 via 10.0.0.14"],
+    "answer": [0],
+    "explanation": "172.16.4.130 no está en 172.16.4.0/25 (.0–.127). Coincide con 172.16.4.128/26 (.128–.191), con el /24 y con la default; gana el /26 por ser más específico, aunque tenga peor AD y métrica que la estática."
+  },
+  {
+    "id": "ccna-d3-066",
+    "domain": "3",
+    "type": "single",
+    "difficulty": "medium",
+    "question": "¿Qué tipo de red OSPF se usa por defecto en una interfaz serial HDLC/PPP?",
+    "options": ["Point-to-point", "Broadcast", "NBMA", "Point-to-multipoint"],
+    "answer": [0],
+    "explanation": "Interfaces seriales con HDLC o PPP son point-to-point por defecto: no hay elección de DR/BDR. Ethernet es broadcast por defecto."
+  },
+  {
+    "id": "ccna-d3-067",
+    "domain": "3",
+    "type": "multiple",
+    "difficulty": "hard",
+    "question": "¿Qué dos factores deben coincidir entre dos routers vecinos para que OSPF forme vecindad pero que NO influyen en la elección de DR?",
+    "options": ["Area ID", "Prioridad de interfaz", "Hello y Dead interval", "Router ID", "Costo de interfaz"],
+    "answer": [0, 2],
+    "explanation": "Área y temporizadores deben coincidir para la vecindad y no participan en la elección del DR. La prioridad y el RID sí deciden el DR (y no tienen que coincidir); el costo no tiene que coincidir."
+  },
+  {
+    "id": "ccna-d3-068",
+    "domain": "3",
+    "type": "single",
+    "difficulty": "medium",
+    "question": "¿Qué ventaja tiene usar una interfaz loopback como origen del Router ID de OSPF?",
+    "options": [
+      "La loopback siempre está up, por lo que el RID es estable",
+      "La loopback tiene costo OSPF 0",
+      "Las loopbacks no se anuncian en OSPF",
+      "Permite que dos routers compartan el mismo RID"
+    ],
+    "answer": [0],
+    "explanation": "Una loopback no depende de un enlace físico, así que permanece up y el RID es estable y predecible. Se anuncia como /32 (stub host) por defecto."
+  },
+  {
+    "id": "ccna-d3-069",
+    "domain": "3",
+    "type": "single",
+    "difficulty": "hard",
+    "question": "R1 tiene `ip route 10.0.0.0 255.0.0.0 Null0`. ¿Para qué sirve?",
+    "options": [
+      "Descartar tráfico hacia partes del /8 sin una ruta más específica, evitando bucles con la ruta por defecto",
+      "Anunciar 10.0.0.0/8 al ISP",
+      "Hacer NAT para 10.0.0.0/8",
+      "Reenviar todo el tráfico 10.0.0.0/8 a la interfaz de gestión"
+    ],
+    "answer": [0],
+    "explanation": "Una ruta a Null0 descarta silenciosamente el tráfico que no coincide con subredes más específicas, evitando que siga la ruta por defecto (y posibles bucles). Es común junto a sumarizaciones."
+  },
+  {
+    "id": "ccna-d3-070",
+    "domain": "3",
+    "type": "single",
+    "difficulty": "medium",
+    "question": "¿Qué información contiene un paquete Hello de OSPF?",
+    "options": [
+      "Router ID, área, máscara, hello/dead interval, prioridad, DR/BDR y lista de vecinos vistos",
+      "La LSDB completa",
+      "La tabla de rutas del emisor",
+      "Solo el RID"
+    ],
+    "answer": [0],
+    "explanation": "El hello transporta los parámetros que deben coincidir y la lista de vecinos detectados (para pasar a 2-Way), además de prioridad, DR y BDR."
+  },
+  {
+    "id": "ccna-d3-071",
+    "domain": "3",
+    "type": "single",
+    "difficulty": "hard",
+    "question": "Según la salida, ¿por qué R1 no es vecino de R2 por Gi0/0?",
+    "exhibit": "```\nR1# show ip ospf interface Gi0/0 | include Area|Timer|Network\n  Internet Address 10.0.0.1/24, Area 0, Attached via Network Statement\n  Process ID 1, Router ID 1.1.1.1, Network Type BROADCAST, Cost: 1\n  Timer intervals configured, Hello 10, Dead 40, Wait 40, Retransmit 5\n\nR2# show ip ospf interface Gi0/0 | include Area|Timer|Network\n  Internet Address 10.0.0.2/24, Area 0, Attached via Network Statement\n  Process ID 2, Router ID 2.2.2.2, Network Type BROADCAST, Cost: 1\n  Timer intervals configured, Hello 5, Dead 20, Wait 20, Retransmit 5\n```",
+    "options": [
+      "Los temporizadores Hello/Dead no coinciden",
+      "Los Process ID son distintos",
+      "Las IP están en subredes distintas",
+      "Los Router ID son distintos"
+    ],
+    "answer": [0],
+    "explanation": "Hello 10/Dead 40 frente a 5/20 impide la vecindad. El Process ID es local y no tiene que coincidir; ambas IPs están en 10.0.0.0/24, y los RIDs deben ser distintos."
+  },
+  {
+    "id": "ccna-d3-072",
+    "domain": "3",
+    "type": "single",
+    "difficulty": "medium",
+    "question": "¿Qué parámetro del proceso OSPF es solo local y no necesita coincidir entre vecinos?",
+    "options": ["Process ID", "Area ID", "Subnet mask", "Authentication"],
+    "answer": [0],
+    "explanation": "El número de proceso (`router ospf 1`) solo identifica la instancia en el router. Área, máscara y autenticación sí deben coincidir."
+  },
+  {
+    "id": "ccna-d3-073",
+    "domain": "3",
+    "type": "single",
+    "difficulty": "hard",
+    "question": "Un router recibe un paquete para 10.5.5.5. Tiene `S 10.5.5.0/24 [1/0] via 10.0.0.2` y `S 10.5.5.0/24 [1/0] via 10.0.0.6`. ¿Qué hace?",
+    "options": [
+      "Balancea la carga entre ambos next hops",
+      "Usa siempre 10.0.0.2 por ser el más bajo",
+      "Rechaza la segunda ruta como duplicada",
+      "Usa la ruta configurada más recientemente"
+    ],
+    "answer": [0],
+    "explanation": "Dos estáticas al mismo prefijo con igual AD (y métrica 0) se instalan ambas y el router balancea la carga (por flujo con CEF)."
+  },
+  {
+    "id": "ccna-d3-074",
+    "domain": "3",
+    "type": "single",
+    "difficulty": "medium",
+    "question": "¿Cuál es la distancia administrativa por defecto de una ruta estática configurada con interfaz de salida?",
+    "options": ["1", "0", "5", "20"],
+    "answer": [0],
+    "explanation": "Toda ruta estática tiene AD 1 por defecto, tenga next hop o interfaz de salida. Las conectadas tienen AD 0."
+  },
+  {
+    "id": "ccna-d3-075",
+    "domain": "3",
+    "type": "single",
+    "difficulty": "hard",
+    "question": "R2 anuncia una default con `default-information originate`. En R1 aparece `O*E2 0.0.0.0/0 [110/1] via 10.0.12.2`. ¿Qué significa E2?",
+    "options": [
+      "Ruta externa tipo 2: la métrica es la asignada por el ASBR y no suma el costo interno",
+      "Ruta externa tipo 2: la métrica suma el costo interno",
+      "Ruta inter-area de segundo nivel",
+      "Ruta estática con AD 2"
+    ],
+    "answer": [0],
+    "explanation": "Las rutas externas E2 (por defecto) conservan la métrica fijada por el ASBR (1 para la default) sin sumar costos internos; E1 sí acumula el costo interno."
+  }
+]

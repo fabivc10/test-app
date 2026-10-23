@@ -1,0 +1,43 @@
+{
+  "id": "aws-saa",
+  "name": "AWS Solutions Architect – Associate",
+  "code": "SAA-C03",
+  "provider": "Amazon Web Services",
+  "version": "SAA-C03",
+  "enabled": true,
+  "description": "Diseño de arquitecturas seguras, resilientes, de alto rendimiento y optimizadas en costo sobre AWS.",
+  "exam": {
+    "questionCount": 65,
+    "durationMinutes": 130,
+    "passPercent": 72,
+    "scaled": { "min": 100, "max": 1000, "pass": 720 },
+    "poolMultiplier": 3,
+    "notes": [
+      "65 preguntas (50 puntuables + 15 no puntuables que no se identifican) en 130 minutos.",
+      "Tipos: opción única (1 de 4) y respuesta múltiple (2 o más de 5+). Sin penalización por adivinar.",
+      "Puntaje escalado 100–1000; aprueba con 720. La app aproxima la escala de forma lineal.",
+      "El examen se puede rendir en español (Latinoamérica); el vocabulario técnico se mantiene en inglés.",
+      "Pregunta típica: escenario + requisito clave (\"MOST cost-effective\", \"LEAST operational overhead\", \"highly available\"). Identifica ese requisito antes de mirar las opciones."
+    ]
+  },
+  "domains": [
+    { "id": "1", "name": "Design Secure Architectures", "weight": 30 },
+    { "id": "2", "name": "Design Resilient Architectures", "weight": 26 },
+    { "id": "3", "name": "Design High-Performing Architectures", "weight": 24 },
+    { "id": "4", "name": "Design Cost-Optimized Architectures", "weight": 20 }
+  ],
+  "sources": [
+    { "type": "official", "title": "AWS Certified Solutions Architect – Associate", "url": "https://aws.amazon.com/certification/certified-solutions-architect-associate/" },
+    { "type": "official", "title": "Exam Guide SAA-C03", "url": "https://docs.aws.amazon.com/aws-certification/latest/solutions-architect-associate-03/solutions-architect-associate-03.html" },
+    { "type": "official", "title": "AWS Skill Builder — Official Practice Question Set (gratis)", "url": "https://skillbuilder.aws/" },
+    { "type": "docs", "title": "AWS Well-Architected Framework", "url": "https://docs.aws.amazon.com/wellarchitected/latest/framework/welcome.html" },
+    { "type": "docs", "title": "AWS Documentation", "url": "https://docs.aws.amazon.com/" },
+    { "type": "docs", "title": "AWS FAQs por servicio", "url": "https://aws.amazon.com/faqs/" },
+    { "type": "github", "title": "keenanromain/AWS-SAA-C02-Study-Guide", "url": "https://github.com/keenanromain/AWS-SAA-C02-Study-Guide", "note": "Guía extensa por servicio (vigente en lo conceptual)" },
+    { "type": "github", "title": "aws-samples (repos oficiales de ejemplo)", "url": "https://github.com/aws-samples", "note": "Arquitecturas y labs de referencia" },
+    { "type": "github", "title": "open-guides/og-aws", "url": "https://github.com/open-guides/og-aws", "note": "Guía práctica de AWS" },
+    { "type": "practice", "title": "Tutorials Dojo — Cheat sheets AWS", "url": "https://tutorialsdojo.com/aws-cheat-sheets/" },
+    { "type": "practice", "title": "AWS Workshops", "url": "https://workshops.aws/", "note": "Labs guiados oficiales" },
+    { "type": "practice", "title": "AWS Free Tier", "url": "https://aws.amazon.com/free/" }
+  ]
+}

@@ -1,0 +1,257 @@
+[
+  {
+    "id": "aws-d3-001",
+    "domain": "3",
+    "type": "single",
+    "difficulty": "hard",
+    "question": "Una base de datos OLTP en EC2 requiere 40 000 IOPS sostenidas con latencia submilisegundo y alta durabilidad. ¿Qué tipo de volumen EBS usar?",
+    "options": ["Provisioned IOPS SSD (io2 Block Express)", "General Purpose SSD gp3", "Throughput Optimized HDD st1", "Cold HDD sc1"],
+    "answer": [0],
+    "explanation": "io2/io2 Block Express está diseñado para IOPS altas y sostenidas (hasta 256 000) con latencia submilisegundo y durabilidad 99,999 %. gp3 llega hasta 16 000 IOPS por volumen; los HDD están optimizados para throughput secuencial."
+  },
+  {
+    "id": "aws-d3-002",
+    "domain": "3",
+    "type": "single",
+    "difficulty": "medium",
+    "question": "Un clúster de big data procesa grandes archivos de forma secuencial y necesita alto throughput al menor costo posible en EBS. ¿Qué tipo de volumen usar?",
+    "options": ["st1 (Throughput Optimized HDD)", "io2", "gp3", "sc1 para todos los datos activos"],
+    "answer": [0],
+    "explanation": "st1 ofrece alto throughput para cargas secuenciales y frecuentes (big data, logs, ETL) a bajo costo. sc1 es para datos fríos de acceso infrecuente; io2 y gp3 son SSD para IOPS aleatorias."
+  },
+  {
+    "id": "aws-d3-003",
+    "domain": "3",
+    "type": "single",
+    "difficulty": "hard",
+    "question": "Una aplicación necesita el almacenamiento temporal más rápido posible para un buffer/caché que puede reconstruirse si se pierde. ¿Qué usar?",
+    "options": ["Instance store (NVMe) de la instancia", "EBS io2", "Amazon EFS Max I/O", "Amazon S3 Express One Zone"],
+    "answer": [0],
+    "explanation": "El instance store está físicamente conectado al host y ofrece la menor latencia y mayor IOPS, pero es efímero (se pierde al detener/terminar la instancia). Es ideal para cachés, buffers y datos temporales replicados."
+  },
+  {
+    "id": "aws-d3-004",
+    "domain": "3",
+    "type": "single",
+    "difficulty": "hard",
+    "question": "Un trabajo HPC con MPI requiere la menor latencia de red posible entre nodos. ¿Qué configuración usar?",
+    "options": [
+      "Un cluster placement group en una sola AZ con instancias que soporten Elastic Fabric Adapter (EFA)",
+      "Un spread placement group en varias AZs",
+      "Un partition placement group",
+      "Instancias en distintas regiones"
+    ],
+    "answer": [0],
+    "explanation": "El cluster placement group coloca instancias cerca dentro de una AZ (baja latencia y alto ancho de banda) y EFA permite comunicación OS-bypass para MPI. Spread maximiza aislamiento; partition se usa para Hadoop/Cassandra/Kafka."
+  },
+  {
+    "id": "aws-d3-005",
+    "domain": "3",
+    "type": "single",
+    "difficulty": "medium",
+    "question": "Una aplicación crítica de 6 instancias debe asegurar que ningún par de instancias comparta hardware subyacente. ¿Qué placement group usar?",
+    "options": ["Spread", "Cluster", "Partition", "Ninguno; las instancias nunca comparten hardware"],
+    "answer": [0],
+    "explanation": "Spread coloca cada instancia en hardware distinto (máximo 7 instancias por AZ por grupo), reduciendo fallos correlacionados."
+  },
+  {
+    "id": "aws-d3-006",
+    "domain": "3",
+    "type": "single",
+    "difficulty": "hard",
+    "question": "Usuarios de todo el mundo suben archivos de varios GB a un bucket S3 en us-east-1 y las subidas son lentas desde Asia. ¿Qué combinación mejora el rendimiento?",
+    "options": [
+      "S3 Transfer Acceleration y multipart upload",
+      "S3 Cross-Region Replication",
+      "S3 Intelligent-Tiering",
+      "CloudFront con caché para las subidas"
+    ],
+    "answer": [0],
+    "explanation": "Transfer Acceleration enruta las subidas por las edge locations de CloudFront y la red de AWS; multipart sube partes en paralelo y reintenta solo las fallidas (recomendado > 100 MB). CRR copia después de subir."
+  },
+  {
+    "id": "aws-d3-007",
+    "domain": "3",
+    "type": "single",
+    "difficulty": "medium",
+    "question": "Un sitio web global sirve imágenes y videos estáticos desde S3 con alta latencia para usuarios lejanos. ¿Qué solución reduce la latencia?",
+    "options": ["Amazon CloudFront con S3 como origen", "Un ALB delante de S3", "S3 Transfer Acceleration", "Más buckets en la misma región"],
+    "answer": [0],
+    "explanation": "CloudFront almacena en caché el contenido en edge locations cercanas a los usuarios. Transfer Acceleration acelera transferencias hacia S3, pero no cachea contenido."
+  },
+  {
+    "id": "aws-d3-008",
+    "domain": "3",
+    "type": "single",
+    "difficulty": "hard",
+    "question": "Una aplicación sobre DynamoDB tiene lecturas muy repetitivas que necesitan latencia de microsegundos, sin modificar mucho el código. ¿Qué usar?",
+    "options": ["DynamoDB Accelerator (DAX)", "ElastiCache for Memcached con lógica propia", "Read replicas de DynamoDB", "DynamoDB Streams"],
+    "answer": [0],
+    "explanation": "DAX es una caché en memoria compatible con la API de DynamoDB (cambiar solo el cliente) que reduce la latencia de lectura de milisegundos a microsegundos. DynamoDB no tiene read replicas como RDS."
+  },
+  {
+    "id": "aws-d3-009",
+    "domain": "3",
+    "type": "single",
+    "difficulty": "medium",
+    "question": "Una aplicación web consulta repetidamente la misma información de un catálogo en Amazon RDS, saturando la base de datos. ¿Qué mejora el rendimiento con el MENOR impacto en la BD?",
+    "options": ["Implementar una caché con Amazon ElastiCache (patrón lazy loading)", "Aumentar el almacenamiento de RDS", "Habilitar Multi-AZ", "Usar EBS io2"],
+    "answer": [0],
+    "explanation": "Cachear resultados frecuentes en ElastiCache reduce lecturas a la BD y la latencia. Multi-AZ es para disponibilidad, no rendimiento."
+  },
+  {
+    "id": "aws-d3-010",
+    "domain": "3",
+    "type": "single",
+    "difficulty": "hard",
+    "question": "Una tabla DynamoDB con capacidad provisionada sufre ThrottlingException solo en ciertas claves muy populares (hot partition), aunque el consumo total está por debajo de lo provisionado. ¿Qué solución aborda la causa?",
+    "options": [
+      "Rediseñar la partition key para distribuir mejor el acceso (alta cardinalidad, write sharding)",
+      "Aumentar la capacidad total provisionada",
+      "Cambiar a modo on-demand",
+      "Crear un índice secundario local"
+    ],
+    "answer": [0],
+    "explanation": "El throttling por hot partition se debe a una clave con poca cardinalidad que concentra tráfico. Aumentar la capacidad o pasar a on-demand ayuda poco si una partición supera su límite. La solución es una clave que distribuya la carga (o DAX para lecturas)."
+  },
+  {
+    "id": "aws-d3-011",
+    "domain": "3",
+    "type": "single",
+    "difficulty": "medium",
+    "question": "Una nueva aplicación tiene tráfico impredecible en DynamoDB, con picos súbitos y periodos sin uso. ¿Qué modo de capacidad usar?",
+    "options": ["On-demand", "Provisioned sin auto scaling", "Provisioned con reserved capacity", "DAX"],
+    "answer": [0],
+    "explanation": "On-demand se ajusta instantáneamente y cobra por petición, ideal para cargas impredecibles o nuevas. Provisioned (con auto scaling y reserva) es más barato para cargas estables y predecibles."
+  },
+  {
+    "id": "aws-d3-012",
+    "domain": "3",
+    "type": "single",
+    "difficulty": "hard",
+    "question": "Una función Lambda que atiende una API sufre latencia alta en las primeras peticiones tras periodos de inactividad (cold starts). La latencia debe ser predecible. ¿Qué configurar?",
+    "options": ["Provisioned concurrency", "Reserved concurrency", "Aumentar el timeout", "Mover la función a una VPC"],
+    "answer": [0],
+    "explanation": "Provisioned concurrency mantiene entornos inicializados listos. Reserved concurrency solo reserva/limita concurrencia, no evita cold starts. (Para Java, SnapStart también reduce el arranque.)"
+  },
+  {
+    "id": "aws-d3-013",
+    "domain": "3",
+    "type": "single",
+    "difficulty": "medium",
+    "question": "Una función Lambda de procesamiento intensivo en CPU es lenta. ¿Qué cambio aumenta la potencia de CPU asignada?",
+    "options": ["Aumentar la memoria configurada", "Aumentar el timeout", "Aumentar la reserved concurrency", "Habilitar X-Ray"],
+    "answer": [0],
+    "explanation": "En Lambda la CPU se asigna proporcionalmente a la memoria (hasta 10 240 MB y 6 vCPUs). Más memoria = más CPU y a menudo menos duración y costo."
+  },
+  {
+    "id": "aws-d3-014",
+    "domain": "3",
+    "type": "single",
+    "difficulty": "hard",
+    "question": "Analistas necesitan ejecutar consultas SQL ad hoc sobre archivos Parquet en S3 sin aprovisionar infraestructura y pagando por datos escaneados. ¿Qué servicio usar?",
+    "options": ["Amazon Athena", "Amazon Redshift provisionado", "Amazon EMR", "Amazon RDS"],
+    "answer": [0],
+    "explanation": "Athena es serverless, consulta S3 con SQL usando el Glue Data Catalog y cobra por TB escaneado (Parquet comprimido y particionado reduce el costo). Redshift es un data warehouse para consultas complejas recurrentes."
+  },
+  {
+    "id": "aws-d3-015",
+    "domain": "3",
+    "type": "single",
+    "difficulty": "medium",
+    "question": "Una empresa necesita un data warehouse para consultas analíticas complejas sobre petabytes de datos estructurados con alto rendimiento y concurrencia. ¿Qué servicio usar?",
+    "options": ["Amazon Redshift", "Amazon DynamoDB", "Amazon RDS for MySQL", "Amazon ElastiCache"],
+    "answer": [0],
+    "explanation": "Redshift es un data warehouse columnar MPP para OLAP. DynamoDB y RDS están orientados a OLTP."
+  },
+  {
+    "id": "aws-d3-016",
+    "domain": "3",
+    "type": "single",
+    "difficulty": "hard",
+    "question": "Una empresa necesita un sistema de archivos de alto rendimiento para HPC que procese datos almacenados en S3 con latencia submilisegundo y cientos de GB/s. ¿Qué servicio usar?",
+    "options": ["Amazon FSx for Lustre vinculado al bucket S3", "Amazon EFS", "Amazon FSx for Windows File Server", "S3 directamente con s3fs"],
+    "answer": [0],
+    "explanation": "FSx for Lustre está optimizado para HPC/ML con throughput masivo y se integra con S3 (data repository association) para cargar y exportar datos. FSx for Windows ofrece SMB para cargas Windows."
+  },
+  {
+    "id": "aws-d3-017",
+    "domain": "3",
+    "type": "single",
+    "difficulty": "medium",
+    "question": "Aplicaciones Windows necesitan un sistema de archivos compartido SMB integrado con Active Directory y con soporte para DFS. ¿Qué servicio usar?",
+    "options": ["Amazon FSx for Windows File Server", "Amazon EFS", "FSx for Lustre", "Amazon S3"],
+    "answer": [0],
+    "explanation": "FSx for Windows File Server ofrece SMB nativo, integración con AD, ACLs NTFS y DFS. EFS es NFS para Linux."
+  },
+  {
+    "id": "aws-d3-018",
+    "domain": "3",
+    "type": "single",
+    "difficulty": "hard",
+    "question": "Una empresa debe migrar 80 TB desde su centro de datos a S3 en dos semanas, pero su enlace a Internet es de 100 Mbps. ¿Qué solución usar?",
+    "options": ["AWS Snowball Edge", "AWS DataSync por Internet", "S3 Transfer Acceleration", "Una VPN site-to-site"],
+    "answer": [0],
+    "explanation": "A 100 Mbps, 80 TB tardarían ~74 días como mínimo. Snowball Edge transfiere offline en dispositivos físicos y es la opción adecuada. DataSync y Transfer Acceleration dependen del ancho de banda disponible."
+  },
+  {
+    "id": "aws-d3-019",
+    "domain": "3",
+    "type": "single",
+    "difficulty": "medium",
+    "question": "Una empresa necesita sincronizar periódicamente un NAS NFS on-premises con Amazon EFS, con cifrado en tránsito, verificación de integridad y programación. ¿Qué servicio usar?",
+    "options": ["AWS DataSync", "AWS Snowcone", "AWS Storage Gateway Volume Gateway", "AWS Transfer Family"],
+    "answer": [0],
+    "explanation": "DataSync automatiza y acelera transferencias en línea entre NFS/SMB/HDFS/objetos y S3/EFS/FSx con programación, cifrado y validación. Transfer Family expone SFTP/FTPS a S3/EFS."
+  },
+  {
+    "id": "aws-d3-020",
+    "domain": "3",
+    "type": "single",
+    "difficulty": "hard",
+    "question": "Aplicaciones on-premises guardan archivos vía NFS y la empresa quiere que esos archivos se almacenen como objetos en S3, manteniendo una caché local de baja latencia para los datos recientes. ¿Qué usar?",
+    "options": ["Amazon S3 File Gateway", "Tape Gateway", "Volume Gateway en modo stored", "AWS DataSync"],
+    "answer": [0],
+    "explanation": "S3 File Gateway presenta NFS/SMB on-premises y guarda los archivos como objetos en S3 con caché local. Tape Gateway reemplaza cintas y Volume Gateway expone volúmenes iSCSI."
+  },
+  {
+    "id": "aws-d3-021",
+    "domain": "3",
+    "type": "single",
+    "difficulty": "medium",
+    "question": "Una aplicación necesita búsquedas de texto completo y analítica de logs casi en tiempo real con dashboards. ¿Qué servicio usar?",
+    "options": ["Amazon OpenSearch Service", "Amazon Athena", "Amazon RDS", "Amazon Neptune"],
+    "answer": [0],
+    "explanation": "OpenSearch Service ofrece búsqueda de texto completo, analítica de logs y visualización con OpenSearch Dashboards. Neptune es una base de grafos."
+  },
+  {
+    "id": "aws-d3-022",
+    "domain": "3",
+    "type": "single",
+    "difficulty": "hard",
+    "question": "Una red social necesita consultar relaciones complejas (amigos de amigos, recomendaciones) con baja latencia. ¿Qué base de datos usar?",
+    "options": ["Amazon Neptune", "Amazon DynamoDB", "Amazon Redshift", "Amazon Timestream"],
+    "answer": [0],
+    "explanation": "Neptune es una base de datos de grafos (Gremlin, openCypher, SPARQL) optimizada para recorrer relaciones. Timestream es para series temporales."
+  },
+  {
+    "id": "aws-d3-023",
+    "domain": "3",
+    "type": "single",
+    "difficulty": "medium",
+    "question": "Una aplicación IoT almacena millones de mediciones por segundo con timestamp y consulta tendencias por rangos de tiempo. ¿Qué base de datos está diseñada para esto?",
+    "options": ["Amazon Timestream", "Amazon Neptune", "Amazon DocumentDB", "Amazon QLDB"],
+    "answer": [0],
+    "explanation": "Timestream es una base de datos de series temporales serverless con almacenamiento por niveles (memoria/magnético) y funciones analíticas de tiempo."
+  },
+  {
+    "id": "aws-d3-024",
+    "domain": "3",
+    "type": "single",
+    "difficulty": "hard",
+    "question": "Una aplicación con Aurora tiene cargas muy variables: picos intensos durante horas y casi nada por la noche. Se busca escalar automáticamente la capacidad de cómputo de la BD en segundos. ¿Qué usar?",
+    "options": ["Aurora Serverless v2", "RDS for MySQL con instancia más grande", "Aurora provisionado con una sola instancia", "DynamoDB on-demand"],
+    "answer": [0],
+    "explanation": "Aurora Serverless v2 escala la capacidad (ACUs) en incrementos finos de forma casi instantánea y puede combinarse con instancias provisionadas y réplicas. Cambiar a DynamoDB implica rediseñar."
+  }
+]

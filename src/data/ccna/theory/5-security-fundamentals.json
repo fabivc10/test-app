@@ -1,0 +1,238 @@
+{
+  "domainId": "5",
+  "topics": [
+    {
+      "id": "ccna-t5-concepts",
+      "objective": "5.1–5.2",
+      "title": "Conceptos de seguridad y programa de seguridad",
+      "content": [
+        "- **Vulnerabilidad**: debilidad. **Exploit**: técnica que la aprovecha. **Amenaza**: posibilidad de que ocurra. **Mitigación**: reduce el riesgo.",
+        "- Tríada **CIA**: confidencialidad, integridad, disponibilidad.",
+        "",
+        "| Ataque | Descripción |",
+        "|---|---|",
+        "| Phishing / spear phishing / whaling | Engaño por correo; dirigido; a ejecutivos |",
+        "| Vishing / smishing | Por voz / SMS |",
+        "| DoS / DDoS | Agotar recursos desde una / muchas fuentes |",
+        "| Spoofing | Falsificar IP/MAC/ARP |",
+        "| MITM | Interceptar tráfico (p. ej., ARP poisoning) |",
+        "| Reconocimiento | Escaneo de puertos, recopilar información |",
+        "| Malware | Virus (necesita ejecución), gusano (se propaga solo), troyano, ransomware |",
+        "| Password attacks | Diccionario, fuerza bruta |",
+        "",
+        "**Elementos del programa**: concientización de usuarios (campañas, phishing simulado), formación por rol y **control de acceso físico** (cuartos cerrados, tarjetas, biometría)."
+      ],
+      "keyPoints": [
+        "Gusano = se replica solo; virus = requiere acción del usuario.",
+        "El acceso físico permite recuperar contraseñas: protégelo."
+      ],
+      "references": [
+        {
+          "title": "Cisco — What is a cyberattack?",
+          "url": "https://www.cisco.com/c/en/us/products/security/common-cyberattacks.html"
+        }
+      ]
+    },
+    {
+      "id": "ccna-t5-passwords-aaa",
+      "objective": "5.3–5.4, 5.8",
+      "title": "Contraseñas locales, políticas y AAA",
+      "content": [
+        "```",
+        "enable secret Str0ng!            ! hash (tipo 5/8/9), prevalece sobre enable password",
+        "service password-encryption     ! tipo 7, reversible (solo ofusca)",
+        "username admin privilege 15 algorithm-type scrypt secret Cl4v3!",
+        "security passwords min-length 10",
+        "login block-for 120 attempts 5 within 60",
+        "line con 0",
+        " login local",
+        " exec-timeout 5 0",
+        "```",
+        "",
+        "**MFA**: combina factores de categorías distintas: algo que sabes, algo que tienes, algo que eres. **Certificados** (PKI) y **biometría** son alternativas a contraseñas.",
+        "",
+        "### AAA",
+        "- **Authentication** (quién eres), **Authorization** (qué puedes hacer), **Accounting** (qué hiciste).",
+        "```",
+        "aaa new-model",
+        "tacacs server ISE",
+        " address ipv4 10.0.0.20",
+        " key S3cr3t",
+        "aaa authentication login default group tacacs+ local",
+        "aaa authorization exec default group tacacs+ local",
+        "aaa accounting commands 15 default start-stop group tacacs+",
+        "```",
+        "El método `local` solo se usa si el servidor **no responde**, no si rechaza.",
+        "",
+        "**802.1X**: supplicant (cliente) ↔ authenticator (switch/WLC) ↔ authentication server (RADIUS)."
+      ],
+      "keyPoints": [
+        "`secret` > `password`; tipo 7 es reversible.",
+        "TACACS+: TCP 49, cifra todo, separa las 3 A. RADIUS: UDP, solo cifra la contraseña.",
+        "Contraseña + PIN no es MFA."
+      ],
+      "references": [
+        {
+          "title": "RFC 8907 — TACACS+",
+          "url": "https://www.rfc-editor.org/rfc/rfc8907"
+        }
+      ]
+    },
+    {
+      "id": "ccna-t5-vpn",
+      "objective": "5.5",
+      "title": "VPNs IPsec: site-to-site y acceso remoto",
+      "content": [
+        "| | Site-to-site | Acceso remoto |",
+        "|---|---|---|",
+        "| Extremos | Router/firewall ↔ router/firewall | Cliente (PC) ↔ concentrador/firewall |",
+        "| Software en el host | No | Sí (Cisco Secure Client) o navegador (clientless) |",
+        "| Protocolos | IPsec (IKE + ESP) | IPsec o TLS/DTLS |",
+        "",
+        "**IPsec** ofrece confidencialidad (AES), integridad (SHA/HMAC), autenticación del origen (PSK o certificados) y anti-replay.",
+        "- **IKE** (UDP 500, 4500 con NAT-T) negocia las SAs.",
+        "- **ESP** (protocolo IP 50) cifra y autentica. **AH** (51) solo autentica y no funciona con NAT.",
+        "- Modos: túnel (encapsula todo el paquete, site-to-site) y transporte.",
+        "- **GRE** (protocolo 47) encapsula (multicast, routing) pero **no cifra**; GRE over IPsec combina ambos."
+      ],
+      "keyPoints": [
+        "ESP cifra; AH no.",
+        "Site-to-site es transparente para los hosts."
+      ],
+      "references": [
+        {
+          "title": "Cisco — IPsec overview",
+          "url": "https://www.cisco.com/c/en/us/td/docs/net_mgmt/vpn_solutions_center/2-0/ip_security/provisioning/guide/IPsecPG1.html"
+        }
+      ]
+    },
+    {
+      "id": "ccna-t5-acl",
+      "objective": "5.6",
+      "title": "Listas de control de acceso (ACL)",
+      "content": [
+        "- Se evalúan de arriba abajo; **primera coincidencia** gana; al final hay un **deny implícito**.",
+        "- Una ACL por interfaz, por dirección, por protocolo.",
+        "- **Estándar** (1–99, 1300–1999): solo origen → cerca del **destino**.",
+        "- **Extendida** (100–199, 2000–2699): protocolo, origen, destino, puertos → cerca del **origen**.",
+        "",
+        "```",
+        "access-list 10 permit 10.99.0.0 0.0.0.255",
+        "line vty 0 15",
+        " access-class 10 in               ! restringir acceso SSH",
+        "",
+        "ip access-list extended BLOQUEO-TELNET",
+        " 10 deny tcp 192.168.10.0 0.0.0.255 any eq 23",
+        " 20 permit ip any any",
+        "interface g0/0",
+        " ip access-group BLOQUEO-TELNET in",
+        "",
+        "ip access-list extended BLOQUEO-TELNET",
+        " 15 deny tcp host 192.168.20.5 any eq 22   ! insertar",
+        " no 20                                     ! borrar línea",
+        "",
+        "show access-lists",
+        "show ip interface g0/0",
+        "```",
+        "",
+        "**Wildcards**: 0 = debe coincidir, 1 = ignorar. `host x` = `x 0.0.0.0`; `any` = `0.0.0.0 255.255.255.255`.",
+        "",
+        "IPv6: `ipv6 access-list NOMBRE` + `ipv6 traffic-filter NOMBRE in`. Permisos implícitos de ND (NA/NS) antes del deny implícito."
+      ],
+      "keyPoints": [
+        "Las entradas específicas van primero.",
+        "`in`/`out` se miden desde el router.",
+        "VTY → `access-class`; interfaz → `ip access-group`.",
+        "`established` coincide con segmentos con ACK/RST."
+      ],
+      "references": [
+        {
+          "title": "Cisco — Configure commonly used IP ACLs",
+          "url": "https://www.cisco.com/c/en/us/support/docs/ip/access-lists/26448-ACLsamples.html"
+        }
+      ]
+    },
+    {
+      "id": "ccna-t5-l2security",
+      "objective": "5.7",
+      "title": "Seguridad de capa 2: DHCP snooping, DAI y port security",
+      "content": [
+        "### Port security",
+        "```",
+        "interface g0/5",
+        " switchport mode access",
+        " switchport port-security",
+        " switchport port-security maximum 2",
+        " switchport port-security mac-address sticky",
+        " switchport port-security violation restrict",
+        "errdisable recovery cause psecure-violation",
+        "show port-security interface g0/5",
+        "```",
+        "| Modo | Descarta | Log/SNMP + contador | Apaga el puerto |",
+        "|---|---|---|---|",
+        "| protect | Sí | No | No |",
+        "| restrict | Sí | Sí | No |",
+        "| shutdown (default) | Sí | Sí | Sí (err-disabled) |",
+        "",
+        "### DHCP snooping",
+        "```",
+        "ip dhcp snooping",
+        "ip dhcp snooping vlan 10,20",
+        "interface g0/24",
+        " ip dhcp snooping trust",
+        "interface range g0/1 - 23",
+        " ip dhcp snooping limit rate 10",
+        "show ip dhcp snooping binding",
+        "```",
+        "Descarta OFFER/ACK en puertos untrusted (rogue DHCP) y construye la tabla de bindings.",
+        "",
+        "### Dynamic ARP Inspection",
+        "```",
+        "ip arp inspection vlan 10,20",
+        "interface g0/24",
+        " ip arp inspection trust",
+        "```",
+        "Valida ARP contra los bindings de DHCP snooping (o ARP ACLs para IPs estáticas).",
+        "",
+        "Otros ataques L2: MAC flooding (→ port security), VLAN hopping por switch spoofing (→ deshabilitar DTP) o double tagging (→ VLAN nativa sin usar)."
+      ],
+      "keyPoints": [
+        "Port security requiere modo access/trunk fijo.",
+        "DAI depende de DHCP snooping.",
+        "Uplinks hacia el servidor/otros switches = trusted."
+      ],
+      "references": [
+        {
+          "title": "Cisco — Catalyst 2960 Port-Based Traffic Control (port security)",
+          "url": "https://www.cisco.com/c/en/us/td/docs/switches/lan/catalyst2960/software/release/12-2_55_se/configuration/guide/scg_2960/swtrafc.html"
+        }
+      ]
+    },
+    {
+      "id": "ccna-t5-wireless-security",
+      "objective": "5.9–5.10",
+      "title": "Seguridad inalámbrica y WPA2-PSK en el WLC",
+      "content": [
+        "- **WPA2**: AES-CCMP, PSK (Personal) o 802.1X (Enterprise).",
+        "- **WPA3**: SAE en Personal, PMF (802.11w) obligatorio, forward secrecy; Enterprise 192-bit opcional (GCMP-256).",
+        "- **PMF** protege las tramas de gestión (deauth/disassoc).",
+        "",
+        "### WPA2-PSK en el WLC",
+        "1. WLANs → Create New → SSID.",
+        "2. Security → Layer 2: **WPA+WPA2**, WPA2 Policy, cifrado **AES**.",
+        "3. Auth Key Mgmt: **PSK**, formato ASCII, introducir la passphrase (8–63 caracteres; usar una larga).",
+        "4. Asociar la interfaz dinámica (VLAN) y habilitar la WLAN."
+      ],
+      "keyPoints": [
+        "WPA3-Personal = SAE; WPA2-Personal = PSK vulnerable a diccionario offline.",
+        "Enterprise = 802.1X + RADIUS."
+      ],
+      "references": [
+        {
+          "title": "Cisco — WPA3 deployment guide",
+          "url": "https://www.cisco.com/c/en/us/products/collateral/wireless/catalyst-9100ax-access-points/wpa3-dep-guide-og.html"
+        }
+      ]
+    }
+  ]
+}

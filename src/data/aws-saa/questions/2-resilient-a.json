@@ -1,0 +1,339 @@
+[
+  {
+    "id": "aws-d2-001",
+    "domain": "2",
+    "type": "single",
+    "difficulty": "medium",
+    "question": "Una base de datos Amazon RDS for MySQL de producción debe sobrevivir a la falla de una zona de disponibilidad con failover automático y sin pérdida de datos confirmados. ¿Qué configurar?",
+    "options": ["Despliegue Multi-AZ", "Una read replica en otra AZ", "Snapshots automáticos cada 5 minutos", "Una instancia más grande"],
+    "answer": [0],
+    "explanation": "Multi-AZ mantiene una standby con replicación síncrona en otra AZ y hace failover automático cambiando el DNS del endpoint. Las read replicas usan replicación asíncrona y su promoción es manual; los snapshots implican restauración (más RTO y RPO)."
+  },
+  {
+    "id": "aws-d2-002",
+    "domain": "2",
+    "type": "single",
+    "difficulty": "hard",
+    "question": "Una aplicación de pedidos recibe picos impredecibles; cuando el backend se satura se pierden pedidos. Se necesita desacoplar la recepción del procesamiento y garantizar que ningún pedido se pierda. ¿Qué solución es la MÁS adecuada?",
+    "options": [
+      "Enviar los pedidos a una cola Amazon SQS y procesarlos con consumidores en un Auto Scaling group escalado según la longitud de la cola",
+      "Aumentar el tamaño de las instancias del backend",
+      "Usar Amazon SNS para enviar los pedidos directamente a las instancias",
+      "Guardar los pedidos en el disco local de las instancias web"
+    ],
+    "answer": [0],
+    "explanation": "SQS amortigua los picos almacenando los mensajes de forma duradera hasta que se procesan; escalar los consumidores por ApproximateNumberOfMessagesVisible (o backlog por instancia) ajusta la capacidad. SNS es push sin retención, y escalar verticalmente no resuelve los picos."
+  },
+  {
+    "id": "aws-d2-003",
+    "domain": "2",
+    "type": "single",
+    "difficulty": "hard",
+    "question": "Un mensaje de SQS se procesa dos veces porque el consumidor tarda 90 segundos y la cola tiene la configuración por defecto. ¿Qué cambio lo evita?",
+    "options": [
+      "Aumentar el visibility timeout por encima del tiempo máximo de procesamiento (p. ej., 180 s)",
+      "Reducir el message retention period",
+      "Habilitar long polling",
+      "Configurar una delay queue de 90 s"
+    ],
+    "answer": [0],
+    "explanation": "El visibility timeout por defecto es 30 s; si el consumidor no borra el mensaje antes, vuelve a ser visible y otro consumidor lo recibe. Debe superar el tiempo de procesamiento (o extenderse con ChangeMessageVisibility). Long polling reduce llamadas vacías."
+  },
+  {
+    "id": "aws-d2-004",
+    "domain": "2",
+    "type": "single",
+    "difficulty": "medium",
+    "question": "Mensajes que fallan repetidamente bloquean el procesamiento de una cola SQS. ¿Cómo aislarlos para analizarlos después?",
+    "options": [
+      "Configurar una dead-letter queue con un maxReceiveCount adecuado",
+      "Aumentar el retention period a 14 días",
+      "Convertir la cola en FIFO",
+      "Reducir el visibility timeout"
+    ],
+    "answer": [0],
+    "explanation": "La redrive policy mueve a la DLQ los mensajes recibidos más veces que maxReceiveCount, evitando poison pills y permitiendo analizarlos o reprocesarlos (redrive)."
+  },
+  {
+    "id": "aws-d2-005",
+    "domain": "2",
+    "type": "single",
+    "difficulty": "hard",
+    "question": "Un sistema financiero debe procesar transacciones de cada cuenta en orden estricto y sin duplicados, pero permitir paralelismo entre cuentas distintas. ¿Qué solución usar?",
+    "options": [
+      "Una cola SQS FIFO usando el ID de cuenta como MessageGroupId y deduplicación habilitada",
+      "Una cola SQS estándar con varios consumidores",
+      "Un tema SNS estándar",
+      "Una cola SQS estándar con delay de 1 s"
+    ],
+    "answer": [0],
+    "explanation": "SQS FIFO garantiza orden dentro de cada message group y exactly-once processing con deduplicación (5 min). Grupos distintos se procesan en paralelo. Las colas estándar ofrecen best-effort ordering y at-least-once."
+  },
+  {
+    "id": "aws-d2-006",
+    "domain": "2",
+    "type": "single",
+    "difficulty": "medium",
+    "question": "Cuando se sube una imagen, tres sistemas independientes (miniaturas, indexación y auditoría) deben procesarla, y cada uno debe poder reintentar a su ritmo. ¿Qué patrón aplicar?",
+    "options": [
+      "Fan-out: publicar en un tema SNS suscrito por tres colas SQS, cada una con su consumidor",
+      "Una sola cola SQS con los tres consumidores",
+      "Invocar los tres sistemas de forma síncrona desde la aplicación",
+      "Guardar en S3 y que cada sistema haga polling"
+    ],
+    "answer": [0],
+    "explanation": "SNS→SQS fan-out entrega una copia a cada cola; cada consumidor procesa y reintenta de forma independiente. Con una sola cola, cada mensaje lo consumiría solo uno de los sistemas."
+  },
+  {
+    "id": "aws-d2-007",
+    "domain": "2",
+    "type": "single",
+    "difficulty": "hard",
+    "question": "Una empresa requiere RPO de 1 hora y RTO de 24 horas para una aplicación no crítica, al menor costo posible en la región de DR. ¿Qué estrategia elegir?",
+    "options": ["Backup and restore", "Pilot light", "Warm standby", "Multi-site active/active"],
+    "answer": [0],
+    "explanation": "Backup and restore es la más barata y adecuada para RTO/RPO de horas. Pilot light mantiene núcleos (p. ej., la BD replicada) encendidos; warm standby una versión reducida funcionando; multi-site es la más cara con RTO casi cero.",
+    "reference": { "title": "Disaster recovery options in the cloud", "url": "https://docs.aws.amazon.com/whitepapers/latest/disaster-recovery-workloads-on-aws/disaster-recovery-options-in-the-cloud.html" }
+  },
+  {
+    "id": "aws-d2-008",
+    "domain": "2",
+    "type": "single",
+    "difficulty": "hard",
+    "question": "Una aplicación crítica requiere RTO de minutos y RPO de segundos. En la región de DR se acepta mantener una versión reducida pero totalmente funcional que se escala durante el desastre. ¿Qué estrategia es?",
+    "options": ["Warm standby", "Pilot light", "Backup and restore", "Cold site"],
+    "answer": [0],
+    "explanation": "Warm standby mantiene una copia funcional a escala reducida que puede atender tráfico inmediatamente y luego escalar. En pilot light solo los componentes de datos están activos; los servidores de aplicación deben aprovisionarse."
+  },
+  {
+    "id": "aws-d2-009",
+    "domain": "2",
+    "type": "single",
+    "difficulty": "medium",
+    "question": "Una aplicación web en dos regiones debe enviar todo el tráfico a la región principal y, solo si falla su health check, a la secundaria. ¿Qué política de Route 53 usar?",
+    "options": ["Failover routing", "Latency-based routing", "Weighted routing", "Geolocation routing"],
+    "answer": [0],
+    "explanation": "Failover routing usa registros primario/secundario con health checks. Latency envía a la región con menor latencia, weighted reparte por pesos y geolocation por ubicación del usuario."
+  },
+  {
+    "id": "aws-d2-010",
+    "domain": "2",
+    "type": "single",
+    "difficulty": "hard",
+    "question": "Un Auto Scaling group detrás de un ALB sigue enviando tráfico a instancias cuyo proceso web se colgó, aunque la instancia está en ejecución. ¿Qué cambio reemplaza automáticamente esas instancias?",
+    "options": [
+      "Configurar el health check type del ASG como ELB",
+      "Aumentar el número mínimo de instancias",
+      "Habilitar detailed monitoring",
+      "Usar instancias más grandes"
+    ],
+    "answer": [0],
+    "explanation": "Por defecto el ASG usa EC2 status checks (hardware/SO). Con health check type ELB, el ASG también considera el health check del target group (p. ej., HTTP /health) y reemplaza instancias no saludables."
+  },
+  {
+    "id": "aws-d2-011",
+    "domain": "2",
+    "type": "single",
+    "difficulty": "medium",
+    "question": "¿Cuál es la configuración mínima de un Auto Scaling group para tolerar la falla de una AZ manteniendo siempre al menos 2 instancias activas?",
+    "options": [
+      "Mínimo 4 instancias distribuidas en 2 AZs (o 3 en 3 AZs)",
+      "Mínimo 2 instancias en una sola AZ",
+      "Mínimo 1 instancia en 2 AZs",
+      "Mínimo 2 instancias en 2 AZs"
+    ],
+    "answer": [0],
+    "explanation": "Si pierdes una AZ pierdes la mitad (con 2 AZs). Para conservar 2 instancias tras perder una AZ necesitas 2 por AZ (4 en 2 AZs) o 1 por AZ en 3 AZs. Con 2 en 2 AZs quedaría 1 hasta que el ASG lance reemplazos."
+  },
+  {
+    "id": "aws-d2-012",
+    "domain": "2",
+    "type": "single",
+    "difficulty": "hard",
+    "question": "Una aplicación global usa Amazon Aurora MySQL. Necesita lecturas de baja latencia en otra región y la capacidad de promover esa región con RPO de ~1 segundo y RTO menor a 1 minuto si la región principal falla. ¿Qué usar?",
+    "options": ["Aurora Global Database", "Read replicas de Aurora en la misma región", "Snapshots copiados a la otra región", "RDS Multi-AZ"],
+    "answer": [0],
+    "explanation": "Aurora Global Database replica a nivel de almacenamiento a hasta 5 regiones secundarias con lag típico < 1 s y permite failover/switchover entre regiones en ~1 minuto. Multi-AZ solo protege dentro de una región."
+  },
+  {
+    "id": "aws-d2-013",
+    "domain": "2",
+    "type": "single",
+    "difficulty": "hard",
+    "question": "Una aplicación usa DynamoDB y debe operar activa-activa en tres regiones con escrituras locales en cada región. ¿Qué usar?",
+    "options": ["DynamoDB global tables", "DynamoDB Streams + Lambda personalizadas", "Backups programados entre regiones", "DAX en cada región"],
+    "answer": [0],
+    "explanation": "Global tables proporcionan replicación multi-región y multi-activa administrada (last writer wins). Construirlo con Streams + Lambda añade sobrecarga. DAX es una caché, no replicación."
+  },
+  {
+    "id": "aws-d2-014",
+    "domain": "2",
+    "type": "single",
+    "difficulty": "medium",
+    "question": "Una empresa quiere centralizar y automatizar copias de seguridad de EBS, RDS, DynamoDB y EFS con políticas de retención y copias entre regiones. ¿Qué servicio usar?",
+    "options": ["AWS Backup", "Amazon Data Lifecycle Manager", "S3 Lifecycle", "AWS DataSync"],
+    "answer": [0],
+    "explanation": "AWS Backup centraliza planes de respaldo para muchos servicios, con copia entre regiones y cuentas, y Vault Lock para inmutabilidad. DLM solo gestiona snapshots de EBS/AMIs."
+  },
+  {
+    "id": "aws-d2-015",
+    "domain": "2",
+    "type": "single",
+    "difficulty": "medium",
+    "question": "Los objetos de un bucket S3 deben copiarse automáticamente a otra región para cumplimiento. ¿Qué se necesita?",
+    "options": [
+      "Habilitar el versionado en ambos buckets y configurar S3 Cross-Region Replication (CRR)",
+      "Habilitar Transfer Acceleration",
+      "Crear un Lifecycle rule a Glacier",
+      "Usar S3 Same-Region Replication"
+    ],
+    "answer": [0],
+    "explanation": "La replicación requiere versionado en origen y destino y un rol IAM. CRR replica solo objetos nuevos; para objetos existentes se usa S3 Batch Replication."
+  },
+  {
+    "id": "aws-d2-016",
+    "domain": "2",
+    "type": "single",
+    "difficulty": "hard",
+    "question": "Varias instancias EC2 Linux en distintas AZs necesitan compartir un sistema de archivos POSIX con lectura y escritura simultánea, de alta disponibilidad. ¿Qué servicio usar?",
+    "options": ["Amazon EFS", "Amazon EBS Multi-Attach", "Instance store", "Amazon S3 montado con s3fs"],
+    "answer": [0],
+    "explanation": "EFS es NFS administrado, regional (multi-AZ) y elástico. EBS Multi-Attach solo funciona con io1/io2 dentro de una misma AZ y requiere un sistema de archivos con clúster. Instance store es efímero y local."
+  },
+  {
+    "id": "aws-d2-017",
+    "domain": "2",
+    "type": "single",
+    "difficulty": "hard",
+    "question": "Las instancias privadas de una VPC en tres AZs salen a Internet por un único NAT gateway en la AZ-a. ¿Qué riesgo existe y cómo se corrige?",
+    "options": [
+      "Si falla la AZ-a, las otras AZs pierden salida; desplegar un NAT gateway por AZ con tablas de rutas por AZ",
+      "No hay riesgo porque el NAT gateway es multi-AZ",
+      "El NAT gateway debe reemplazarse por un internet gateway",
+      "El riesgo es de seguridad; añadir un security group al NAT"
+    ],
+    "answer": [0],
+    "explanation": "Un NAT gateway es redundante dentro de su AZ, pero no entre AZs. Para resiliencia (y evitar cargos de tráfico entre AZs) se crea uno por AZ y cada subred privada enruta a su NAT local."
+  },
+  {
+    "id": "aws-d2-018",
+    "domain": "2",
+    "type": "single",
+    "difficulty": "medium",
+    "question": "Una aplicación monolítica guarda sesiones de usuario en memoria local, y al escalar los usuarios pierden la sesión. ¿Qué solución hace la capa web stateless?",
+    "options": [
+      "Guardar las sesiones en Amazon ElastiCache (Redis/Valkey) o DynamoDB",
+      "Habilitar sticky sessions como única medida",
+      "Usar instancias más grandes",
+      "Guardar las sesiones en el instance store"
+    ],
+    "answer": [0],
+    "explanation": "Externalizar el estado permite que cualquier instancia atienda cualquier petición y que el ASG escale o reemplace instancias sin perder sesiones. Las sticky sessions pierden la sesión si la instancia falla."
+  },
+  {
+    "id": "aws-d2-019",
+    "domain": "2",
+    "type": "single",
+    "difficulty": "hard",
+    "question": "Una aplicación necesita orquestar un flujo de varios pasos (validar pago, reservar inventario, enviar correo) con reintentos, manejo de errores y compensaciones si un paso falla. ¿Qué servicio usar con el MENOR código?",
+    "options": ["AWS Step Functions", "Amazon SQS", "Amazon SNS", "Lambda invocando a Lambda en cadena"],
+    "answer": [0],
+    "explanation": "Step Functions define máquinas de estado con Retry/Catch, paralelismo y patrón saga para compensaciones, con integraciones directas a servicios. Encadenar Lambdas manualmente es frágil."
+  },
+  {
+    "id": "aws-d2-020",
+    "domain": "2",
+    "type": "single",
+    "difficulty": "medium",
+    "question": "Una empresa quiere reaccionar a eventos de varios servicios AWS y de aplicaciones SaaS (por ejemplo, Zendesk) y enrutarlos por reglas a distintos destinos. ¿Qué servicio usar?",
+    "options": ["Amazon EventBridge", "Amazon SQS", "Amazon Kinesis Data Streams", "AWS Batch"],
+    "answer": [0],
+    "explanation": "EventBridge es un bus de eventos serverless con reglas basadas en patrones, integración con partners SaaS, schema registry y archivo/replay."
+  },
+  {
+    "id": "aws-d2-021",
+    "domain": "2",
+    "type": "single",
+    "difficulty": "hard",
+    "question": "Una función Lambda invocada de forma asíncrona falla ocasionalmente y los eventos se pierden después de los reintentos. ¿Qué configuración captura esos eventos?",
+    "options": [
+      "Un on-failure destination (SQS, SNS, EventBridge o Lambda) o una DLQ en la función",
+      "Aumentar la memoria de la función",
+      "Habilitar provisioned concurrency",
+      "Aumentar el timeout a 15 minutos"
+    ],
+    "answer": [0],
+    "explanation": "En invocaciones asíncronas Lambda reintenta 2 veces por defecto; luego descarta el evento salvo que se configure una DLQ o un destino on-failure (que incluye contexto adicional)."
+  },
+  {
+    "id": "aws-d2-022",
+    "domain": "2",
+    "type": "single",
+    "difficulty": "medium",
+    "question": "¿Qué ventaja aporta un Application Load Balancer con cross-zone load balancing?",
+    "options": [
+      "Distribuye el tráfico uniformemente entre todos los targets registrados en todas las AZs habilitadas",
+      "Replica los datos entre AZs",
+      "Permite usar un solo target por región",
+      "Reduce el costo de transferencia entre regiones"
+    ],
+    "answer": [0],
+    "explanation": "Con cross-zone, cada nodo del balanceador reparte entre todos los targets de todas las AZs, evitando desequilibrios cuando las AZs tienen distinto número de instancias. En ALB está siempre habilitado a nivel de balanceador."
+  },
+  {
+    "id": "aws-d2-023",
+    "domain": "2",
+    "type": "single",
+    "difficulty": "hard",
+    "question": "Una empresa quiere replicar servidores on-premises (físicos y virtuales) a AWS continuamente para recuperarlos en minutos con RPO de segundos, pagando poco por la infraestructura en reposo. ¿Qué servicio usar?",
+    "options": ["AWS Elastic Disaster Recovery (DRS)", "AWS Application Migration Service únicamente", "AWS Backup", "AWS DataSync"],
+    "answer": [0],
+    "explanation": "Elastic Disaster Recovery replica a nivel de bloque de forma continua a un área de staging de bajo costo y lanza instancias de recuperación bajo demanda (RPO de segundos, RTO de minutos). DataSync transfiere archivos."
+  },
+  {
+    "id": "aws-d2-024",
+    "domain": "2",
+    "type": "single",
+    "difficulty": "hard",
+    "question": "Una API recibe ráfagas que superan la capacidad del backend. ¿Qué característica de Amazon API Gateway protege el backend?",
+    "options": [
+      "Throttling (límite de tasa y ráfaga) a nivel de stage o usage plan",
+      "Cifrado TLS",
+      "Integración con CloudTrail",
+      "Custom domain names"
+    ],
+    "answer": [0],
+    "explanation": "API Gateway aplica throttling con el algoritmo token bucket (rate y burst) por cuenta, stage, método o cliente (usage plans), devolviendo 429 cuando se excede. También puede usarse caché de respuestas."
+  },
+  {
+    "id": "aws-d2-025",
+    "domain": "2",
+    "type": "single",
+    "difficulty": "medium",
+    "question": "Un clúster de Amazon ElastiCache for Redis debe seguir disponible si falla el nodo primario. ¿Qué configurar?",
+    "options": [
+      "Réplicas en otras AZs con Multi-AZ y failover automático habilitados",
+      "Un solo nodo de mayor tamaño",
+      "Memcached con varios nodos",
+      "Snapshots cada hora"
+    ],
+    "answer": [0],
+    "explanation": "Redis/Valkey con réplicas y Multi-AZ promueve automáticamente una réplica si el primario falla. Memcached no tiene replicación ni failover."
+  },
+  {
+    "id": "aws-d2-026",
+    "domain": "2",
+    "type": "multiple",
+    "difficulty": "hard",
+    "question": "Una aplicación de tres capas en una región debe tolerar la falla de una AZ. ¿Qué DOS acciones son necesarias?",
+    "options": [
+      "Desplegar la capa web/app en un Auto Scaling group que abarque varias AZs detrás de un ALB",
+      "Configurar la base de datos RDS en Multi-AZ",
+      "Usar una sola subred grande para todas las instancias",
+      "Usar instancias con instance store para mayor velocidad",
+      "Colocar todas las instancias en un cluster placement group"
+    ],
+    "answer": [0, 1],
+    "explanation": "Cada capa debe ser multi-AZ: ASG + ALB en varias AZs y RDS Multi-AZ. Una subred existe en una sola AZ, el instance store es efímero y un cluster placement group concentra instancias en una AZ."
+  }
+]

@@ -1,0 +1,1036 @@
+[
+  {
+    "id": "ccna-d2-001",
+    "domain": "2",
+    "type": "single",
+    "difficulty": "medium",
+    "question": "¿Qué comando configura un puerto de switch como puerto de acceso en la VLAN 30?",
+    "options": [
+      "`switchport mode access` y `switchport access vlan 30`",
+      "`switchport mode trunk` y `switchport trunk allowed vlan 30`",
+      "`vlan 30` dentro de la interfaz",
+      "`encapsulation dot1q 30`"
+    ],
+    "answer": [
+      0
+    ],
+    "explanation": "Un puerto de acceso se configura con `switchport mode access` (desactiva DTP) y `switchport access vlan 30`. `encapsulation dot1q` se usa en subinterfaces de router y `allowed vlan` en trunks."
+  },
+  {
+    "id": "ccna-d2-002",
+    "domain": "2",
+    "type": "single",
+    "difficulty": "medium",
+    "question": "Asignaste un puerto a la VLAN 40 con `switchport access vlan 40`, pero la VLAN 40 no existía en el switch. En un Catalyst moderno, ¿qué ocurre?",
+    "options": [
+      "El switch crea automáticamente la VLAN 40 y el puerto queda operativo en ella",
+      "El comando es rechazado",
+      "El puerto queda en la VLAN 1",
+      "El puerto pasa a err-disabled"
+    ],
+    "answer": [
+      0
+    ],
+    "explanation": "En IOS actual, al asignar un puerto de acceso a una VLAN inexistente el switch la crea (mensaje `% Access VLAN does not exist. Creating vlan 40`). Si luego se borra la VLAN, el puerto queda inactive hasta que se recree."
+  },
+  {
+    "id": "ccna-d2-003",
+    "domain": "2",
+    "type": "single",
+    "difficulty": "hard",
+    "question": "Un teléfono IP con un PC conectado detrás se enchufa a Gi0/5. El PC debe estar en la VLAN 10 y la voz en la VLAN 110. ¿Qué configuración es correcta?",
+    "options": [
+      "`switchport mode access`, `switchport access vlan 10`, `switchport voice vlan 110`",
+      "`switchport mode trunk`, `switchport trunk native vlan 110`, `switchport trunk allowed vlan 10`",
+      "`switchport mode access`, `switchport access vlan 110`, `switchport voice vlan 10`",
+      "`switchport mode access`, `switchport access vlan 10,110`"
+    ],
+    "answer": [
+      0
+    ],
+    "explanation": "El puerto sigue siendo de acceso: el tráfico de datos (PC, sin etiqueta) va a la access VLAN 10 y el teléfono etiqueta su tráfico de voz con la voice VLAN 110 (aprendida vía CDP/LLDP). No hace falta un trunk."
+  },
+  {
+    "id": "ccna-d2-004",
+    "domain": "2",
+    "type": "single",
+    "difficulty": "medium",
+    "question": "¿Qué rango corresponde a las VLANs de rango normal en switches Cisco?",
+    "options": [
+      "1–1005",
+      "1–4094",
+      "1006–4094",
+      "2–1001"
+    ],
+    "answer": [
+      0
+    ],
+    "explanation": "Las VLANs normales son 1–1005 (1002–1005 reservadas para Token Ring/FDDI). Las extendidas son 1006–4094. Las VLANs 0 y 4095 están reservadas por 802.1Q."
+  },
+  {
+    "id": "ccna-d2-005",
+    "domain": "2",
+    "type": "single",
+    "difficulty": "medium",
+    "question": "En un trunk 802.1Q, ¿cómo se transmiten las tramas de la VLAN nativa?",
+    "options": [
+      "Sin etiqueta 802.1Q",
+      "Con una etiqueta de VLAN 1 siempre",
+      "Encapsuladas en ISL",
+      "Con etiqueta y prioridad CoS 7"
+    ],
+    "answer": [
+      0
+    ],
+    "explanation": "802.1Q no etiqueta la VLAN nativa (por defecto VLAN 1). El extremo receptor coloca las tramas sin etiqueta en su propia VLAN nativa, por eso debe coincidir en ambos lados."
+  },
+  {
+    "id": "ccna-d2-006",
+    "domain": "2",
+    "type": "single",
+    "difficulty": "hard",
+    "question": "En SW1 el trunk tiene `switchport trunk native vlan 99` y en SW2 la VLAN nativa es la 1. ¿Cuál es el resultado?",
+    "options": [
+      "CDP reporta native VLAN mismatch y el tráfico sin etiqueta de una VLAN termina en la otra",
+      "El trunk no se forma y ambos puertos quedan como acceso",
+      "Los puertos pasan a err-disabled",
+      "STP bloquea todas las VLANs del trunk"
+    ],
+    "answer": [
+      0
+    ],
+    "explanation": "El trunk sigue funcionando, pero las tramas sin etiqueta enviadas en la VLAN 99 de SW1 se reciben en la VLAN 1 de SW2 (VLAN leaking). CDP genera el mensaje `%CDP-4-NATIVE_VLAN_MISMATCH` y PVST+ puede poner el puerto en estado inconsistente para esas VLANs."
+  },
+  {
+    "id": "ccna-d2-007",
+    "domain": "2",
+    "type": "single",
+    "difficulty": "hard",
+    "question": "Ambos extremos de un enlace entre switches tienen el modo DTP `dynamic auto`. ¿Qué modo operativo resulta?",
+    "options": [
+      "Access",
+      "Trunk",
+      "Err-disabled",
+      "Trunk solo si la VLAN nativa coincide"
+    ],
+    "answer": [
+      0
+    ],
+    "explanation": "`dynamic auto` solo responde a negociaciones; ninguno inicia, así que el enlace queda en access. Se forma trunk con auto+desirable, desirable+desirable o cuando un lado es trunk y el otro auto/desirable."
+  },
+  {
+    "id": "ccna-d2-008",
+    "domain": "2",
+    "type": "single",
+    "difficulty": "medium",
+    "question": "¿Qué comando desactiva las negociaciones DTP en un puerto trunk configurado manualmente?",
+    "options": [
+      "switchport nonegotiate",
+      "no cdp enable",
+      "switchport mode dynamic auto",
+      "spanning-tree portfast trunk"
+    ],
+    "answer": [
+      0
+    ],
+    "explanation": "`switchport nonegotiate` impide que el puerto envíe tramas DTP; solo funciona con modo access o trunk fijo. Es una buena práctica de seguridad para evitar que un atacante negocie un trunk."
+  },
+  {
+    "id": "ccna-d2-009",
+    "domain": "2",
+    "type": "single",
+    "difficulty": "hard",
+    "question": "Un trunk entre SW1 y SW2 está activo, pero los hosts de la VLAN 30 no se comunican entre switches. Según la salida, ¿qué se debe corregir?",
+    "exhibit": "```\nSW1# show interfaces trunk\nPort      Mode   Encapsulation  Status    Native vlan\nGi0/1     on     802.1q         trunking  1\n\nPort      Vlans allowed on trunk\nGi0/1     10,20,40\n\nPort      Vlans allowed and active in management domain\nGi0/1     10,20,40\n\nPort      Vlans in spanning tree forwarding state and not pruned\nGi0/1     10,20,40\n```",
+    "options": [
+      "Agregar la VLAN 30 con `switchport trunk allowed vlan add 30`",
+      "Cambiar la encapsulación a ISL",
+      "Configurar `switchport trunk native vlan 30`",
+      "Ejecutar `switchport trunk allowed vlan 30`, que añade la VLAN a la lista"
+    ],
+    "answer": [
+      0
+    ],
+    "explanation": "La VLAN 30 no está en la lista de permitidas. `allowed vlan add 30` la agrega conservando las demás. Sin `add`, `allowed vlan 30` reemplazaría la lista y cortaría las VLANs 10, 20 y 40: error clásico de examen."
+  },
+  {
+    "id": "ccna-d2-010",
+    "domain": "2",
+    "type": "multiple",
+    "difficulty": "medium",
+    "question": "¿Qué dos afirmaciones son correctas al comparar CDP y LLDP?",
+    "options": [
+      "CDP es propietario de Cisco; LLDP es el estándar IEEE 802.1AB",
+      "LLDP está habilitado por defecto en todos los switches Cisco",
+      "CDP está habilitado por defecto en dispositivos Cisco",
+      "LLDP solo funciona entre dispositivos del mismo fabricante",
+      "Ambos operan en capa 3"
+    ],
+    "answer": [
+      0,
+      2
+    ],
+    "explanation": "CDP es propietario y viene habilitado por defecto en Cisco; LLDP (802.1AB) es multivendedor y generalmente debe habilitarse con `lldp run`. Ambos son protocolos de capa 2."
+  },
+  {
+    "id": "ccna-d2-011",
+    "domain": "2",
+    "type": "single",
+    "difficulty": "medium",
+    "question": "¿Qué comando muestra la dirección IP, plataforma y versión de IOS de los vecinos Cisco directamente conectados?",
+    "options": [
+      "show cdp neighbors detail",
+      "show cdp neighbors",
+      "show ip interface brief",
+      "show lldp traffic"
+    ],
+    "answer": [
+      0
+    ],
+    "explanation": "`show cdp neighbors detail` (o `show cdp entry *`) muestra dirección IP, versión de software, plataforma y puertos. `show cdp neighbors` solo lista ID, interfaz local, holdtime, capacidades, plataforma y puerto remoto, sin IP."
+  },
+  {
+    "id": "ccna-d2-012",
+    "domain": "2",
+    "type": "single",
+    "difficulty": "medium",
+    "question": "¿Qué comando habilita LLDP globalmente en un switch Cisco?",
+    "options": [
+      "lldp run",
+      "lldp enable",
+      "cdp run lldp",
+      "feature lldp"
+    ],
+    "answer": [
+      0
+    ],
+    "explanation": "En IOS se usa `lldp run` globalmente; por interfaz se controla con `lldp transmit` y `lldp receive`. `feature lldp` es sintaxis de NX-OS."
+  },
+  {
+    "id": "ccna-d2-013",
+    "domain": "2",
+    "type": "single",
+    "difficulty": "medium",
+    "question": "Un lado de un EtherChannel usa `channel-group 1 mode active`. ¿Qué modo en el otro lado permite formar el canal con LACP?",
+    "options": [
+      "passive o active",
+      "desirable",
+      "auto",
+      "on"
+    ],
+    "answer": [
+      0
+    ],
+    "explanation": "LACP forma el canal con active–active o active–passive. desirable/auto son modos de PAgP y `on` no negocia (no forma canal con un lado LACP)."
+  },
+  {
+    "id": "ccna-d2-014",
+    "domain": "2",
+    "type": "single",
+    "difficulty": "hard",
+    "question": "Ambos extremos de un EtherChannel tienen `channel-group 5 mode passive`. ¿Qué ocurre?",
+    "options": [
+      "No se forma el EtherChannel porque ningún lado inicia la negociación LACP",
+      "Se forma un EtherChannel LACP",
+      "Se forma un EtherChannel PAgP",
+      "Los enlaces pasan a err-disabled"
+    ],
+    "answer": [
+      0
+    ],
+    "explanation": "Passive solo responde a LACPDUs; si ambos están en passive nadie inicia y el canal no se forma. Los enlaces funcionan como puertos independientes (normalmente STP bloquea los redundantes). Lo mismo ocurre con auto–auto en PAgP."
+  },
+  {
+    "id": "ccna-d2-015",
+    "domain": "2",
+    "type": "multiple",
+    "difficulty": "hard",
+    "question": "¿Qué dos parámetros deben coincidir en todas las interfaces miembro para que se agrupen en un EtherChannel de capa 2?",
+    "options": [
+      "Velocidad y dúplex",
+      "Descripción de la interfaz",
+      "Modo de switchport y VLANs permitidas/nativa (si es trunk)",
+      "Dirección MAC",
+      "Prioridad de puerto LACP"
+    ],
+    "answer": [
+      0,
+      2
+    ],
+    "explanation": "Los miembros deben tener misma velocidad, dúplex, modo (access/trunk), access VLAN o allowed/native VLAN en trunk. La descripción, la MAC y la prioridad LACP pueden diferir; la prioridad solo decide qué enlaces quedan activos/hot-standby."
+  },
+  {
+    "id": "ccna-d2-016",
+    "domain": "2",
+    "type": "single",
+    "difficulty": "hard",
+    "question": "¿Qué indica la salida para el Port-channel 1?",
+    "exhibit": "```\nSW1# show etherchannel summary\nFlags:  D - down        P - bundled in port-channel\n        I - stand-alone s - suspended\n        S - Layer2      U - in use\n        R - Layer3\nGroup  Port-channel  Protocol    Ports\n------+-------------+-----------+------------------------\n1      Po1(SD)       LACP        Gi0/1(I)    Gi0/2(I)\n```",
+    "options": [
+      "El canal de capa 2 está caído y los puertos operan de forma independiente porque no hubo negociación LACP con el vecino",
+      "El canal de capa 3 está activo con dos miembros",
+      "Los puertos están suspendidos por diferencias de configuración",
+      "El canal está activo pero sin VLANs asignadas"
+    ],
+    "answer": [
+      0
+    ],
+    "explanation": "Po1(SD): Layer2, Down. Los miembros con (I) están stand-alone: no recibieron LACPDUs (vecino sin LACP, en passive con este lado passive, o configurado con `on`). Con (s) estarían suspendidos por incompatibilidad y con (P) agrupados."
+  },
+  {
+    "id": "ccna-d2-017",
+    "domain": "2",
+    "type": "single",
+    "difficulty": "medium",
+    "question": "¿Qué protocolo de agregación de enlaces es propietario de Cisco?",
+    "options": [
+      "PAgP",
+      "LACP",
+      "802.3ad",
+      "LLDP"
+    ],
+    "answer": [
+      0
+    ],
+    "explanation": "PAgP es propietario de Cisco (modos desirable/auto). LACP es el estándar IEEE 802.3ad (hoy 802.1AX), modos active/passive."
+  },
+  {
+    "id": "ccna-d2-018",
+    "domain": "2",
+    "type": "single",
+    "difficulty": "hard",
+    "question": "Para crear un EtherChannel de capa 3 en un switch multilayer, ¿qué se debe hacer?",
+    "options": [
+      "Ejecutar `no switchport` en las interfaces físicas antes de `channel-group` y asignar la IP a la interfaz Port-channel",
+      "Asignar la IP a cada interfaz física miembro",
+      "Usar solo el modo `on` porque LACP no soporta capa 3",
+      "Configurar una SVI con el mismo número del port-channel"
+    ],
+    "answer": [
+      0
+    ],
+    "explanation": "Las interfaces miembro deben ser routed ports (`no switchport`) para que el Port-channel creado también sea de capa 3; la IP se configura en `interface port-channel N`. LACP y PAgP funcionan en capa 3."
+  },
+  {
+    "id": "ccna-d2-019",
+    "domain": "2",
+    "type": "single",
+    "difficulty": "medium",
+    "question": "¿Qué criterio usa STP para elegir el root bridge?",
+    "options": [
+      "El Bridge ID más bajo (prioridad + MAC)",
+      "La MAC más alta",
+      "El switch con más puertos activos",
+      "El costo de ruta más bajo hacia el core"
+    ],
+    "answer": [
+      0
+    ],
+    "explanation": "Gana el BID más bajo: primero la prioridad (por defecto 32768 + VLAN ID en PVST+, por el extended system ID) y, si empatan, la MAC más baja."
+  },
+  {
+    "id": "ccna-d2-020",
+    "domain": "2",
+    "type": "single",
+    "difficulty": "hard",
+    "question": "Quieres que SW-CORE sea root bridge de la VLAN 10 y que lo siga siendo aunque en el futuro se añada un switch con prioridad 4096 (los actuales usan la prioridad por defecto). ¿Qué comando lo garantiza?",
+    "options": [
+      "spanning-tree vlan 10 priority 0",
+      "spanning-tree vlan 10 root primary",
+      "spanning-tree vlan 10 root secondary",
+      "spanning-tree vlan 10 priority 8192"
+    ],
+    "answer": [
+      0
+    ],
+    "explanation": "`priority 0` es la prioridad más baja posible, así que un switch con 4096 nunca ganará. `root primary` es un macro que se ejecuta una sola vez: fija 24576 (o 4096 menos que el root actual) y no se reajusta, así que el switch nuevo con 4096 ganaría. `root secondary` fija 28672 y 8192 también pierde frente a 4096."
+  },
+  {
+    "id": "ccna-d2-021",
+    "domain": "2",
+    "type": "single",
+    "difficulty": "hard",
+    "question": "En la VLAN 1, SW3 tiene dos caminos hacia el root: Gi0/1 (costo acumulado 8) y Gi0/2 (costo acumulado 8). El vecino en Gi0/1 tiene BID 32769.0011.1111.1111 y el de Gi0/2 tiene BID 32769.0011.1111.0000. ¿Cuál será el root port?",
+    "options": [
+      "Gi0/2, por tener el vecino con el Bridge ID más bajo",
+      "Gi0/1, por tener el número de puerto local más bajo",
+      "Ambos, porque STP balancea carga en empates",
+      "Ninguno; ambos se bloquean"
+    ],
+    "answer": [
+      0
+    ],
+    "explanation": "Desempate para root port: 1) menor root path cost, 2) menor BID del switch vecino (emisor), 3) menor Port ID del vecino. Empatan en costo, así que gana el vecino con BID menor (…1111.0000) por Gi0/2."
+  },
+  {
+    "id": "ccna-d2-022",
+    "domain": "2",
+    "type": "single",
+    "difficulty": "medium",
+    "question": "¿Cuál es el costo STP (short/revised IEEE) de un enlace de 1 Gbps?",
+    "options": [
+      "4",
+      "19",
+      "2",
+      "100"
+    ],
+    "answer": [
+      0
+    ],
+    "explanation": "Costos revisados (short): 10 Mbps=100, 100 Mbps=19, 1 Gbps=4, 10 Gbps=2. En el método long, 1 Gbps = 20 000."
+  },
+  {
+    "id": "ccna-d2-023",
+    "domain": "2",
+    "type": "single",
+    "difficulty": "medium",
+    "question": "¿Cuáles son los roles de puerto en Rapid PVST+ (802.1w)?",
+    "options": [
+      "Root, designated, alternate, backup (y disabled)",
+      "Root, designated, blocking, listening",
+      "Forwarding, learning, discarding",
+      "Primary, secondary, standby"
+    ],
+    "answer": [
+      0
+    ],
+    "explanation": "RSTP define roles: root, designated, alternate (camino alternativo al root), backup (respaldo de un designated en el mismo segmento) y disabled. Forwarding/learning/discarding son estados, no roles."
+  },
+  {
+    "id": "ccna-d2-024",
+    "domain": "2",
+    "type": "single",
+    "difficulty": "medium",
+    "question": "¿Qué estados de puerto existen en RSTP?",
+    "options": [
+      "Discarding, learning, forwarding",
+      "Blocking, listening, learning, forwarding",
+      "Disabled, blocking, forwarding",
+      "Listening, forwarding"
+    ],
+    "answer": [
+      0
+    ],
+    "explanation": "RSTP fusiona disabled, blocking y listening de 802.1D en un único estado discarding; luego learning y forwarding."
+  },
+  {
+    "id": "ccna-d2-025",
+    "domain": "2",
+    "type": "single",
+    "difficulty": "medium",
+    "question": "¿Qué hace `spanning-tree portfast` en un puerto de acceso conectado a un PC?",
+    "options": [
+      "Pasa el puerto a forwarding inmediatamente, sin los estados listening/learning",
+      "Deshabilita STP por completo en el puerto",
+      "Bloquea el puerto si recibe un BPDU",
+      "Aumenta la prioridad del puerto"
+    ],
+    "answer": [
+      0
+    ],
+    "explanation": "PortFast hace que el puerto de borde pase directo a forwarding, evitando los ~30 s de espera (útil para DHCP). STP sigue activo; si recibe BPDU pierde su estado de edge. Bloquear al recibir BPDU es BPDU Guard."
+  },
+  {
+    "id": "ccna-d2-026",
+    "domain": "2",
+    "type": "single",
+    "difficulty": "hard",
+    "question": "Un usuario conecta un switch doméstico a un puerto que tiene PortFast y BPDU Guard. ¿Qué ocurre cuando el switch doméstico envía un BPDU?",
+    "options": [
+      "El puerto pasa a err-disabled",
+      "El puerto pierde PortFast y sigue los estados normales de STP",
+      "El puerto se convierte en root port",
+      "El BPDU se ignora y el puerto sigue en forwarding"
+    ],
+    "answer": [
+      0
+    ],
+    "explanation": "BPDU Guard deshabilita (err-disabled) el puerto al recibir cualquier BPDU, protegiendo la topología. Se recupera con `shutdown`/`no shutdown` o con `errdisable recovery cause bpduguard`."
+  },
+  {
+    "id": "ccna-d2-027",
+    "domain": "2",
+    "type": "single",
+    "difficulty": "hard",
+    "question": "¿Qué función cumple Root Guard en un puerto designado?",
+    "options": [
+      "Si recibe un BPDU superior, pone el puerto en estado root-inconsistent para impedir que un switch se convierta en root",
+      "Deshabilita el puerto ante cualquier BPDU",
+      "Evita bucles por fallos unidireccionales",
+      "Acelera la convergencia en puertos de acceso"
+    ],
+    "answer": [
+      0
+    ],
+    "explanation": "Root Guard protege la ubicación del root: si llega un BPDU superior por ese puerto, lo bloquea (root-inconsistent) mientras continúen esos BPDUs. BPDU Guard reacciona a cualquier BPDU y Loop Guard ayuda con fallos unidireccionales."
+  },
+  {
+    "id": "ccna-d2-028",
+    "domain": "2",
+    "type": "single",
+    "difficulty": "hard",
+    "question": "Según la salida, ¿qué afirmación es cierta?",
+    "exhibit": "```\nSW2# show spanning-tree vlan 20\nVLAN0020\n  Spanning tree enabled protocol rstp\n  Root ID    Priority    24596\n             Address     0c11.2233.4401\n             Cost        4\n             Port        1 (GigabitEthernet0/1)\n  Bridge ID  Priority    32788  (priority 32768 sys-id-ext 20)\n             Address     0c11.2233.4402\nInterface        Role Sts Cost      Prio.Nbr Type\n---------------- ---- --- --------- -------- -----\nGi0/1            Root FWD 4         128.1    P2p\nGi0/2            Altn BLK 4         128.2    P2p\nGi0/3            Desg FWD 19        128.3    P2p Edge\n```",
+    "options": [
+      "SW2 no es el root; el root tiene prioridad configurada 24576 y Gi0/2 es un camino alternativo bloqueado",
+      "SW2 es el root bridge de la VLAN 20",
+      "Gi0/3 conecta con otro switch y es la ruta hacia el root",
+      "El root bridge usa la prioridad por defecto"
+    ],
+    "answer": [
+      0
+    ],
+    "explanation": "La prioridad del root es 24596 = 24576 + 20 (sys-id-ext). SW2 tiene un root port (Gi0/1), así que no es root. Gi0/2 es Alternate/BLK. Gi0/3 es un puerto Edge (PortFast) hacia un host a 100 Mbps (costo 19)."
+  },
+  {
+    "id": "ccna-d2-029",
+    "domain": "2",
+    "type": "single",
+    "difficulty": "medium",
+    "question": "En una arquitectura Cisco con lightweight APs, ¿qué protocolo se usa entre el AP y el WLC?",
+    "options": [
+      "CAPWAP",
+      "LWAPP sobre TCP",
+      "GRE",
+      "IPsec obligatorio"
+    ],
+    "answer": [
+      0
+    ],
+    "explanation": "CAPWAP (RFC 5415) crea dos túneles UDP: control (UDP 5246, cifrado con DTLS) y datos (UDP 5247, cifrado opcional)."
+  },
+  {
+    "id": "ccna-d2-030",
+    "domain": "2",
+    "type": "single",
+    "difficulty": "medium",
+    "question": "En una arquitectura split-MAC, ¿qué funciones realiza el lightweight AP y no el WLC?",
+    "options": [
+      "Transmisión de beacons, respuestas a probes y cifrado/ACK de tramas en tiempo real",
+      "Autenticación 802.1X y asociación de clientes",
+      "Gestión de RF y asignación de canales",
+      "Políticas de seguridad y QoS de la WLAN"
+    ],
+    "answer": [
+      0
+    ],
+    "explanation": "El AP maneja las funciones de tiempo real de 802.11 (beacons, probe responses, ACKs, cifrado). El WLC maneja gestión: autenticación, asociación/reasociación, RRM, seguridad, QoS y roaming."
+  },
+  {
+    "id": "ccna-d2-031",
+    "domain": "2",
+    "type": "single",
+    "difficulty": "hard",
+    "question": "Una sucursal remota tiene APs gestionados por un WLC en la sede central. Si el enlace WAN cae, los clientes deben seguir conectados y su tráfico debe conmutarse localmente. ¿Qué modo de AP usar?",
+    "options": [
+      "FlexConnect",
+      "Local",
+      "Monitor",
+      "Sniffer"
+    ],
+    "answer": [
+      0
+    ],
+    "explanation": "FlexConnect permite conmutar el tráfico localmente en el sitio remoto y seguir operando si se pierde el WLC (modo standalone). Local tuneliza todo al WLC; Monitor y Sniffer no atienden clientes."
+  },
+  {
+    "id": "ccna-d2-032",
+    "domain": "2",
+    "type": "single",
+    "difficulty": "medium",
+    "question": "¿Qué modo de AP no atiende clientes y escanea los canales para detectar rogue APs e intrusiones?",
+    "options": [
+      "Monitor",
+      "Local",
+      "Bridge",
+      "FlexConnect"
+    ],
+    "answer": [
+      0
+    ],
+    "explanation": "En modo Monitor el AP no transmite WLANs a clientes; escanea todos los canales para IDS/rogue detection y localización. Bridge sirve para enlaces punto a punto/mesh."
+  },
+  {
+    "id": "ccna-d2-033",
+    "domain": "2",
+    "type": "single",
+    "difficulty": "medium",
+    "question": "¿Qué tipo de despliegue usa APs autónomos sin WLC donde cada AP se configura individualmente?",
+    "options": [
+      "Arquitectura autónoma",
+      "Arquitectura centralizada (split-MAC)",
+      "Cloud-based (Meraki)",
+      "Embedded wireless controller"
+    ],
+    "answer": [
+      0
+    ],
+    "explanation": "En la arquitectura autónoma cada AP tiene su propia configuración y se gestiona individualmente; las VLANs se extienden hasta el AP por trunk. Centralizada usa WLC y cloud-based se gestiona desde un dashboard en la nube."
+  },
+  {
+    "id": "ccna-d2-034",
+    "domain": "2",
+    "type": "single",
+    "difficulty": "hard",
+    "question": "¿Cómo se debe configurar el puerto del switch conectado a un lightweight AP en modo Local?",
+    "options": [
+      "Como puerto de acceso en la VLAN de gestión de los APs",
+      "Como trunk con todas las VLANs de clientes",
+      "Como puerto routed sin VLAN",
+      "Como miembro de un EtherChannel con el WLC"
+    ],
+    "answer": [
+      0
+    ],
+    "explanation": "En modo Local el tráfico de clientes viaja dentro del túnel CAPWAP hacia el WLC, así que el AP solo necesita un puerto de acceso en su VLAN de gestión. Los APs autónomos o FlexConnect con conmutación local sí necesitan trunk."
+  },
+  {
+    "id": "ccna-d2-035",
+    "domain": "2",
+    "type": "single",
+    "difficulty": "hard",
+    "question": "Un WLC tiene cuatro puertos de distribución hacia el switch y quieres redundancia y ancho de banda agregado. ¿Qué debes saber sobre LAG en el WLC (AireOS)?",
+    "options": [
+      "El WLC solo soporta EtherChannel en modo `on`; no negocia LACP ni PAgP",
+      "El WLC requiere LACP en modo active",
+      "El WLC requiere PAgP desirable",
+      "El WLC no soporta agregación de enlaces"
+    ],
+    "answer": [
+      0
+    ],
+    "explanation": "En los WLC AireOS, LAG es estático: el switch debe usar `channel-group N mode on`. Todos los puertos de distribución se agrupan en un único enlace lógico."
+  },
+  {
+    "id": "ccna-d2-036",
+    "domain": "2",
+    "type": "multiple",
+    "difficulty": "medium",
+    "question": "¿Qué dos métodos de acceso de gestión envían credenciales en texto plano y deberían evitarse?",
+    "options": [
+      "Telnet",
+      "SSH",
+      "HTTP",
+      "HTTPS",
+      "Consola con cable rollover"
+    ],
+    "answer": [
+      0,
+      2
+    ],
+    "explanation": "Telnet y HTTP no cifran. SSH y HTTPS cifran la sesión. La consola es acceso físico local, no viaja por la red."
+  },
+  {
+    "id": "ccna-d2-037",
+    "domain": "2",
+    "type": "single",
+    "difficulty": "hard",
+    "question": "Configuraste SSH en un router, pero `crypto key generate rsa` falla. ¿Qué falta probablemente?",
+    "options": [
+      "Configurar un `hostname` distinto al predeterminado y un `ip domain-name`",
+      "Habilitar `transport input telnet` en las VTY",
+      "Configurar `enable password`",
+      "Crear una VLAN de gestión"
+    ],
+    "answer": [
+      0
+    ],
+    "explanation": "Las llaves RSA se nombran con hostname.dominio, por eso IOS exige un hostname distinto de `Router` y un `ip domain-name`. Luego se usan llaves ≥768 bits (2048 recomendado) para SSHv2, `login local` y `transport input ssh`."
+  },
+  {
+    "id": "ccna-d2-038",
+    "domain": "2",
+    "type": "single",
+    "difficulty": "medium",
+    "question": "¿Qué diferencia clave hay entre TACACS+ y RADIUS?",
+    "options": [
+      "TACACS+ cifra todo el payload y separa autenticación, autorización y accounting; RADIUS solo cifra la contraseña",
+      "RADIUS usa TCP 49 y TACACS+ usa UDP 1812",
+      "TACACS+ es estándar abierto y RADIUS es propietario",
+      "RADIUS no soporta accounting"
+    ],
+    "answer": [
+      0
+    ],
+    "explanation": "TACACS+ (Cisco, TCP 49) cifra el paquete completo y separa las tres A, ideal para administración de dispositivos (autorización por comando). RADIUS (estándar, UDP 1812/1813) combina autenticación/autorización y solo cifra la contraseña; es típico para acceso de red (802.1X)."
+  },
+  {
+    "id": "ccna-d2-039",
+    "domain": "2",
+    "type": "single",
+    "difficulty": "hard",
+    "question": "Las líneas VTY tienen `login local` y `transport input ssh`. ¿Qué ocurre si alguien intenta Telnet?",
+    "options": [
+      "La conexión es rechazada porque las VTY solo aceptan SSH",
+      "Se acepta Telnet pero pide usuario local",
+      "Se acepta Telnet sin contraseña",
+      "El router responde con un banner y luego cierra"
+    ],
+    "answer": [
+      0
+    ],
+    "explanation": "`transport input ssh` limita los protocolos aceptados en las VTY; Telnet se rechaza. `login local` hace que se autentique contra la base de usuarios local (`username … secret …`)."
+  },
+  {
+    "id": "ccna-d2-040",
+    "domain": "2",
+    "type": "single",
+    "difficulty": "medium",
+    "question": "Al crear una WLAN en un WLC, ¿qué opción de seguridad de capa 2 corresponde a WPA2 con autenticación contra un servidor RADIUS?",
+    "options": [
+      "WPA2 + 802.1X (Enterprise)",
+      "WPA2 + PSK",
+      "Open con Web Auth",
+      "WEP estático"
+    ],
+    "answer": [
+      0
+    ],
+    "explanation": "WPA2-Enterprise usa 802.1X/EAP con un servidor AAA (RADIUS). PSK usa una clave compartida (Personal). Web Auth es seguridad de capa 3 (portal cautivo)."
+  },
+  {
+    "id": "ccna-d2-041",
+    "domain": "2",
+    "type": "single",
+    "difficulty": "medium",
+    "question": "En el WLC, quieres que una WLAN de voz reciba la máxima prioridad de cola. ¿Qué perfil de QoS asignas?",
+    "options": [
+      "Platinum",
+      "Gold",
+      "Silver",
+      "Bronze"
+    ],
+    "answer": [
+      0
+    ],
+    "explanation": "Perfiles del WLC: Platinum (voz), Gold (video), Silver (best effort, por defecto) y Bronze (background)."
+  },
+  {
+    "id": "ccna-d2-042",
+    "domain": "2",
+    "type": "single",
+    "difficulty": "medium",
+    "question": "Al crear una WLAN en el WLC, ¿qué valor la asocia con la VLAN cableada donde se conmuta el tráfico de los clientes?",
+    "options": [
+      "La interfaz dinámica (dynamic interface / interface group)",
+      "El SSID",
+      "El perfil de QoS",
+      "El modo del AP"
+    ],
+    "answer": [
+      0
+    ],
+    "explanation": "Cada WLAN se mapea a una interfaz dinámica del WLC, que tiene su VLAN, IP y gateway. Así WLAN ↔ VLAN. El SSID solo es el nombre anunciado."
+  },
+  {
+    "id": "ccna-d2-043",
+    "domain": "2",
+    "type": "single",
+    "difficulty": "medium",
+    "question": "¿Qué comando verifica qué VLANs existen y qué puertos de acceso pertenecen a cada una?",
+    "options": [
+      "show vlan brief",
+      "show interfaces trunk",
+      "show mac address-table",
+      "show vtp status"
+    ],
+    "answer": [
+      0
+    ],
+    "explanation": "`show vlan brief` lista las VLANs, su estado y los puertos de acceso asignados. Los trunks no aparecen ahí; se verifican con `show interfaces trunk`."
+  },
+  {
+    "id": "ccna-d2-044",
+    "domain": "2",
+    "type": "multiple",
+    "difficulty": "hard",
+    "question": "Un puerto de acceso no aparece en `show vlan brief` bajo ninguna VLAN. ¿Qué dos causas son posibles?",
+    "options": [
+      "El puerto está operando como trunk",
+      "El puerto está en shutdown",
+      "El puerto pertenece a un EtherChannel de capa 2 en modo trunk",
+      "El puerto tiene PortFast",
+      "El puerto tiene port security"
+    ],
+    "answer": [
+      0,
+      2
+    ],
+    "explanation": "`show vlan brief` solo muestra puertos de acceso. Si el puerto es trunk (o miembro de un port-channel trunk) desaparece de la lista. Un puerto en shutdown, con PortFast o port security sigue apareciendo en su VLAN."
+  },
+  {
+    "id": "ccna-d2-045",
+    "domain": "2",
+    "type": "single",
+    "difficulty": "medium",
+    "question": "¿Cuál es la principal ventaja de Rapid PVST+ frente a PVST+?",
+    "options": [
+      "Convergencia mucho más rápida mediante mecanismo proposal/agreement",
+      "Un único árbol para todas las VLANs",
+      "Elimina la necesidad de root bridge",
+      "Permite balancear carga en todos los enlaces sin bloquear ninguno"
+    ],
+    "answer": [
+      0
+    ],
+    "explanation": "Rapid PVST+ (802.1w por VLAN) converge en segundos usando handshake proposal/agreement en enlaces punto a punto y roles alternate/backup precalculados. Sigue habiendo una instancia por VLAN y puertos bloqueados."
+  },
+  {
+    "id": "ccna-d2-046",
+    "domain": "2",
+    "type": "single",
+    "difficulty": "hard",
+    "question": "En PVST+, ¿cómo puedes hacer que la VLAN 10 use un uplink y la VLAN 20 el otro, aprovechando ambos enlaces?",
+    "options": [
+      "Hacer que DS1 sea root de la VLAN 10 y DS2 root de la VLAN 20",
+      "Configurar PortFast en los uplinks",
+      "Deshabilitar STP en la VLAN 20",
+      "Configurar BPDU filter en un uplink"
+    ],
+    "answer": [
+      0
+    ],
+    "explanation": "Como PVST+ tiene una instancia por VLAN, cambiar el root por VLAN (prioridades) hace que cada VLAN bloquee un uplink distinto, logrando balanceo de carga por VLAN. Deshabilitar STP o filtrar BPDUs crea riesgo de bucles."
+  },
+  {
+    "id": "ccna-d2-047",
+    "domain": "2",
+    "type": "single",
+    "difficulty": "medium",
+    "question": "¿Qué VLAN es la nativa y la de gestión por defecto en un switch Cisco nuevo?",
+    "options": [
+      "VLAN 1",
+      "VLAN 0",
+      "VLAN 99",
+      "VLAN 1002"
+    ],
+    "answer": [
+      0
+    ],
+    "explanation": "La VLAN 1 es la VLAN por defecto, nativa y la que contiene la SVI de gestión inicial. Las buenas prácticas recomiendan mover gestión y nativa a VLANs dedicadas no usadas por usuarios."
+  },
+  {
+    "id": "ccna-d2-048",
+    "domain": "2",
+    "type": "single",
+    "difficulty": "hard",
+    "question": "Un switch de capa 2 debe ser gestionable por SSH desde otra subred. Ya tiene la SVI `interface vlan 99` con IP. ¿Qué más necesita?",
+    "options": [
+      "`ip default-gateway` apuntando al router de la VLAN 99",
+      "`ip routing`",
+      "`ip route 0.0.0.0 0.0.0.0` en la SVI",
+      "Un trunk con native VLAN 99"
+    ],
+    "answer": [
+      0
+    ],
+    "explanation": "Un switch de capa 2 (sin `ip routing`) usa `ip default-gateway` para alcanzar otras subredes con su tráfico de gestión. `ip routing` lo convertiría en router y entonces usaría rutas estáticas."
+  },
+  {
+    "id": "ccna-d2-049",
+    "domain": "2",
+    "type": "single",
+    "difficulty": "medium",
+    "question": "¿Qué campo de la etiqueta 802.1Q transporta la prioridad de capa 2 (CoS)?",
+    "options": [
+      "PCP (Priority Code Point), 3 bits",
+      "VID, 12 bits",
+      "TPID, 16 bits",
+      "DEI, 1 bit"
+    ],
+    "answer": [
+      0
+    ],
+    "explanation": "La etiqueta de 4 bytes contiene TPID (0x8100), PCP (3 bits, CoS 0–7), DEI (1 bit) y VID (12 bits, VLAN 0–4095)."
+  },
+  {
+    "id": "ccna-d2-050",
+    "domain": "2",
+    "type": "single",
+    "difficulty": "medium",
+    "question": "¿Qué ventaja principal ofrece una solución inalámbrica gestionada en la nube (por ejemplo, Meraki)?",
+    "options": [
+      "Gestión centralizada desde un dashboard web sin desplegar un WLC local",
+      "El tráfico de clientes siempre pasa por la nube",
+      "No necesita conexión a Internet",
+      "Elimina la necesidad de switches"
+    ],
+    "answer": [
+      0
+    ],
+    "explanation": "En la gestión en la nube el plano de gestión está en el dashboard del proveedor; los datos de usuarios se conmutan localmente, no pasan por la nube. Requiere conectividad a Internet para gestión."
+  },
+  {
+    "id": "ccna-d2-051",
+    "domain": "2",
+    "type": "single",
+    "difficulty": "hard",
+    "question": "Configuraste `switchport port-security` en un puerto pero el comando es rechazado con el mensaje *Command rejected: … is a dynamic port*. ¿Qué falta?",
+    "options": [
+      "Configurar `switchport mode access` (o trunk) explícitamente",
+      "Habilitar `spanning-tree portfast`",
+      "Crear la VLAN",
+      "Aplicar `no shutdown`"
+    ],
+    "answer": [
+      0
+    ],
+    "explanation": "Port security no se puede habilitar en un puerto en modo DTP dinámico (dynamic auto/desirable). Primero hay que fijar `switchport mode access`."
+  },
+  {
+    "id": "ccna-d2-052",
+    "domain": "2",
+    "type": "single",
+    "difficulty": "medium",
+    "question": "¿Qué ocurre en 802.1D (STP clásico) cuando un puerto bloqueado debe pasar a forwarding tras un cambio de topología indirecto, con temporizadores por defecto?",
+    "options": [
+      "Espera Max Age (20 s) y luego listening (15 s) y learning (15 s): ~50 s",
+      "Pasa a forwarding de inmediato",
+      "Espera 2 s (hello) y pasa a forwarding",
+      "Espera 15 s en learning únicamente"
+    ],
+    "answer": [
+      0
+    ],
+    "explanation": "En 802.1D, una falla indirecta requiere que expire Max Age (20 s) y luego recorrer listening y learning (forward delay de 15 s cada uno): hasta 50 s. RSTP evita esta espera."
+  },
+  {
+    "id": "ccna-d2-053",
+    "domain": "2",
+    "type": "single",
+    "difficulty": "medium",
+    "question": "¿Qué comando muestra los vecinos LLDP y sus capacidades?",
+    "options": [
+      "show lldp neighbors",
+      "show cdp neighbors",
+      "show lldp interface",
+      "show ip lldp"
+    ],
+    "answer": [
+      0
+    ],
+    "explanation": "`show lldp neighbors` (y `detail`) lista vecinos, interfaz local, holdtime, capacidades y puerto remoto."
+  },
+  {
+    "id": "ccna-d2-054",
+    "domain": "2",
+    "type": "multiple",
+    "difficulty": "hard",
+    "question": "¿Qué dos acciones son buenas prácticas de seguridad para puertos de switch no utilizados?",
+    "options": [
+      "Apagarlos con `shutdown`",
+      "Asignarlos a una VLAN no utilizada (\"parking\" VLAN)",
+      "Configurarlos como trunk con DTP desirable",
+      "Asignarlos a la VLAN 1",
+      "Habilitar CDP en ellos"
+    ],
+    "answer": [
+      0,
+      1
+    ],
+    "explanation": "Los puertos sin uso deben estar en shutdown y en una VLAN aislada sin uso. Dejarlos en VLAN 1 o con DTP dinámico facilita ataques (VLAN hopping); CDP en puertos de usuario filtra información."
+  },
+  {
+    "id": "ccna-d2-055",
+    "domain": "2",
+    "type": "single",
+    "difficulty": "hard",
+    "question": "Según la salida, ¿por qué el PC en Fa0/1 de SW1 no puede comunicarse con el PC en Fa0/1 de SW2 si ambos deberían estar en la VLAN de ventas?",
+    "exhibit": "```\nSW1# show vlan brief\nVLAN Name        Status    Ports\n---- ----------- --------- -------------------\n1    default     active    Fa0/3, Fa0/4\n10   VENTAS      active    Fa0/1, Fa0/2\n\nSW2# show vlan brief\nVLAN Name        Status    Ports\n---- ----------- --------- -------------------\n1    default     active    Fa0/1, Fa0/3\n10   VENTAS      active    Fa0/2\n```",
+    "options": [
+      "En SW2, Fa0/1 está en la VLAN 1 en lugar de la VLAN 10",
+      "El nombre de la VLAN debe ser distinto en cada switch",
+      "La VLAN 10 debe ser la VLAN nativa",
+      "SW2 necesita una SVI en la VLAN 10"
+    ],
+    "answer": [
+      0
+    ],
+    "explanation": "El PC de SW2 está en un puerto de la VLAN 1, por lo que está en otro dominio de broadcast. Se corrige con `switchport access vlan 10` en Fa0/1 de SW2. Para conmutación en capa 2 no se necesita SVI."
+  },
+  {
+    "id": "ccna-d2-056",
+    "domain": "2",
+    "type": "single",
+    "difficulty": "medium",
+    "question": "¿Cuál es el propósito del extended system ID en el Bridge ID de PVST+?",
+    "options": [
+      "Incluir el número de VLAN en la prioridad para que cada VLAN tenga un BID único",
+      "Indicar la versión de STP",
+      "Indicar el costo de ruta hacia el root",
+      "Aumentar el número de MACs disponibles"
+    ],
+    "answer": [
+      0
+    ],
+    "explanation": "Los 16 bits de prioridad se dividen en 4 bits de prioridad (múltiplos de 4096) y 12 bits de extended system ID (VLAN ID). Por eso la prioridad debe ser múltiplo de 4096 y aparece como 32768 + VLAN."
+  },
+  {
+    "id": "ccna-d2-057",
+    "domain": "2",
+    "type": "single",
+    "difficulty": "medium",
+    "question": "Desde el WLC GUI, ¿dónde se configura que una WLAN use autenticación contra un servidor RADIUS específico?",
+    "options": [
+      "En la pestaña Security > AAA Servers de la WLAN",
+      "En el perfil de QoS",
+      "En el modo del AP",
+      "En la interfaz de servicio"
+    ],
+    "answer": [
+      0
+    ],
+    "explanation": "En la configuración de la WLAN, Security tiene subpestañas Layer 2, Layer 3 y AAA Servers; ahí se eligen los servidores RADIUS (previamente definidos en Security > RADIUS) para autenticación y accounting."
+  },
+  {
+    "id": "ccna-d2-058",
+    "domain": "2",
+    "type": "single",
+    "difficulty": "medium",
+    "question": "¿Qué ventaja tiene usar el PSK en formato ASCII largo (por ejemplo, 20+ caracteres) en una WLAN WPA2-Personal?",
+    "options": [
+      "Dificulta los ataques de diccionario offline contra el handshake capturado",
+      "Permite usar 802.1X",
+      "Habilita automáticamente WPA3",
+      "Aumenta la velocidad de la WLAN"
+    ],
+    "answer": [
+      0
+    ],
+    "explanation": "WPA2-PSK es vulnerable a capturar el 4-way handshake y probar contraseñas offline; una frase larga y aleatoria lo hace inviable. No cambia el método de autenticación ni el rendimiento."
+  },
+  {
+    "id": "ccna-d2-059",
+    "domain": "2",
+    "type": "single",
+    "difficulty": "hard",
+    "question": "Un enlace entre SW1 (trunk) y SW2 (access VLAN 10) está up/up. ¿Qué sucede con el tráfico?",
+    "options": [
+      "SW1 envía tramas etiquetadas que SW2 descarta salvo las de la VLAN nativa, que SW2 coloca en la VLAN 10",
+      "El enlace se cae automáticamente",
+      "Todo el tráfico de todas las VLANs llega a la VLAN 10 de SW2",
+      "DTP convierte SW2 en trunk"
+    ],
+    "answer": [
+      0
+    ],
+    "explanation": "Con modo access fijo, SW2 no negocia trunk. Las tramas etiquetadas que recibe se descartan; las no etiquetadas (VLAN nativa de SW1) se aceptan en la VLAN 10. Es una mala configuración que solo pasa una VLAN y mezcla dominios."
+  },
+  {
+    "id": "ccna-d2-060",
+    "domain": "2",
+    "type": "single",
+    "difficulty": "medium",
+    "question": "¿Qué comando aplica PortFast por defecto a todos los puertos de acceso del switch?",
+    "options": [
+      "spanning-tree portfast default",
+      "spanning-tree portfast bpduguard default",
+      "spanning-tree mode rapid-pvst",
+      "spanning-tree portfast trunk"
+    ],
+    "answer": [
+      0
+    ],
+    "explanation": "`spanning-tree portfast default` (modo global) habilita PortFast en todos los puertos de acceso. `portfast bpduguard default` activa BPDU Guard en los puertos con PortFast, y `portfast trunk` se aplica a una interfaz trunk concreta (p. ej., hacia un servidor)."
+  }
+]

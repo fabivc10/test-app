@@ -1,0 +1,113 @@
+{
+  "id": "ccna",
+  "name": "Cisco CCNA",
+  "code": "200-301",
+  "provider": "Cisco",
+  "version": "v1.1",
+  "enabled": true,
+  "description": "Cisco Certified Network Associate: fundamentos de redes, switching, routing, servicios IP, seguridad y automatización.",
+  "exam": {
+    "questionCount": 100,
+    "durationMinutes": 120,
+    "passPercent": 82,
+    "poolMultiplier": 3,
+    "notes": [
+      "El examen real tiene ~100–120 preguntas en 120 minutos (Cisco no publica el número exacto).",
+      "Tipos de pregunta reales: opción única, opción múltiple, drag & drop, simulaciones (sims/simlets). Las sims se practican en la sección Labs con Packet Tracer.",
+      "Cisco no publica el puntaje de aprobación; la comunidad estima ~82–85 %. La app usa 82 % como referencia.",
+      "En el examen real NO se puede volver a una pregunta ya respondida. En la app sí puedes navegar para repasar.",
+      "Temario v1.1 vigente. Cisco anunció CCNA v2.0 con fecha de primer examen el 3 de febrero de 2027: si rindes después de esa fecha, revisa el nuevo temario."
+    ]
+  },
+  "domains": [
+    {
+      "id": "1",
+      "name": "Network Fundamentals",
+      "weight": 20
+    },
+    {
+      "id": "2",
+      "name": "Network Access",
+      "weight": 20
+    },
+    {
+      "id": "3",
+      "name": "IP Connectivity",
+      "weight": 25
+    },
+    {
+      "id": "4",
+      "name": "IP Services",
+      "weight": 10
+    },
+    {
+      "id": "5",
+      "name": "Security Fundamentals",
+      "weight": 15
+    },
+    {
+      "id": "6",
+      "name": "Automation and Programmability",
+      "weight": 10
+    }
+  ],
+  "sources": [
+    {
+      "type": "official",
+      "title": "Cisco — CCNA 200-301 Exam Topics v1.1",
+      "url": "https://learningnetwork.cisco.com/s/ccna-exam-topics"
+    },
+    {
+      "type": "official",
+      "title": "Cisco — CCNA certification",
+      "url": "https://www.cisco.com/site/us/en/learn/training-certifications/certifications/enterprise/ccna/index.html"
+    },
+    {
+      "type": "official",
+      "title": "Cisco Packet Tracer (Networking Academy)",
+      "url": "https://www.netacad.com/cisco-packet-tracer"
+    },
+    {
+      "type": "docs",
+      "title": "Cisco — Catalyst 9300 Layer 2 Configuration Guide (17.12)",
+      "url": "https://www.cisco.com/c/en/us/td/docs/switches/lan/catalyst9300/software/release/17-12/configuration_guide/lyr2/b_1712_lyr2_9300_cg.html"
+    },
+    {
+      "type": "docs",
+      "title": "RFC 1918 — Address Allocation for Private Internets",
+      "url": "https://www.rfc-editor.org/rfc/rfc1918"
+    },
+    {
+      "type": "docs",
+      "title": "RFC 4291 — IPv6 Addressing Architecture",
+      "url": "https://www.rfc-editor.org/rfc/rfc4291"
+    },
+    {
+      "type": "github",
+      "title": "vanhoangkha/CCNA_Course_Notes",
+      "url": "https://github.com/vanhoangkha/CCNA_Course_Notes",
+      "note": "Apuntes estructurados por temario"
+    },
+    {
+      "type": "github",
+      "title": "Panagiss/ccna-200-301",
+      "url": "https://github.com/Panagiss/ccna-200-301",
+      "note": "Apuntes de un aprobado (basados en el curso de Neil Anderson)"
+    },
+    {
+      "type": "practice",
+      "title": "Jeremy's IT Lab — CCNA 200-301 (curso y labs gratuitos)",
+      "url": "https://www.youtube.com/@JeremysITLab"
+    },
+    {
+      "type": "practice",
+      "title": "Cisco Networking Academy — CCNA",
+      "url": "https://www.netacad.com/courses/ccna-introduction-networks"
+    },
+    {
+      "type": "practice",
+      "title": "Boson ExSim-Max for CCNA (simulador comercial de referencia)",
+      "url": "https://www.boson.com/practice-exam/200-301-cisco-ccna-practice-exam"
+    }
+  ]
+}
